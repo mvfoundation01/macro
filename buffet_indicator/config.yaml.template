@@ -1,0 +1,5 @@
+fred_api_key: "PASTE_YOUR_32_CHAR_KEY_HERE"
+project_root: ""        # empty = auto-resolve
+shared_raw_data: ""     # empty = auto-resolve
+cache_ttl_hours: 24
+auto_push: false        # set true after first manual push to GitHub works

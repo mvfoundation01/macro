@@ -1,0 +1,17 @@
+[project]
+name = "buffett-ingestion"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+
+[tool.pytest.ini_options]
+addopts = "-q --cov=src --cov-report=term-missing"
+testpaths = ["tests"]
+markers = ["integration: hits real network -- opt in via INTEGRATION_TESTS=1"]

@@ -1,0 +1,11 @@
+{
+  "wilshire_5000": {
+    "splice_date": "2023-05-30",
+    "tv_label": "tv_FRED_WILL5000PRFC",
+    "yh_label": "yahoo_^W5000",
+    "scale_factor_k": 0.9999999914216727,
+    "scale_factor_mad": 3.010730498242964e-08,
+    "overlap_n_days": 8663,
+    "computed_at": "2026-05-18T17:20:56.206256"
+  }
+}

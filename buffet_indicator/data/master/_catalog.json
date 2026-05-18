@@ -1,0 +1,14 @@
+{
+  "wilshire_5000": {
+    "path": "D:\\macro\\buffet_indicator\\data\\master\\wilshire_5000.parquet",
+    "earliest": "1970-12-31",
+    "latest": "2026-05-15",
+    "n_observations": 11810,
+    "schema_version": 1,
+    "sources_used": [
+      "tv_FRED_WILL5000PRFC",
+      "yahoo_^W5000"
+    ],
+    "last_refresh": "2026-05-18T17:42:27.619513"
+  }
+}
