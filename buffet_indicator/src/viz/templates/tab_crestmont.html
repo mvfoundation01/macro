@@ -1,0 +1,78 @@
+{% import "_macros.html" as m %}
+<section data-tab="crestmont" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">Crestmont P/E &mdash; Trend-earnings normalization</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Easterling 2010: real S&amp;P 500 divided by a log-linear trend of real
+      earnings (fit over the full 1871-present sample), then z-scored against
+      its own long-run trend.
+    </p>
+    <div id="hero-chart-crestmont" class="hero-chart-container"></div>
+    {{ m.interp_grid(cr.interpretation.hero) }}
+  </div>
+
+  {{ m.why_it_matters_card("Crestmont P/E", cr.interpretation.why_it_matters) }}
+
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ cr.regime_color }};">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div><div class="text-xs text-gray-500">Crestmont P/E</div><div class="text-xl font-semibold">{{ cr.value_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Z-score (LR)</div><div class="text-xl font-semibold">{{ cr.z_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ cr.pct_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ cr.regime }}</div></div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel A &mdash; Crestmont Z-Score Time Series</h3>
+    <div id="crestmont-panel-a-crestmont" class="panel-chart-container"></div>
+    {{ m.interp_grid(cr.interpretation.panel_a) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel B &mdash; Crestmont Z vs 10-Year Forward CAGR</h3>
+    <div id="crestmont-panel-b-crestmont" class="panel-chart-container"></div>
+    {{ m.interp_grid(cr.interpretation.panel_b) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 by MVCI Regime</h3>
+    <div id="crestmont-panel-c-crestmont" class="panel-chart-container"></div>
+    {{ m.interp_grid(cr.interpretation.panel_c) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Predictive Regression (10Y, primary FR)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ cr.beta_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ cr.t_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_in</td><td>{{ cr.r2_in_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_OOS</td><td>{{ cr.r2_oos_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">Full conviction (10Y)</td><td>{{ cr.conviction_fmt }} / 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">About Crestmont P/E</h3>
+    <p class="text-sm leading-relaxed">
+      Crestmont P/E (Easterling 2010, <i>Probable Outcomes</i>) is a
+      cyclically-adjusted P/E that normalizes real price by a
+      <strong>smooth exponential trend</strong> of real earnings, rather than
+      Shiller's 10-year trailing average. Formally:
+      <code>crestmont_pe<sub>t</sub> = real_price<sub>t</sub> /
+      exp(α̂ + β̂·t)</code>, where (α̂, β̂) are fit via OLS on
+      <code>log(real_eps)</code> over the full sample.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      Compared to CAPE, the Crestmont trend is smoother (insensitive to
+      single-year earnings shocks) but more sensitive to the slope of the
+      historical fit. The two indicators usually agree on direction; when
+      they diverge, the gap is informative about whether recent earnings are
+      above or below the long-run trend line.
+    </p>
+  </div>
+</section>

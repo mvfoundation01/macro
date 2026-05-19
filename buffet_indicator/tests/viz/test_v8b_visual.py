@@ -66,15 +66,16 @@ def _capture_tab(tab_name: str, output_name: str, viewport: dict[str, int]) -> P
 
 
 _TABS = [
-    ("overview", "v8b_overview.png", _DESKTOP),
-    ("mvci", "v8b_mvci.png", _DESKTOP),
-    ("buffett", "v8b_buffett.png", _DESKTOP),
-    ("cape", "v8b_cape.png", _DESKTOP),
-    ("qratio", "v8b_qratio.png", _DESKTOP),
-    ("ey_deficit", "v8b_ey_deficit.png", _DESKTOP),
-    ("mean_reversion", "v8b_mean_reversion.png", _DESKTOP),
-    ("diagnostics", "v8b_diagnostics.png", _DESKTOP),
-    ("overview", "v8b_mobile.png", _MOBILE),
+    ("overview", "v9_0_overview.png", _DESKTOP),
+    ("mvci", "v9_0_mvci.png", _DESKTOP),
+    ("buffett", "v9_0_buffett.png", _DESKTOP),
+    ("cape", "v9_0_cape.png", _DESKTOP),
+    ("crestmont", "v9_0_crestmont.png", _DESKTOP),
+    ("qratio", "v9_0_qratio.png", _DESKTOP),
+    ("ey_deficit", "v9_0_ey_deficit.png", _DESKTOP),
+    ("mean_reversion", "v9_0_mean_reversion.png", _DESKTOP),
+    ("diagnostics", "v9_0_diagnostics.png", _DESKTOP),
+    ("overview", "v9_0_mobile.png", _MOBILE),
 ]
 
 

@@ -130,6 +130,7 @@ _DASHBOARD_VARIANTS = (
     "bi_wilshire_pct",
     "bi_spx_proxy",
     "cape",
+    "crestmont",
     "qratio",
     "ey_deficit",
     "mean_reversion",
@@ -139,6 +140,7 @@ _OVERVIEW_VARIANTS = (
     "bi_wilshire_pct",
     "bi_spx_proxy",
     "cape",
+    "crestmont",
     "qratio",
     "ey_deficit",
     "mean_reversion",
@@ -230,6 +232,14 @@ def build_hero_specs(
     out["ey_deficit"] = (
         make_hero_chart(ey_z, title="Equity Yield Deficit", chart_name="ey_deficit_hero")
         if not ey_z.empty
+        else None
+    )
+
+    # Spec v9.0: Crestmont P/E hero.
+    crestmont_z = _z_series_for(z_history, "crestmont") if z_history is not None else pd.Series(dtype="float64")
+    out["crestmont"] = (
+        make_hero_chart(crestmont_z, title="Crestmont P/E", chart_name="crestmont_hero")
+        if not crestmont_z.empty
         else None
     )
 

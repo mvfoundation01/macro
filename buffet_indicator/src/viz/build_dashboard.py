@@ -711,6 +711,13 @@ def build_dashboard(
     else:
         ey_deficit_html = ""
 
+    # v9.0: Crestmont P/E dedicated tab
+    if "crestmont" in variants:
+        cr_block = _build_variant_block(headline, "crestmont")
+        crestmont_html = env.get_template("tab_crestmont.html").render(cr=cr_block)
+    else:
+        crestmont_html = ""
+
     # v8b: Diagnostics tab
     diag_ctx = _build_diagnostics_context(headline, parquets, charts_dir)
     diagnostics_html = env.get_template("tab_diagnostics.html").render(**diag_ctx)
@@ -790,6 +797,7 @@ def build_dashboard(
         tab_mvci_html=mvci_html,
         tab_buffett_html=buffett_html,
         tab_cape_html=cape_html,
+        tab_crestmont_html=crestmont_html,
         tab_qratio_html=qratio_html,
         tab_ey_deficit_html=ey_deficit_html,
         tab_mean_reversion_html=mean_reversion_html,

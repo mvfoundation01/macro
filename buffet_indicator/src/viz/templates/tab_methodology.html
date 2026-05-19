@@ -125,7 +125,21 @@
     the fitted trend; the z-score is standardized over the full history.
   </p>
 
-  <h3>3.6 MV Composite Index (MVCI)</h3>
+  <h3>3.6 Crestmont P/E (v9.0)</h3>
+  <p>
+    <strong>Crestmont P/E</strong> (Easterling 2010): a cyclically-adjusted P/E that
+    normalizes real price by a <strong>log-linear trend of real earnings</strong> rather
+    than a trailing 10-year average. The trend is fit via
+    <code>log(real_eps<sub>t</sub>) = α + β·t + ε</code> over the full 1871-present
+    sample, then <code>crestmont_pe<sub>t</sub> = real_price<sub>t</sub> /
+    exp(α̂ + β̂·t)</code>. Differs from Shiller CAPE in normalization basis
+    (smooth exponential trend vs. moving average); both are valid normalizers,
+    and Crestmont's smoothness reduces sensitivity to single-year earnings shocks.
+    Note that when real-earnings growth tracks real-price growth over multi-decade
+    periods, Crestmont becomes mathematically close to the Mean Reversion indicator.
+  </p>
+
+  <h3>3.7 MV Composite Index (MVCI)</h3>
   <p>
     A standardized aggregation of all variants above. Three weighting schemes:
   </p>

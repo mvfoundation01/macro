@@ -178,10 +178,13 @@ def test_V8B_C3_per_indicator_interpretations_exist_and_render() -> None:
 
 
 def test_V8B_C4_why_it_matters_present_for_every_indicator() -> None:
-    """Every indicator key in WHY_IT_MATTERS has a non-trivial paragraph."""
-    expected = {"mvci", "cape", "buffett", "qratio", "ey_deficit", "mean_reversion"}
-    assert set(WHY_IT_MATTERS.keys()) == expected
-    for key in expected:
+    """Every indicator key in WHY_IT_MATTERS has a non-trivial paragraph.
+
+    v9.0 added crestmont as a 7th key.
+    """
+    required = {"mvci", "cape", "buffett", "qratio", "ey_deficit", "mean_reversion"}
+    assert required.issubset(set(WHY_IT_MATTERS.keys()))
+    for key in WHY_IT_MATTERS.keys():
         body = why_it_matters(key)
         assert len(body) >= 200, f"{key} body too short: {len(body)} chars"
 

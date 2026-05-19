@@ -73,6 +73,11 @@ PANEL_A_CAPTIONS: dict[str, str] = {
         "trend. The simplest valuation indicator: when the price-trend gap grows "
         "large, gravity has historically pulled it back."
     ),
+    "crestmont": (
+        "Crestmont P/E (Easterling 2010): real S&P 500 normalized by a smooth "
+        "exponential trend of real earnings (vs. CAPE's 10-year moving average). "
+        "Higher = stretched relative to the long-run earnings growth path."
+    ),
 }
 
 
@@ -294,6 +299,36 @@ def ey_deficit_hero_interpretation(
     }
 
 
+def crestmont_hero_interpretation(
+    value: float | None,
+    z: float | None,
+    percentile: float | None,
+    regime: str,
+) -> dict[str, str]:
+    val_fmt = f"{value:.2f}" if value is not None else "n/a"
+    z_fmt = f"{z:+.2f}" if z is not None else "n/a"
+    pct_fmt = f"{percentile:.0f}" if percentile is not None else "n/a"
+    return {
+        "what_this_shows": (
+            "Crestmont P/E (Easterling 2010): the real S&P 500 divided by a "
+            "smooth exponential trend of real earnings, fit via OLS regression "
+            "over the full 1871-present sample. An alternative to Shiller's "
+            "CAPE that uses a trend line instead of a 10-year moving average."
+        ),
+        "how_to_read": (
+            "Like CAPE, lower is cheaper. Crestmont reads above its long-run "
+            "norm when current real price has outrun the historical "
+            "earnings-growth trajectory. Z > +1.5σ historically preceded "
+            "sub-par 10-year returns; z > +2σ is extremely rare and only "
+            "seen near 1929, 2000, and 2021 peaks."
+        ),
+        "current_reading": (
+            f"Crestmont = {val_fmt}, z = {z_fmt}σ, {pct_fmt}th percentile — "
+            f"**{regime}**. {_historical_analog(percentile)}"
+        ),
+    }
+
+
 def mean_reversion_hero_interpretation(
     deviation_pct: float | None,
     z: float | None,
@@ -459,6 +494,17 @@ WHY_IT_MATTERS: dict[str, str] = {
         "largest gaps in 150 years. The metric is purely autoregressive: it uses no "
         "earnings, dividends, or balance-sheet data; just price and inflation."
     ),
+    "crestmont": (
+        "Crestmont addresses a critique of Shiller CAPE: the 10-year moving "
+        "average can be skewed by a single anomalous year (e.g., the 2008 EPS "
+        "collapse). A regression-fit trend is robust to these episodes and "
+        "produces a smoother normalizer. The two measures usually agree on "
+        "regime direction but can diverge in magnitude, providing a useful "
+        "cross-check. Note: when real-earnings growth tracks real-price growth "
+        "over long periods, Crestmont becomes mathematically close to the Mean "
+        "Reversion indicator — the two correlate at ~1.0 in the present "
+        "sample, so they contribute partially-overlapping signal to the MVCI."
+    ),
 }
 
 
@@ -513,6 +559,9 @@ def all_interpretations_for(
     elif variant_key == "mean_reversion":
         hero = mean_reversion_hero_interpretation(mr_deviation_pct, z, percentile, regime)
         why_key = "mean_reversion"
+    elif variant_key == "crestmont":
+        hero = crestmont_hero_interpretation(value, z, percentile, regime)
+        why_key = "crestmont"
     else:
         hero = mvci_hero_interpretation(z, regime, percentile)
         why_key = variant_key
@@ -542,6 +591,7 @@ __all__ = [
     "qratio_hero_interpretation",
     "ey_deficit_hero_interpretation",
     "mean_reversion_hero_interpretation",
+    "crestmont_hero_interpretation",
     "panel_a_interpretation",
     "panel_b_interpretation",
     "panel_c_interpretation",

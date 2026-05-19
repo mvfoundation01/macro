@@ -176,6 +176,8 @@
       renderBuffettCharts(key);
     } else if (tabName === "cape") {
       renderVariantPanels("cape", "cape");
+    } else if (tabName === "crestmont") {
+      renderVariantPanels("crestmont", "crestmont");
     } else if (tabName === "qratio") {
       renderVariantPanels("qratio", "qratio");
     } else if (tabName === "ey_deficit") {

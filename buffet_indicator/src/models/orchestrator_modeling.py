@@ -51,6 +51,8 @@ HEADLINE_LABELS: dict[str, tuple[str, str]] = {
     "mvci": ("MV Composite Index", "sigma"),
     # Spec v8a.1 addition:
     "mean_reversion": ("Mean Reversion (Real S&P)", ""),
+    # Spec v9.0 addition: Crestmont P/E (Easterling 2010) — trend-earnings normalization.
+    "crestmont": ("Crestmont P/E", ""),
 }
 
 # All variants currently use the convention HIGH = OVERVALUED. EY-Deficit is
@@ -64,6 +66,7 @@ HEADLINE_DIRECTION: dict[str, int] = {
     "ey_deficit": +1,
     "mvci": +1,
     "mean_reversion": +1,
+    "crestmont": +1,
 }
 
 
@@ -632,6 +635,8 @@ _CONSTITUENT_KEYS = (
     "ey_deficit",
     # Spec v8a.1: Mean Reversion added as a 7th MVCI constituent.
     "mean_reversion",
+    # Spec v9.0: Crestmont P/E added as an 8th MVCI constituent.
+    "crestmont",
 )
 
 
@@ -1032,6 +1037,16 @@ def run_modeling(
         bi_desc = {**bi_desc, **mr_variants}
         bi_bt = {**bi_bt, **mr_variants}
 
+    # Spec v9.0: Crestmont P/E (Easterling 2010). Real S&P 500 normalized
+    # by an exponential trend of real earnings (vs CAPE's 10-year moving
+    # average). 8th MVCI constituent.
+    from src.transform.crestmont_compute import compute_crestmont_variant
+
+    crestmont_variants = compute_crestmont_variant(sh) if sh is not None else {}
+    if crestmont_variants:
+        bi_desc = {**bi_desc, **crestmont_variants}
+        bi_bt = {**bi_bt, **crestmont_variants}
+
     # 5. Build headline (with forward outlook) + backtest view (without, for speed).
     headline = _build_view(
         bi_desc,
@@ -1127,6 +1142,7 @@ _HEADLINE_LABELS_FOR_VALUE_HISTORY = {
     "ey_deficit": "%",
     "mvci": "sigma",
     "mean_reversion": "index",
+    "crestmont": "ratio",
 }
 
 
