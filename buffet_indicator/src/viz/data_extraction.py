@@ -203,8 +203,10 @@ def build_hero_specs(
             mvci_z,
             title="MV Composite Index (MVCI)",
         )
-        out["overview"] = hero
         out["mvci"] = hero
+        # v8b.1 D bundle-size optimization: overview and mvci share the same
+        # MVCI hero spec — sentinel-reference instead of inlining twice.
+        out["overview"] = "__HERO_MVCI__"
     else:
         out["overview"] = None
         out["mvci"] = None
@@ -289,6 +291,9 @@ def assemble_dashboard_data(
     variants = headline.get("variants", {})
 
     # Per-variant chart specs.
+    # v8b.1 D bundle-size optimization: Panel C (S&P 500 by MVCI regime) is
+    # identical across every variant tab. Build it once and reference it via
+    # a sentinel string so the JS layer can deduplicate.
     variant_specs: dict[str, Any] = {}
     sparklines: dict[str, Any] = {}
     for vkey in _DASHBOARD_VARIANTS:
@@ -304,20 +309,31 @@ def assemble_dashboard_data(
             regression=reg,
             current_z=current_z,
         )
+        # Replace the duplicated panel_c with a pointer to the shared spec.
+        if variant_specs[vkey].get("panel_c") is not None:
+            variant_specs[vkey]["panel_c"] = "__SHARED_PANEL_C__"
     for vkey in _OVERVIEW_VARIANTS:
         if vkey in variants:
             sparklines[vkey] = build_sparkline_for(vkey, z_history)
 
     # MVCI PCA loadings (long_run frame) for the bar chart.
+    # v8b.1 fix B.3: prefer loadings_full (raw PC1 eigenvector on balanced
+    # panel) over weights_current (availability-rebased) so every variant
+    # appears with non-zero contribution. weights_current would zero out
+    # any variant that has NaN in the latest month — misleading display.
     mvci = variants.get("mvci", {})
-    mvci_pca = (
-        mvci.get("long_run", {})
-        .get("schemes", {})
-        .get("pca_pc1", {})
-        .get("weights_current", {})
+    mvci_scheme = (
+        mvci.get("long_run", {}).get("schemes", {}).get("pca_pc1", {})
+    )
+    mvci_pca = mvci_scheme.get("loadings_full") or mvci_scheme.get(
+        "weights_current", {}
     )
     pca_loadings_chart = make_pca_loadings_bar(
-        {k: float(v) for k, v in mvci_pca.items() if v is not None}
+        {
+            k: float(v)
+            for k, v in mvci_pca.items()
+            if v is not None and not (isinstance(v, float) and v != v)  # drop NaN
+        }
     )
 
     # Spec v8a.1: build hero chart specs per tab.
@@ -327,6 +343,13 @@ def assemble_dashboard_data(
         value_history=parquets.get("value_history"),
     )
 
+    # v8b.1 D bundle-size optimization: build Panel C once and share across
+    # variants. Per-variant entries reference it via "__SHARED_PANEL_C__".
+    shared_panel_c = None
+    if sp500_df is not None and not sp500_df.empty:
+        from src.viz.chart_specs import make_panel_c as _build_pc
+        shared_panel_c = _build_pc(sp500_df)
+
     return {
         "asof": headline.get("asof"),
         "view": headline.get("view"),
@@ -335,6 +358,7 @@ def assemble_dashboard_data(
         "cross_variant_current_regime": headline.get("cross_variant_current_regime", {}),
         "variants": variants,
         "variant_charts": variant_specs,
+        "shared_panel_c": shared_panel_c,
         "sparklines": sparklines,
         "hero_specs": hero_specs,
         "mvci_pca_loadings_chart": pca_loadings_chart,

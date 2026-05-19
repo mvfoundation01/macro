@@ -75,7 +75,6 @@ def resample_quarterly_backtest(s: pd.Series, release_lag: pd.Timedelta) -> pd.S
         pd.Timestamp.today().normalize() + pd.offsets.MonthEnd(0),
         freq="ME",
     )
-    quarter_dates = s.index.to_numpy()
     lag_days = release_lag.days
     available_at = s.index + pd.Timedelta(days=lag_days)
     available_at_np = available_at.to_numpy()

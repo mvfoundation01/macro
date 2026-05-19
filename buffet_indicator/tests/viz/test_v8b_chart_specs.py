@@ -75,11 +75,16 @@ def test_V8B_A2_panel_chart_height_is_450() -> None:
 
 
 def test_V8B_A3_modebar_visible_with_export_button() -> None:
+    """v8b.1 B.2 changed scrollZoom default from True to False (mobile-safe).
+
+    The JS layer feature-detects touch devices and only enables scrollZoom
+    on non-touch desktops at render time. The base spec must default False.
+    """
     spec = make_hero_chart(_z_series_short(), "Test")
     cfg = spec["config"]
     assert cfg["displayModeBar"] is True
     assert cfg["displaylogo"] is False
-    assert cfg["scrollZoom"] is True
+    assert cfg["scrollZoom"] is False  # v8b.1 default; JS opts in on desktop
     assert cfg["doubleClick"] == "reset+autosize"
     assert "toImageButtonOptions" in cfg
     assert cfg["toImageButtonOptions"]["scale"] == 2

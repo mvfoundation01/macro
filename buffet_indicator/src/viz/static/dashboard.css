@@ -327,35 +327,6 @@ nav.tab-bar::-webkit-scrollbar-thumb {
   border-radius: 3px;
 }
 
-/* Coming-in-v8b modal placeholder (legacy; v8b removes the modal entirely) */
-.coming-soon-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.coming-soon-modal.open {
-  display: flex;
-}
-
-.coming-soon-modal-card {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.5rem 2rem;
-  max-width: 24rem;
-  text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-}
-
-.dark .coming-soon-modal-card {
-  background: #1f2937;
-  color: #e5e7eb;
-}
-
 /* ============================================================
    v8b: Diagnostics tab tables
    ============================================================ */

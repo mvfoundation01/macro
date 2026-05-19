@@ -137,6 +137,22 @@ def _run_dashboard(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_emit_diagnostics(args: argparse.Namespace) -> int:
+    """v8b.1 A.5: regenerate the diagnostics parquets without re-running modeling."""
+    from src.config import OUTPUTS_DIR
+    from src.models.diagnostics import emit_diagnostics
+
+    charts_dir = OUTPUTS_DIR / "charts"
+    paths = emit_diagnostics(charts_dir)
+    for name, p in paths.items():
+        print(f"  {name}: {p} ({p.stat().st_size} bytes)")
+    if getattr(args, "rebuild_dashboard", False):
+        from src.viz.build_dashboard import build_dashboard
+        out = build_dashboard()
+        print(f"Dashboard rebuilt: {out}")
+    return 0
+
+
 def _run_ingestion(args: argparse.Namespace) -> int:
     from src.ingest.orchestrator import run_ingestion
 
@@ -172,6 +188,21 @@ def main() -> int:
 
     sub.add_parser("dashboard", help="Rebuild outputs/dashboard.html (Spec v8a).")
 
+    p_diag = sub.add_parser(
+        "emit-diagnostics",
+        help="Regenerate diagnostics parquets + calibration JSON (Spec v8b.1).",
+    )
+    p_diag.add_argument(
+        "--rebuild-dashboard",
+        action="store_true",
+        help="Also rebuild dashboard.html after emitting diagnostics.",
+    )
+    p_diag.add_argument(
+        "--full",
+        action="store_true",
+        help="(Reserved) — full diagnostics pass; currently same as default.",
+    )
+
     # Ingestion flags also accessible at top level for backwards compatibility.
     parser.add_argument("--force-refresh", action="store_true")
     parser.add_argument("--skip-fred", action="store_true")
@@ -186,6 +217,8 @@ def main() -> int:
         return _run_modeling(args)
     if args.cmd == "dashboard":
         return _run_dashboard(args)
+    if args.cmd == "emit-diagnostics":
+        return _run_emit_diagnostics(args)
     # Default: ingestion (handles both `python -m src.cli` and `... ingest`).
     return _run_ingestion(args)
 

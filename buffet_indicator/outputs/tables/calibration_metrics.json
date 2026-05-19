@@ -1,0 +1,62 @@
+{
+  "available": true,
+  "horizon_years": 10,
+  "event": "forward_10y_cagr_below_5pct",
+  "n_observations": 1655,
+  "buckets": [
+    {
+      "predicted_mean": 0.03117104565615075,
+      "realized_freq": 0.09036144578313253,
+      "n": 166
+    },
+    {
+      "predicted_mean": 0.09800332605951977,
+      "realized_freq": 0.06060606060606061,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.1383388216138369,
+      "realized_freq": 0.13253012048192772,
+      "n": 166
+    },
+    {
+      "predicted_mean": 0.170197448775525,
+      "realized_freq": 0.09696969696969697,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.1952320592808934,
+      "realized_freq": 0.09696969696969697,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.2218171160816646,
+      "realized_freq": 0.1144578313253012,
+      "n": 166
+    },
+    {
+      "predicted_mean": 0.2520871271194093,
+      "realized_freq": 0.10909090909090909,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.2840229611210439,
+      "realized_freq": 0.3373493975903614,
+      "n": 166
+    },
+    {
+      "predicted_mean": 0.3282475900420983,
+      "realized_freq": 0.5333333333333333,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.40860598023787675,
+      "realized_freq": 0.5240963855421686,
+      "n": 166
+    }
+  ],
+  "brier_score": 0.1458149856742606,
+  "reliability": 0.011002538784857779,
+  "resolution": 0.030685868741005103,
+  "uncertainty": 0.16570714031452796
+}

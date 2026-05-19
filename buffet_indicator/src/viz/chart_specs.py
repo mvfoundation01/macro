@@ -96,12 +96,17 @@ def _x_axis_block(*, with_rangeslider: bool = True, with_rangeselector: bool = T
 
 
 def _interactive_config(chart_name: str = "chart") -> dict[str, Any]:
-    """v8b interactive config: visible toolbar, drag-zoom, scroll-zoom, PNG export."""
+    """v8b interactive config: visible toolbar, drag-zoom, PNG export.
+
+    v8b.1 fix B.2: scrollZoom defaults to False to avoid trapping page-scroll
+    on touch devices. The dashboard JS runtime enables scrollZoom at runtime
+    via feature detection (non-touch desktop only).
+    """
     return {
         "displayModeBar": True,
         "displaylogo": False,
         "responsive": True,
-        "scrollZoom": True,
+        "scrollZoom": False,
         "doubleClick": "reset+autosize",
         "modeBarButtonsToRemove": [
             "lasso2d",
@@ -126,40 +131,68 @@ def _interactive_config(chart_name: str = "chart") -> dict[str, Any]:
 
 
 def _add_historical_annotations(z_series: pd.Series, annotations: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Append labeled arrows at 1929, 2000, 2021 peak dates when in series range."""
+    """Append labeled arrows at 1929, 2000, 2021 peak dates when in series range.
+
+    v8b.1 fix C: each annotation has ``xanchor``/``ax``/``xshift`` configured so
+    the label sits on the chart-interior side of the arrow (not overflowing
+    past the right edge at 360px viewport).
+    """
     if z_series is None or z_series.empty:
         return annotations
+    idx_min, idx_max = z_series.index.min(), z_series.index.max()
+    total_span = idx_max - idx_min
+    # All annotations live in the (date, z) data space; anchor side is chosen
+    # by relative position to keep labels inside the plotting area on narrow
+    # viewports.
     peaks = [
         ("1929-09-30", "1929 peak<br>(crash followed)"),
         ("2000-03-31", "Dot-com peak<br>(-50% over 2y)"),
         ("2021-12-31", "Post-COVID peak<br>(-25% in 2022)"),
     ]
-    idx_min, idx_max = z_series.index.min(), z_series.index.max()
     for date_str, label in peaks:
         date = pd.Timestamp(date_str)
-        if idx_min <= date <= idx_max:
-            idx = z_series.index.get_indexer([date], method="nearest")[0]
-            actual_date = z_series.index[idx]
-            actual_z = float(z_series.iloc[idx])
-            annotations.append(
-                {
-                    "x": actual_date.strftime("%Y-%m-%d"),
-                    "y": actual_z,
-                    "xref": "x",
-                    "yref": "y",
-                    "text": label,
-                    "showarrow": True,
-                    "arrowhead": 2,
-                    "arrowsize": 1,
-                    "arrowcolor": "#666",
-                    "ax": 0,
-                    "ay": -40,
-                    "bgcolor": "rgba(255, 255, 255, 0.92)",
-                    "bordercolor": "#666",
-                    "borderwidth": 1,
-                    "font": {"size": 11, "family": FONT_FAMILY, "color": "#222"},
-                }
-            )
+        if not (idx_min <= date <= idx_max):
+            continue
+        idx = z_series.index.get_indexer([date], method="nearest")[0]
+        actual_date = z_series.index[idx]
+        actual_z = float(z_series.iloc[idx])
+        # Relative x-position in [0, 1]. Right-most annotation must anchor to
+        # the right so the label extends leftward into the chart.
+        rel = (
+            (actual_date - idx_min).total_seconds()
+            / total_span.total_seconds()
+            if total_span.total_seconds() > 0
+            else 0.5
+        )
+        if rel > 0.80:
+            xanchor = "right"
+            ax = -30
+        elif rel < 0.20:
+            xanchor = "left"
+            ax = 30
+        else:
+            xanchor = "center"
+            ax = 0
+        annotations.append(
+            {
+                "x": actual_date.strftime("%Y-%m-%d"),
+                "y": actual_z,
+                "xref": "x",
+                "yref": "y",
+                "text": label,
+                "showarrow": True,
+                "arrowhead": 2,
+                "arrowsize": 1,
+                "arrowcolor": "#666",
+                "ax": ax,
+                "ay": -40,
+                "xanchor": xanchor,
+                "bgcolor": "rgba(255, 255, 255, 0.92)",
+                "bordercolor": "#666",
+                "borderwidth": 1,
+                "font": {"size": 11, "family": FONT_FAMILY, "color": "#222"},
+            }
+        )
     return annotations
 
 
@@ -440,19 +473,24 @@ def make_panel_b(
             },
             "yaxis": {
                 "title": {
-                    "text": "Subsequent 10Y CAGR (%)",
+                    "text": "Subsequent 10Y CAGR",
                     "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY},
                 },
                 "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+                # v8b.1 fix B.1: y-values are absolute percent (we multiply by
+                # 100 upstream), so dtick=5 means a 5pp gridline. With
+                # ticksuffix="%" the labels read 5%, 10%, 15%...
                 "ticksuffix": "%",
+                "dtick": 5,
+                "nticks": 10,
                 "showspikes": True,
                 "spikecolor": "#666",
                 "spikethickness": 1,
                 "spikedash": "dot",
                 "zeroline": True,
-                "zerolinecolor": "#999",
+                "zerolinecolor": "#333",
+                "zerolinewidth": 1.5,
                 "gridcolor": "rgba(150, 150, 150, 0.2)",
-                "nticks": 8,
             },
             "annotations": [
                 {
@@ -1011,6 +1049,233 @@ def make_oos_r2_chart(dates: list[str], r2_values: list[float], *, chart_name: s
     }
 
 
+def make_acf_pacf_charts(
+    residuals: pd.Series,
+    *,
+    n_lags: int = 20,
+    chart_name: str = "acf_pacf",
+) -> dict[str, Any]:
+    """Two-panel Plotly spec for residual ACF (left) and PACF (right).
+
+    Stem plot per lag with 95% confidence bands at ±1.96/√N (Bartlett's
+    approximation under the null of white noise).
+    """
+    if residuals is None or residuals.empty or len(residuals.dropna()) < n_lags + 5:
+        return {"data": [], "layout": {"title": {"text": "ACF/PACF — insufficient residuals"}}}
+
+    series = residuals.dropna().astype("float64").to_numpy()
+    n = len(series)
+    ci_band = 1.96 / np.sqrt(n)
+
+    try:
+        from statsmodels.tsa.stattools import acf, pacf
+    except ImportError:
+        return {"data": [], "layout": {"title": {"text": "ACF/PACF unavailable — statsmodels missing"}}}
+
+    acf_vals = acf(series, nlags=n_lags, fft=True)
+    pacf_vals = pacf(series, nlags=n_lags, method="ywm")
+    lags = list(range(len(acf_vals)))
+
+    def _stems(values: list[float], xaxis: str, yaxis: str, color: str, name: str) -> list[dict[str, Any]]:
+        traces: list[dict[str, Any]] = []
+        # Stem lines (vertical from 0 to value) — one trace per lag for clarity.
+        for lag, v in zip(lags, values, strict=False):
+            traces.append(
+                {
+                    "x": [lag, lag],
+                    "y": [0.0, float(v)],
+                    "type": "scatter",
+                    "mode": "lines",
+                    "line": {"color": color, "width": 1.5},
+                    "xaxis": xaxis,
+                    "yaxis": yaxis,
+                    "showlegend": False,
+                    "hoverinfo": "skip",
+                }
+            )
+        # Markers on top
+        traces.append(
+            {
+                "x": lags,
+                "y": [float(v) for v in values],
+                "type": "scatter",
+                "mode": "markers",
+                "marker": {"size": 7, "color": color},
+                "xaxis": xaxis,
+                "yaxis": yaxis,
+                "name": name,
+                "hovertemplate": "Lag %{x}<br>" + name + " = %{y:+.3f}<extra></extra>",
+                "showlegend": False,
+            }
+        )
+        return traces
+
+    traces = _stems(list(acf_vals), "x", "y", "#1F77B4", "ACF") + _stems(
+        list(pacf_vals), "x2", "y2", "#C8102E", "PACF"
+    )
+
+    # Confidence bands (horizontal lines at ±ci_band)
+    for sign in (1, -1):
+        for xaxis, yaxis in (("x", "y"), ("x2", "y2")):
+            traces.append(
+                {
+                    "x": [0, n_lags],
+                    "y": [sign * ci_band, sign * ci_band],
+                    "type": "scatter",
+                    "mode": "lines",
+                    "line": {"color": "rgba(200, 16, 46, 0.5)", "width": 1, "dash": "dash"},
+                    "xaxis": xaxis,
+                    "yaxis": yaxis,
+                    "hoverinfo": "skip",
+                    "showlegend": False,
+                }
+            )
+
+    return {
+        "data": traces,
+        "layout": {
+            "title": {
+                "text": "Residual ACF & PACF — MVCI 10Y predictive regression",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                "x": 0.5,
+            },
+            "font": {"family": FONT_FAMILY},
+            "grid": {"rows": 1, "columns": 2, "pattern": "independent"},
+            "xaxis": {
+                "title": {"text": "Lag (months)", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "dtick": 2,
+                "anchor": "y",
+                "domain": [0.0, 0.46],
+            },
+            "yaxis": {
+                "title": {"text": "ACF", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "zeroline": True,
+                "zerolinecolor": "#333",
+                "range": [-1.05, 1.05],
+            },
+            "xaxis2": {
+                "title": {"text": "Lag (months)", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "dtick": 2,
+                "anchor": "y2",
+                "domain": [0.54, 1.0],
+            },
+            "yaxis2": {
+                "title": {"text": "PACF", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "zeroline": True,
+                "zerolinecolor": "#333",
+                "range": [-1.05, 1.05],
+                "anchor": "x2",
+            },
+            "height": 420,
+            "margin": {"t": 60, "b": 70, "l": 70, "r": 30},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_calibration_plot(
+    buckets: list[dict[str, float]],
+    *,
+    brier_score: float,
+    reliability: float,
+    resolution: float,
+    uncertainty: float,
+    chart_name: str = "calibration",
+) -> dict[str, Any]:
+    """Reliability diagram + Brier decomposition (v8b.1 A.4)."""
+    if not buckets:
+        return {"data": [], "layout": {"title": {"text": "Calibration — insufficient data"}}}
+
+    x = [b["predicted_mean"] for b in buckets]
+    y = [b["realized_freq"] for b in buckets]
+    n = [b["n"] for b in buckets]
+    sizes = [max(8.0, float(np.sqrt(c)) * 2.0) for c in n]
+
+    return {
+        "data": [
+            {
+                "x": [0, 1],
+                "y": [0, 1],
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#999", "width": 1.5, "dash": "dash"},
+                "name": "Perfect calibration",
+                "hoverinfo": "skip",
+            },
+            {
+                "x": x,
+                "y": y,
+                "type": "scatter",
+                "mode": "markers+lines",
+                "marker": {"size": sizes, "color": "#1F77B4"},
+                "line": {"color": "#1F77B4", "width": 2},
+                "name": "Observed",
+                "customdata": n,
+                "hovertemplate": (
+                    "Predicted: %{x:.2f}<br>"
+                    "Realized: %{y:.2f}<br>"
+                    "n = %{customdata}<extra></extra>"
+                ),
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Calibration / reliability diagram (P(10Y CAGR < 5%))",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                "x": 0.5,
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": {
+                "title": {"text": "Predicted probability", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "dtick": 0.1,
+                "range": [0.0, 1.0],
+                "gridcolor": "rgba(150, 150, 150, 0.2)",
+            },
+            "yaxis": {
+                "title": {"text": "Realized frequency", "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY},
+                "dtick": 0.1,
+                "range": [0.0, 1.0],
+                "gridcolor": "rgba(150, 150, 150, 0.2)",
+            },
+            "annotations": [
+                {
+                    "xref": "paper",
+                    "yref": "paper",
+                    "x": 0.02,
+                    "y": 0.98,
+                    "showarrow": False,
+                    "align": "left",
+                    "text": (
+                        f"Brier score: {brier_score:.3f}<br>"
+                        f"Reliability: {reliability:.3f}<br>"
+                        f"Resolution: {resolution:.3f}<br>"
+                        f"Uncertainty: {uncertainty:.3f}"
+                    ),
+                    "bgcolor": "rgba(255, 255, 255, 0.92)",
+                    "bordercolor": "#cccccc",
+                    "borderwidth": 1,
+                    "font": {"size": ANNOTATION_FONT_SIZE, "family": FONT_FAMILY},
+                }
+            ],
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 60, "b": 70, "l": 75, "r": 35},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "hovermode": "closest",
+            "legend": {"font": {"size": LEGEND_FONT_SIZE, "family": FONT_FAMILY}},
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
 __all__ = [
     "FONT_FAMILY",
     "TICK_FONT_SIZE",
@@ -1030,4 +1295,6 @@ __all__ = [
     "make_mean_reversion_hero",
     "make_correlation_heatmap",
     "make_oos_r2_chart",
+    "make_acf_pacf_charts",
+    "make_calibration_plot",
 ]

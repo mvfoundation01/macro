@@ -20,7 +20,6 @@ from src.transform.forward_returns import (
     forward_returns,
     shiller_nominal_total_return,
     splice_shiller_spxtr,
-    spxtr_monthly_level,
 )
 
 

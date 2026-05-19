@@ -7,6 +7,13 @@ requires-python = ">=3.11"
 line-length = 100
 target-version = "py311"
 
+# E402 (module-import-not-at-top-of-file) is suppressed in test files because
+# tests use a `sys.path.insert(0, _ROOT)` pattern before importing src.* to
+# support running pytest from any directory. This is an intentional pattern,
+# not an oversight.
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["E402"]
+
 [tool.mypy]
 strict = true
 python_version = "3.11"

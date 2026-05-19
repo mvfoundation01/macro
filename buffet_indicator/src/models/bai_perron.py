@@ -153,7 +153,6 @@ def _segment_fit(
     sum_y = float(yv.sum())
     sum_xx = float((x * x).sum())
     sum_xy = float((x * yv).sum())
-    sum_yy = float((yv * yv).sum())
     denom = n * sum_xx - sum_x * sum_x
     if denom > 1e-12:
         beta = (n * sum_xy - sum_x * sum_y) / denom

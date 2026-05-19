@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Literal
 
 import chardet
-import numpy as np
 import pandas as pd
 
 from src.config import TV_GDP_BAK, TV_SPX, TV_SPXTR, TV_WILSHIRE

@@ -4,31 +4,42 @@
     <h2 class="text-xl font-bold mb-1">Diagnostics &mdash; Statistical Health</h2>
     <p class="text-sm text-gray-500">
       Power-user view of the underlying statistical machinery: stationarity tests,
-      cross-variant correlations, predictive R&sup2; properties, and PCA explained
-      variance. Use these to gauge whether the headline signals are robust or
-      whether one or more constituent indicators is drifting away from its
-      historical regime.
+      Bai-Perron structural breaks, cross-variant correlations, OOS R² evolution,
+      residual autocorrelation, and probability-engine calibration. Use these to
+      gauge whether the headline signals are robust or whether one or more
+      constituent indicators is drifting away from its historical regime.
     </p>
   </div>
 
-  <!-- 1. Stationarity tests -->
+  <!-- 1. Stationarity tests (4-test panel per v8b.1 A.1) -->
   <div class="rounded-lg border bg-white p-4 mb-6">
     <h3 class="text-lg font-semibold mb-2">1. Stationarity tests (per variant, long-run frame)</h3>
     <p class="text-sm text-gray-600 mb-3">
-      ADF tests the null of a unit root (alternative: stationary). KPSS tests the
-      null of stationarity. A variant z-score series passes the stationarity check
-      iff ADF rejects (p &lt; 0.05) <em>and</em> KPSS fails to reject (p &gt; 0.05).
+      Four complementary unit-root / stationarity tests run on each variant's
+      long-run z-score series.
+      <strong>ADF</strong> (null: unit root) and <strong>PP</strong>
+      (Phillips-Perron, null: unit root) reject when p &lt; 0.05.
+      <strong>KPSS</strong> (null: stationarity) fails to reject when p &gt; 0.05.
+      <strong>ZA</strong> (Zivot-Andrews, null: unit root with no structural break)
+      rejects when p &lt; 0.05.
+      <strong>Overall PASS</strong> iff at least 2 of the 4 tests agree on
+      stationarity — agreement strengthens the signal because each test has a
+      different power profile against different alternatives.
     </p>
     {% if stationarity_rows %}
     <table class="diag-table">
       <thead>
         <tr>
           <th>Variant</th>
-          <th>N observations</th>
-          <th>ADF p-value</th>
-          <th>ADF rejects unit root</th>
-          <th>KPSS p-value</th>
-          <th>KPSS fails to reject</th>
+          <th>N obs</th>
+          <th>ADF p</th>
+          <th>KPSS p</th>
+          <th>PP p</th>
+          <th>ZA p</th>
+          <th>ADF</th>
+          <th>KPSS</th>
+          <th>PP</th>
+          <th>ZA</th>
           <th>Overall</th>
         </tr>
       </thead>
@@ -38,23 +49,28 @@
           <td><code>{{ row.variant }}</code></td>
           <td>{{ row.n_obs }}</td>
           <td>{{ row.adf_p_fmt }}</td>
-          <td>{% if row.adf_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
           <td>{{ row.kpss_p_fmt }}</td>
-          <td>{% if row.kpss_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
+          <td>{{ row.pp_p_fmt }}</td>
+          <td>{{ row.za_p_fmt }}</td>
+          <td>{% if row.adf_pass %}<span class="diag-stationarity-pass">✓</span>{% else %}<span class="diag-stationarity-fail">✗</span>{% endif %}</td>
+          <td>{% if row.kpss_pass %}<span class="diag-stationarity-pass">✓</span>{% else %}<span class="diag-stationarity-fail">✗</span>{% endif %}</td>
+          <td>{% if row.pp_pass %}<span class="diag-stationarity-pass">✓</span>{% else %}<span class="diag-stationarity-fail">✗</span>{% endif %}</td>
+          <td>{% if row.za_pass %}<span class="diag-stationarity-pass">✓</span>{% else %}<span class="diag-stationarity-fail">✗</span>{% endif %}</td>
           <td>{% if row.overall_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
     {% else %}
-    <p class="text-sm text-gray-500">Stationarity tests unavailable (requires <code>statsmodels.tsa.stattools</code>).</p>
+    <p class="text-sm text-gray-500">Stationarity tests unavailable (requires <code>statsmodels.tsa.stattools</code> and <code>arch.unitroot</code>).</p>
     {% endif %}
     <p class="text-xs text-gray-500 mt-3">
-      Interpretation: a FAIL on ADF or KPSS does not necessarily invalidate a variant — many
-      valuation series exhibit structural breaks (regime changes in capital intensity,
-      buyback adoption, free cash flow margins) that legitimately violate stationarity. Use
-      this as a screen for "this variant's distribution may be drifting" rather than a
-      reject/accept decision rule.
+      Interpretation: many valuation series exhibit structural breaks (regime
+      changes in capital intensity, buyback adoption, free-cash-flow margins)
+      that legitimately violate strict stationarity. Use this as a screen for
+      "this variant's distribution may be drifting" rather than a hard
+      accept/reject decision. PP and ZA agreement with ADF is the strongest
+      signal; KPSS often disagrees on heavy-tailed series.
     </p>
   </div>
 
@@ -75,9 +91,60 @@
     </p>
   </div>
 
-  <!-- 3. OOS R² evolution chart -->
+  <!-- 3. Bai-Perron break dates per variant (v8b.1 A.2) -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">3. Bai-Perron structural break dates (per variant)</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Bai-Perron multiple-break detection identifies structural breaks endogenously
+      under a piecewise-linear-in-time model. Up to 5 breaks per variant, selected
+      by BIC. The 95% CI uses an asymptotic ±18-month band as a conservative
+      proxy for the proper Bai-Perron interval.
+    </p>
+    {% if break_dates_rows %}
+    {% for vrow in break_dates_rows %}
+    <details class="mb-2 px-3 py-2 rounded border bg-gray-50">
+      <summary class="cursor-pointer font-medium text-sm">
+        <code>{{ vrow.variant }}</code> &mdash; {{ vrow.breaks|length }} break{{ '' if vrow.breaks|length == 1 else 's' }} detected
+      </summary>
+      {% if vrow.breaks %}
+      <table class="diag-table mt-2">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Break date</th>
+            <th>95% CI lower</th>
+            <th>95% CI upper</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in vrow.breaks %}
+          <tr>
+            <td>{{ b.break_idx }}</td>
+            <td>{{ b.break_date_fmt }}</td>
+            <td>{{ b.ci_lower_fmt }}</td>
+            <td>{{ b.ci_upper_fmt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-xs text-gray-500 mt-2">No breaks detected by BIC (m_optimal = 0).</p>
+      {% endif %}
+    </details>
+    {% endfor %}
+    {% else %}
+    <p class="text-sm text-gray-500">Break-date detection unavailable.</p>
+    {% endif %}
+    <p class="text-xs text-gray-500 mt-3">
+      Recent breaks (≤ 25 years old) suggest the current_regime frame is still
+      adapting and headline z-scores may understate the regime shift. Older-only
+      breaks suggest a stable post-break regime.
+    </p>
+  </div>
+
+  <!-- 4. OOS R² evolution chart -->
   <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
-    <h3 class="text-lg font-semibold mb-2">3. Out-of-sample R² evolution (MVCI 10Y, expanding window)</h3>
+    <h3 class="text-lg font-semibold mb-2">4. Out-of-sample R² evolution (MVCI 10Y, expanding window)</h3>
     <p class="text-sm text-gray-600 mb-3">
       Goyal-Welch R<sup>2</sup><sub>OOS</sub> computed at each month-end on an expanding
       window: at each date <em>t</em>, the model is fit on data through <em>t-1</em> and
@@ -88,45 +155,55 @@
     <div id="diagnostics-oos-r2-chart" style="width:100%; height:450px;"></div>
   </div>
 
-  <!-- 4. Predictive properties summary -->
-  <div class="rounded-lg border bg-white p-4 mb-6">
-    <h3 class="text-lg font-semibold mb-2">4. Predictive properties &mdash; key metrics</h3>
+  <!-- 5. Residual ACF/PACF (v8b.1 A.3) -->
+  <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
+    <h3 class="text-lg font-semibold mb-2">5. Residual autocorrelation (MVCI 10Y predictive regression)</h3>
     <p class="text-sm text-gray-600 mb-3">
-      Newey-West t-statistics, in-sample R<sup>2</sup>, and out-of-sample R<sup>2</sup>
-      (Goyal-Welch) are reported per-variant on the dedicated indicator tabs.
-      The relevant headline summary is in the right rail of each tab's
-      "Predictive Regression" block.
+      Sample autocorrelation (ACF) and partial autocorrelation (PACF) of the
+      OLS residuals from the MVCI z → 10Y forward CAGR regression, 20 lags.
+      Dashed red bands are the 95% confidence interval under the null of white
+      noise (Bartlett ±1.96/√N). Lags spiking outside the band indicate
+      omitted dynamics — typically the overlapping-observation effect on the
+      10Y horizon, which the Newey-West HAC SE on the headline already controls
+      for.
     </p>
-    <p class="text-xs text-gray-500">
-      Goyal-Welch R<sup>2</sup><sub>OOS</sub> compares a recursively-fit model against
-      a no-skill mean prediction; positive values indicate genuine out-of-sample
-      forecasting skill. Negative R<sup>2</sup><sub>OOS</sub> means the recursive model
-      underperforms the unconditional mean — a strong red flag against using the
-      variant for forecasting.
-    </p>
+    <div id="diagnostics-acf-pacf-chart" style="width:100%; height:430px;"></div>
   </div>
 
-  <!-- 5. Probability engine calibration -->
-  <div class="rounded-lg border bg-white p-4 mb-6">
-    <h3 class="text-lg font-semibold mb-2">5. Probability engine calibration</h3>
-    <p class="text-sm text-gray-600">
-      The Bayesian posterior CIs reported on each variant tab are constructed from a
-      conjugate normal model with weakly informative priors. Calibration metrics
-      (Brier score decomposition, PIT histograms, reliability diagrams) are computed
-      during the orchestrator's backtest pass and saved to
-      <code>outputs/tables/calibration_metrics.json</code>. Use the
-      <strong>Data</strong> tab to download those tables for offline analysis.
+  <!-- 6. Probability calibration (v8b.1 A.4) -->
+  <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
+    <h3 class="text-lg font-semibold mb-2">6. Probability engine calibration (P(10Y CAGR &lt; 5%))</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Reliability diagram for the headline event probability P(forward 10Y CAGR &lt; 5%).
+      Predicted probabilities are bucketed into deciles and compared to realized event
+      frequencies. Points near the diagonal indicate well-calibrated probabilities;
+      systematic departures indicate miscalibration. Brier score = reliability
+      − resolution + uncertainty (lower is better).
     </p>
+    <div id="diagnostics-calibration-chart" style="width:100%; height:450px;"></div>
+    {% if calibration_summary %}
+    <p class="text-xs text-gray-500 mt-3">
+      <strong>n = {{ calibration_summary.n_obs }}</strong> historical observations.
+      Brier = {{ calibration_summary.brier_fmt }}; reliability {{ calibration_summary.reliability_fmt }}
+      (lower is better, &lt; 0.05 well-calibrated, &gt; 0.10 systematic miscalibration);
+      resolution {{ calibration_summary.resolution_fmt }} (higher is better);
+      uncertainty {{ calibration_summary.uncertainty_fmt }}.
+    </p>
+    {% else %}
+    <p class="text-xs text-gray-500 mt-3">Calibration metrics unavailable — insufficient historical observations or recursive estimation failed.</p>
+    {% endif %}
   </div>
 
-  <!-- 6. Notes -->
+  <!-- 7. Notes -->
   <div class="rounded-lg border bg-white p-4">
-    <h3 class="text-lg font-semibold mb-2">6. Caveats</h3>
+    <h3 class="text-lg font-semibold mb-2">7. Caveats</h3>
     <ul class="text-sm leading-relaxed list-disc list-inside">
       <li>All test statistics are sample estimates and are themselves subject to sampling variability — interpret p-values as continuous evidence rather than as binary accept/reject decisions.</li>
       <li>The 10Y forward-return target induces overlapping observations; the Newey-West t-stat with lag = horizon controls for this, but the effective sample size is much smaller than the raw observation count would suggest.</li>
       <li>The Mean Reversion variant uses a log-linear trend fit over the full sample — by construction the residuals have zero mean over the sample, which is not the same as long-run zero mean for future data.</li>
       <li>The MVCI composite z-score is constructed equal-weighted by default (most robust); the PCA-PC1 and inverse-variance schemes are reported as sensitivity checks in the MVCI tab's "Weighting Schemes" table.</li>
+      <li>Bai-Perron CIs above use a conservative ±18-month asymptotic band. The proper Bai-Perron interval depends on within-segment variance; the band here is a documentation device, not a hypothesis test.</li>
+      <li>Calibration uses recursive Gaussian probability estimates (no look-ahead). The headline tab reports Bayesian posterior probabilities which include a weakly-informative prior; calibration here measures the OLS-only estimate.</li>
     </ul>
   </div>
 

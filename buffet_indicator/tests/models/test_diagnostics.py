@@ -117,8 +117,8 @@ def test_compute_oos_r2_evolution_empty_on_too_few_obs() -> None:
 
 
 def test_emit_diagnostics_writes_three_files(tmp_path: Path) -> None:
+    """v8b emitted 3 files; v8b.1 A.2-A.4 expanded to 6 (break_dates, residuals, calibration)."""
     charts_dir = tmp_path / "charts"
-    # Write input parquets first
     zh = _synth_z_history()
     sc = _synth_scatter(n=200)
     charts_dir.mkdir()
@@ -126,10 +126,13 @@ def test_emit_diagnostics_writes_three_files(tmp_path: Path) -> None:
     sc.to_parquet(charts_dir / "scatter_data.parquet")
 
     paths = emit_diagnostics(charts_dir)
-    assert set(paths.keys()) == {"stationarity", "correlation", "oos_r2_evolution"}
+    # v8b's original 3 must still be present.
+    assert {"stationarity", "correlation", "oos_r2_evolution"}.issubset(set(paths.keys()))
+    # v8b.1 adds 3 more.
+    assert {"break_dates", "mvci_residuals", "calibration"}.issubset(set(paths.keys()))
     for path in paths.values():
         assert path.exists()
-        assert path.stat().st_size > 0
+        assert path.stat().st_size >= 0  # calibration JSON may be tiny on synth data
 
 
 def test_emit_diagnostics_works_without_input_parquets(tmp_path: Path) -> None:

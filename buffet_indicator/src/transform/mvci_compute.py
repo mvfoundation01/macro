@@ -130,6 +130,10 @@ def pca_pc1_mvci(
 
     arr = z_panel.to_numpy(dtype="float64")
     last_explained = np.nan
+    # v8b.1 fix B.3: track the FULL PC1 loadings (before availability rebasing)
+    # so the dashboard can display every variant's contribution to PC1, even
+    # when the latest observation has NaN for some variants.
+    last_full_loadings: dict[str, float] | None = None
     for i in range(len(out_idx)):
         if i + 1 < min_periods:
             for c in z_panel.columns:
@@ -168,6 +172,10 @@ def pca_pc1_mvci(
             loadings = np.full_like(v1, 1.0 / n_constituents)
         else:
             loadings = v1 / s
+        # Capture the full balanced-panel loadings before any rebasing.
+        last_full_loadings = {
+            c: float(loadings[j]) for j, c in enumerate(z_panel.columns)
+        }
         latest = arr[i]
         if np.isnan(latest).any():
             mask = ~np.isnan(latest)
@@ -198,7 +206,14 @@ def pca_pc1_mvci(
         "scheme": "pca_pc1",
         "z_score_series": series,
         "z_score": float(series.dropna().iloc[-1]) if not series.dropna().empty else float("nan"),
+        # v8b.1: weights_current = availability-rebased (renormalized over
+        # currently-observed variants only); used internally for the actual
+        # composite computation. loadings_full = raw PC1 loadings on the
+        # balanced panel (no rebasing); used by the dashboard PCA loadings
+        # chart so every constituent's contribution to PC1 is visible.
         "weights_current": {c: float(last_weights.get(c, np.nan)) for c in z_panel.columns},
+        "loadings_full": last_full_loadings
+        or {c: float("nan") for c in z_panel.columns},
         "weights_history": weights_df,
         "n_constituents": int(n_constituents),
         "explained_variance": float(last_explained) if np.isfinite(last_explained) else None,

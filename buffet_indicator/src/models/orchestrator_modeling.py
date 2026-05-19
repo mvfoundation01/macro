@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -736,6 +737,9 @@ def _build_mvci_for_frame(
                 "scheme": s["scheme"],
                 "z_score": s["z_score"],
                 "weights_current": s["weights_current"],
+                # v8b.1: loadings_full carries the unscaled PCA PC1 eigenvector
+                # so the dashboard can display every variant's contribution.
+                "loadings_full": s.get("loadings_full"),
                 "explained_variance": s.get("explained_variance"),
                 "n_constituents": s["n_constituents"],
                 "z_score_series": s["z_score_series"],

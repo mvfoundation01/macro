@@ -21,7 +21,6 @@ from __future__ import annotations
 import pandas as pd
 
 from src.ingest._base import IngestError, get_logger
-from src.ingest.fred_loader import FredSeries
 from src.ingest.shiller_loader import ShillerData
 
 logger = get_logger("buffett.transform.ey_deficit")

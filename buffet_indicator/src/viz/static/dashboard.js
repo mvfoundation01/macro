@@ -96,6 +96,13 @@
   const renderedCharts = new Set();
   const chartDivIds = [];
 
+  // v8b.1 fix B.2: enable scroll-wheel zoom only on non-touch desktops.
+  // Touch devices keep scrollZoom=false so vertical scrolling doesn't get
+  // trapped inside the chart.
+  const IS_TOUCH_DEVICE =
+    "ontouchstart" in window ||
+    (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0);
+
   function renderPlot(divId, spec) {
     if (!spec || (!spec.data && !spec.layout)) return;
     const el = document.getElementById(divId);
@@ -106,6 +113,10 @@
       { responsive: true, displaylogo: false, displayModeBar: true },
       spec.config || {}
     );
+    // Per-render override: only enable scrollZoom on desktop pointing devices.
+    if (!IS_TOUCH_DEVICE) {
+      config.scrollZoom = true;
+    }
     if (document.documentElement.classList.contains("dark")) {
       layout.paper_bgcolor = "rgba(0,0,0,0)";
       layout.plot_bgcolor = "rgba(0,0,0,0)";
@@ -121,7 +132,10 @@
   }
 
   function renderHeroForTab(tabName) {
-    const hero = (DATA.hero_specs || {})[tabName];
+    let hero = (DATA.hero_specs || {})[tabName];
+    // v8b.1 D — overview hero is sentinel-referenced to the mvci hero
+    // to avoid duplicating the spec in the inline JSON payload.
+    if (hero === "__HERO_MVCI__") hero = DATA.hero_specs.mvci;
     if (!hero) return;
     if (tabName === "buffett") {
       const sub = window.localStorage.getItem("mv_buffett_subtab") || "bi_allequity_pct";
@@ -203,7 +217,11 @@
     if (!charts) return;
     if (charts.panel_a) renderPlot(`${tabName}-panel-a-${variantKey}`, charts.panel_a);
     if (charts.panel_b) renderPlot(`${tabName}-panel-b-${variantKey}`, charts.panel_b);
-    if (charts.panel_c) renderPlot(`${tabName}-panel-c-${variantKey}`, charts.panel_c);
+    // v8b.1 D — Panel C is the same across all variants; the per-variant
+    // entry is a sentinel string pointing at DATA.shared_panel_c.
+    let panelC = charts.panel_c;
+    if (panelC === "__SHARED_PANEL_C__") panelC = DATA.shared_panel_c;
+    if (panelC) renderPlot(`${tabName}-panel-c-${variantKey}`, panelC);
   }
 
   function renderDiagnostics() {
@@ -212,6 +230,12 @@
     }
     if (DATA.diagnostics_oos_r2_chart && !renderedCharts.has("diagnostics-oos-r2-chart")) {
       renderPlot("diagnostics-oos-r2-chart", DATA.diagnostics_oos_r2_chart);
+    }
+    if (DATA.diagnostics_acf_pacf_chart && !renderedCharts.has("diagnostics-acf-pacf-chart")) {
+      renderPlot("diagnostics-acf-pacf-chart", DATA.diagnostics_acf_pacf_chart);
+    }
+    if (DATA.diagnostics_calibration_chart && !renderedCharts.has("diagnostics-calibration-chart")) {
+      renderPlot("diagnostics-calibration-chart", DATA.diagnostics_calibration_chart);
     }
   }
 
@@ -240,6 +264,20 @@
         downloadBlob(text, "mv_headline.json", "application/json");
       });
     }
+    // 2b. Scatter data: rebuild CSV from inline variant_charts on click
+    // (v8b.1 D bundle-size optimization — scatter_data CSV no longer inlined).
+    const scatterBtn = document.getElementById("download-scatter-on-demand");
+    if (scatterBtn && scatterBtn.dataset.wired !== "1") {
+      scatterBtn.dataset.wired = "1";
+      scatterBtn.addEventListener("click", () => {
+        const csv = rebuildScatterCSV();
+        if (!csv) {
+          alert("Scatter data unavailable — variant chart specs missing.");
+          return;
+        }
+        downloadBlob(csv, "mv_scatter_data.csv", "text/csv");
+      });
+    }
     // 3. Populate the JSON viewer (truncated for performance).
     const viewer = document.getElementById("headline-json-viewer");
     if (viewer && !viewer.dataset.populated) {
@@ -247,6 +285,32 @@
       const raw = DATA.headline_json_str || "{}";
       viewer.textContent = raw.length > 8000 ? raw.slice(0, 8000) + "\n\n... [truncated — use download button for full file]" : raw;
     }
+  }
+
+  // v8b.1 D — rebuild scatter_data CSV from inline panel B traces.
+  // Each variant's Panel B carries (date, z_score, forward_120m_cagr) tuples
+  // in trace 0 (Historical scatter). We reconstruct a long-format CSV
+  // matching the original outputs/charts/scatter_data.parquet schema.
+  function rebuildScatterCSV() {
+    const variantCharts = DATA.variant_charts || {};
+    if (!Object.keys(variantCharts).length) return null;
+    const rows = ["date,variant,z_score_long_run,forward_120m_cagr"];
+    for (const variant of Object.keys(variantCharts)) {
+      const panelB = variantCharts[variant] && variantCharts[variant].panel_b;
+      if (!panelB || !panelB.data || !panelB.data.length) continue;
+      const hist = panelB.data[0]; // first trace = Historical
+      const xs = hist.x || [];
+      const ys = hist.y || [];
+      const dates = hist.customdata || [];
+      for (let i = 0; i < xs.length; i++) {
+        // y is in % (we multiply by 100 upstream); divide back for raw CAGR
+        const cagr = (ys[i] != null) ? (ys[i] / 100) : "";
+        const date = dates[i] || "";
+        const z = (xs[i] != null) ? xs[i] : "";
+        rows.push(`${date},${variant},${z},${cagr}`);
+      }
+    }
+    return rows.length > 1 ? rows.join("\n") : null;
   }
 
   function downloadBlob(text, filename, mime) {

@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 from src.ingest import orchestrator as orch
-from src.ingest import master_archive as ma
 from src.ingest import csv_loader as cl
 from src.ingest.yahoo_loader import YahooSeries
 

@@ -1,9 +1,8 @@
 """Tests for src.ingest.fred_loader."""
 from __future__ import annotations
 
-import json
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -15,7 +14,6 @@ from src.ingest import fred_loader as fl
 from src.ingest._base import (
     APIKeyError,
     DataValidationError,
-    NetworkError,
 )
 
 

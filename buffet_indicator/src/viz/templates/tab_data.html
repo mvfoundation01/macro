@@ -26,18 +26,21 @@
       <button class="csv-download-btn" data-csv-key="sp500_with_regime" data-csv-filename="mv_sp500_with_regime.csv">
         ⬇ sp500_with_regime.csv
       </button>
-      <button class="csv-download-btn" data-csv-key="scatter_data" data-csv-filename="mv_scatter_data.csv">
-        ⬇ scatter_data.csv
+      <button class="csv-download-btn" id="download-scatter-on-demand">
+        ⬇ scatter_data.csv (rebuilt on click)
       </button>
       <button class="csv-download-btn" id="download-headline-json">
-        ⬇ headline.json
+        ⬇ headline.json (compact, no series)
       </button>
     </div>
     <p class="text-xs text-gray-500 mt-3">
       <strong>z_history</strong>: per-variant, per-frame z-score by month.
-      <strong>value_history</strong>: per-variant raw level (or transformed value) by month.
+      <strong>value_history</strong>: per-variant raw level by month.
       <strong>sp500_with_regime</strong>: S&amp;P 500 monthly close + MVCI regime label.
-      <strong>scatter_data</strong>: per-variant z-score paired with realized forward returns for each horizon.
+      <strong>scatter_data</strong>: per-variant z-score paired with realized forward returns;
+      this CSV is reconstructed in the browser from the inline chart data on click
+      (v8b.1 bundle-size optimization). For full pipeline output, run the model offline and use the
+      <code>outputs/charts/*.parquet</code> files directly.
     </p>
   </div>
 

@@ -9,7 +9,7 @@ import pytest
 
 from src.config import SHILLER_XLS
 from src.ingest import shiller_loader as sl
-from src.ingest._base import DataValidationError, FileFormatError
+from src.ingest._base import FileFormatError
 
 
 # ---------------------------------------------------------------------------

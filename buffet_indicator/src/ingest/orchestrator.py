@@ -4,9 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
 
-from src.config import MANIFEST, SHARED_RAW_DATA, ensure_skeleton
+from src.config import MANIFEST, ensure_skeleton
 from src.ingest._base import (
     IngestError,
     SourceMissingError,

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
@@ -199,7 +198,6 @@ def _update_master_atomically(series_id: str, candidate: pd.DataFrame) -> pd.Dat
             existing = _empty_master_frame()
             existing.index = pd.DatetimeIndex([], name="date")
 
-        existing_dates = set(existing.index)
         merged_rows: list[pd.DataFrame] = []
 
         # Append: only the truly NEW dates.

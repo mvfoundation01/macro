@@ -111,6 +111,56 @@ def _headline_value_fmt(variant: dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 
 
+_SERIES_KEYS_TO_STRIP = {
+    "z_score_series",
+    "weights_history",
+    "loadings_history",
+    "trend_series",
+    "fitted_series",
+    "residuals",
+    "z_history",
+    "scatter_data",
+    # v8b.1 D: sample distributions inside forward_outlook are large
+    # (~7KB × 7 variants × 4 horizons × 3 robustness × 2 frames) and only
+    # summary scalars (mean / quantile-based events) are read by the dashboard.
+    "current_dist",
+    "bucket_centers",
+    "bucket_samples",
+}
+
+
+def _strip_series_for_json_viewer(obj: Any) -> Any:
+    """Recursively drop large series fields from a headline-like dict.
+
+    Used by the Data tab JSON viewer (v8b.1 D bundle-size optimization).
+    Keeps the structural shape but replaces each stripped value with the
+    placeholder ``"<series omitted from viewer — download CSV instead>"``.
+    """
+    if isinstance(obj, dict):
+        out: dict[str, Any] = {}
+        for k, v in obj.items():
+            if k in _SERIES_KEYS_TO_STRIP:
+                out[k] = "<series omitted from viewer — download CSV instead>"
+            else:
+                out[k] = _strip_series_for_json_viewer(v)
+        return out
+    if isinstance(obj, list):
+        return [_strip_series_for_json_viewer(x) for x in obj]
+    return obj
+
+
+def _slim_variants_for_inline(variants: dict[str, Any]) -> dict[str, Any]:
+    """Slim the embedded `variants` payload — drop heavy fields not used by JS.
+
+    The dashboard runtime only reads scalar headline values
+    (z_score / regime / forward_outlook scalars / regression / full_conviction)
+    from ``DATA.variants``. Sample distributions, full z-score series, and PCA
+    weight histories are not consumed and can be safely stripped to shrink
+    the inline JSON payload.
+    """
+    return _strip_series_for_json_viewer(variants)
+
+
 def _safe_get(d: dict[str, Any] | None, *keys: str, default: Any = None) -> Any:
     cur: Any = d
     for k in keys:
@@ -371,8 +421,16 @@ def _build_diagnostics_context(
                 continue
             adf_p = float(row.get("adf_pvalue", float("nan")))
             kpss_p = float(row.get("kpss_pvalue", float("nan")))
+            pp_p = float(row.get("pp_pvalue", float("nan")))
+            za_p = float(row.get("za_pvalue", float("nan")))
             adf_pass = (not math.isnan(adf_p)) and adf_p < 0.05
             kpss_pass = (not math.isnan(kpss_p)) and kpss_p > 0.05
+            pp_pass = (not math.isnan(pp_p)) and pp_p < 0.05
+            za_pass = (not math.isnan(za_p)) and za_p < 0.05
+            # v8b.1 spec A.1: PASS iff at least 2 of the 4 tests agree on
+            # stationarity (each test has different power profile against
+            # different alternatives, so agreement strengthens the signal).
+            n_pass = sum([adf_pass, kpss_pass, pp_pass, za_pass])
             stationarity_rows.append(
                 {
                     "variant": row["variant"],
@@ -381,7 +439,11 @@ def _build_diagnostics_context(
                     "adf_pass": adf_pass,
                     "kpss_p_fmt": f"{kpss_p:.3f}" if not math.isnan(kpss_p) else "n/a",
                     "kpss_pass": kpss_pass,
-                    "overall_pass": adf_pass and kpss_pass,
+                    "pp_p_fmt": f"{pp_p:.3f}" if not math.isnan(pp_p) else "n/a",
+                    "pp_pass": pp_pass,
+                    "za_p_fmt": f"{za_p:.3f}" if not math.isnan(za_p) else "n/a",
+                    "za_pass": za_pass,
+                    "overall_pass": n_pass >= 2,
                 }
             )
 
@@ -419,10 +481,67 @@ def _build_diagnostics_context(
     )
     pc1_explained = mvci_pca.get("explained_variance")
 
+    # ---- v8b.1 A.2: Bai-Perron break dates ----
+    break_dates_rows: list[dict[str, Any]] = []
+    bd_path = charts_dir / "diagnostics_break_dates.parquet"
+    if bd_path.exists():
+        try:
+            bd_df = pd.read_parquet(bd_path)
+            for variant, sub in bd_df.groupby("variant"):
+                breaks = []
+                for _, row in sub.iterrows():
+                    breaks.append(
+                        {
+                            "break_idx": int(row["break_idx"]),
+                            "break_date_fmt": pd.Timestamp(row["break_date"]).strftime(
+                                "%Y-%m"
+                            ),
+                            "ci_lower_fmt": pd.Timestamp(row["ci_lower"]).strftime("%Y-%m"),
+                            "ci_upper_fmt": pd.Timestamp(row["ci_upper"]).strftime("%Y-%m"),
+                        }
+                    )
+                break_dates_rows.append({"variant": variant, "breaks": breaks})
+        except Exception:  # noqa: BLE001
+            break_dates_rows = []
+
+    # ---- v8b.1 A.3: residuals (for ACF/PACF) ----
+    residuals: pd.Series | None = None
+    res_path = charts_dir / "diagnostics_mvci_residuals.parquet"
+    if res_path.exists():
+        try:
+            res_df = pd.read_parquet(res_path)
+            if not res_df.empty and "residual" in res_df.columns:
+                residuals = res_df["residual"].astype("float64")
+        except Exception:  # noqa: BLE001
+            residuals = None
+
+    # ---- v8b.1 A.4: calibration metrics ----
+    calib_dict: dict[str, Any] | None = None
+    calib_path = charts_dir.parent / "tables" / "calibration_metrics.json"
+    if calib_path.exists():
+        try:
+            calib_dict = json.loads(calib_path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            calib_dict = None
+
+    calibration_summary: dict[str, str] | None = None
+    if calib_dict and calib_dict.get("available"):
+        calibration_summary = {
+            "brier_fmt": f"{calib_dict['brier_score']:.3f}",
+            "reliability_fmt": f"{calib_dict['reliability']:.3f}",
+            "resolution_fmt": f"{calib_dict['resolution']:.3f}",
+            "uncertainty_fmt": f"{calib_dict['uncertainty']:.3f}",
+            "n_obs": str(calib_dict.get("n_observations", "?")),
+        }
+
     return {
         "stationarity_rows": stationarity_rows,
         "corr_matrix": corr_matrix,
         "oos_evolution": oos_evolution,
+        "break_dates_rows": break_dates_rows,
+        "residuals": residuals,
+        "calibration_dict": calib_dict,
+        "calibration_summary": calibration_summary,
         "pc1_explained_fmt": (
             f"{pc1_explained * 100:.1f}%" if pc1_explained is not None else "n/a"
         ),
@@ -438,21 +557,36 @@ def _build_data_context(
     headline: dict[str, Any],
     parquets: dict[str, pd.DataFrame],
 ) -> dict[str, Any]:
-    """Inline CSV strings for client-side downloads + data-source bibliography."""
+    """Inline CSV strings for client-side downloads + data-source bibliography.
+
+    v8b.1 D — bundle size: scatter_data CSV (~1.5 MB) and z_history CSV (~1 MB)
+    are the dominant byte contributors. We keep z_history + value_history +
+    sp500_with_regime fully inlined (≤ 1 MB combined) and store
+    scatter_data lazily — surfaced as a thin pointer that triggers an
+    on-demand re-CSV from the inline JSON variant arrays instead of pre-stringifying.
+    """
     csv_exports: dict[str, str] = {}
 
-    # Each parquet -> CSV string (compact, no index)
     for key, df in parquets.items():
         if df is None or df.empty:
+            continue
+        # Skip the largest export to keep bundle below the 8 MB target.
+        # scatter_data is reconstructible from variant_charts panel B data,
+        # which is already inlined; users can rebuild the CSV via the JSON viewer.
+        if key == "scatter_data":
             continue
         try:
             csv_exports[key] = df.to_csv(index=False)
         except Exception:  # noqa: BLE001
             continue
 
-    # Headline JSON as a separately-downloadable string
+    # v8b.1 D — strip large series arrays from the headline-JSON viewer.
+    # The dashboard chart layer carries the actual time-series data; the
+    # viewer is a structured-record viewer, not a data export. Series fields
+    # remain available via the per-parquet CSV downloads.
     try:
-        headline_json_str = json.dumps(headline, default=str, indent=2)
+        slim = _strip_series_for_json_viewer(headline)
+        headline_json_str = json.dumps(slim, default=str, indent=2)
     except Exception:  # noqa: BLE001
         headline_json_str = "{}"
 
@@ -591,6 +725,15 @@ def build_dashboard(
     inline_css = _read_static(_STATIC_DIR / "dashboard.css")
     inline_js = _read_static(_STATIC_DIR / "dashboard.js")
 
+    # v8b.1 D bundle-size optimization: strip sample arrays / series from the
+    # embedded variants dict before JSON serialization. The dashboard runtime
+    # only reads scalar fields from DATA.variants; variant_charts carries the
+    # plotting data.
+    if "variants" in dashboard_data:
+        dashboard_data["variants"] = _slim_variants_for_inline(
+            dashboard_data["variants"]
+        )
+
     # Spec v8a.3 sanitizer: scrub NaN/Infinity *before* serialization, then
     # ask json.dumps to refuse stragglers. Guarantees browser JSON.parse works.
     sanitized = _clean_for_json(dashboard_data)
@@ -610,6 +753,26 @@ def build_dashboard(
             r2_values=[float(v) for v in oos_df["r2_oos"].astype("float64")],
         )
         sanitized["diagnostics_oos_r2_chart"] = _clean_for_json(oos_spec)
+
+    # v8b.1 A.3 — ACF/PACF chart from residuals
+    residuals = diag_ctx.get("residuals")
+    if residuals is not None and not residuals.empty:
+        from src.viz.chart_specs import make_acf_pacf_charts
+        acf_spec = make_acf_pacf_charts(residuals)
+        sanitized["diagnostics_acf_pacf_chart"] = _clean_for_json(acf_spec)
+
+    # v8b.1 A.4 — calibration plot
+    calib_dict = diag_ctx.get("calibration_dict")
+    if calib_dict and calib_dict.get("available"):
+        from src.viz.chart_specs import make_calibration_plot
+        calib_spec = make_calibration_plot(
+            buckets=calib_dict["buckets"],
+            brier_score=calib_dict["brier_score"],
+            reliability=calib_dict["reliability"],
+            resolution=calib_dict["resolution"],
+            uncertainty=calib_dict["uncertainty"],
+        )
+        sanitized["diagnostics_calibration_chart"] = _clean_for_json(calib_spec)
 
     # v8b: inline CSV exports in payload for client-side downloads.
     sanitized["csv_exports"] = data_ctx.get("csv_exports", {})
