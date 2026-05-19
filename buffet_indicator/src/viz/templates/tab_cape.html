@@ -1,0 +1,66 @@
+{% import "_macros.html" as m %}
+<section data-tab="cape" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">CAPE / Shiller P/E10 &mdash; 1881 onwards</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Z-score deviations from the long-run trend on Shiller's CAPE (price /
+      10-year real earnings).
+    </p>
+    <div id="hero-chart-cape" class="hero-chart-container"></div>
+    {{ m.interp_grid(cape.interpretation.hero) }}
+  </div>
+
+  {{ m.why_it_matters_card("CAPE", cape.interpretation.why_it_matters) }}
+
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ cape.regime_color }};">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div><div class="text-xs text-gray-500">CAPE</div><div class="text-xl font-semibold">{{ cape.value_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Z-score (LR)</div><div class="text-xl font-semibold">{{ cape.z_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ cape.pct_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ cape.regime }}</div></div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel A &mdash; CAPE Z-Score Time Series</h3>
+    <div id="cape-panel-a-cape" class="panel-chart-container"></div>
+    {{ m.interp_grid(cape.interpretation.panel_a) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel B &mdash; CAPE Z vs 10-Year Forward CAGR</h3>
+    <div id="cape-panel-b-cape" class="panel-chart-container"></div>
+    {{ m.interp_grid(cape.interpretation.panel_b) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 by MVCI Regime</h3>
+    <div id="cape-panel-c-cape" class="panel-chart-container"></div>
+    {{ m.interp_grid(cape.interpretation.panel_c) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Predictive Regression (10Y, primary FR)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ cape.beta_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ cape.t_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_in</td><td>{{ cape.r2_in_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_OOS</td><td>{{ cape.r2_oos_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">Full conviction (10Y)</td><td>{{ cape.conviction_fmt }} / 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">About CAPE</h3>
+    <p class="text-sm leading-relaxed">
+      The Cyclically Adjusted P/E (P/E10) is Shiller's price / 10-year-real-earnings
+      ratio, 1881+. It is the textbook long-horizon valuation predictor for US equities
+      (Campbell-Shiller 1988, Shiller 1996).
+    </p>
+  </div>
+</section>

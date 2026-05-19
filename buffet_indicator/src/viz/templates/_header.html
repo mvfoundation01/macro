@@ -1,0 +1,51 @@
+<header class="bg-white shadow-md">
+  <div class="flex justify-between items-center px-4 py-3">
+    <h1 class="text-2xl font-bold">MV Valuation Dashboard</h1>
+    <span class="text-sm text-gray-500">Updated {{ asof_label }}</span>
+  </div>
+
+  <div class="mx-4 my-3 p-4 rounded-lg text-white shadow"
+       style="background-color: {{ regime_color }};">
+    <p class="text-xl">
+      The US stock market is <strong>{{ regime_label }}</strong>
+    </p>
+    <p class="text-sm opacity-90 mt-1">
+      Long-run frame, primary variant = MV Composite Index.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 pb-3">
+    <div class="bg-gray-100 rounded p-2 text-center">
+      <div class="text-xs text-gray-500">MVCI</div>
+      <div class="text-lg font-semibold">{{ mvci_z_fmt }}</div>
+    </div>
+    <div class="bg-gray-100 rounded p-2 text-center">
+      <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
+      <div class="text-lg font-semibold">{{ p_below5_fmt }}</div>
+    </div>
+    <div class="bg-gray-100 rounded p-2 text-center">
+      <div class="text-xs text-gray-500">Confidence</div>
+      <div class="text-lg font-semibold">{{ confidence_fmt }}</div>
+    </div>
+    <div class="bg-gray-100 rounded p-2 text-center">
+      <div class="text-xs text-gray-500">Conviction</div>
+      <div class="text-lg font-semibold">{{ conviction_fmt }} / 5</div>
+    </div>
+  </div>
+
+  <nav class="tab-bar flex items-center border-b px-2">
+    <button data-tab="overview" class="tab-button">Overview</button>
+    <button data-tab="mvci" class="tab-button">MVCI</button>
+    <button data-tab="buffett" class="tab-button">Buffett</button>
+    <button data-tab="cape" class="tab-button">CAPE</button>
+    <button data-tab="qratio" class="tab-button">Q-Ratio</button>
+    <button data-tab="ey_deficit" class="tab-button">EY-Deficit</button>
+    <button data-tab="mean_reversion" class="tab-button">Mean Reversion</button>
+    <button data-tab="diagnostics" class="tab-button">Diagnostics</button>
+    <button data-tab="data" class="tab-button">Data</button>
+    <button data-tab="methodology" class="tab-button">Methodology</button>
+    <button id="dark-toggle"
+            class="ml-auto px-3 py-2 text-lg"
+            aria-label="Toggle dark mode">&#9790;</button>
+  </nav>
+</header>

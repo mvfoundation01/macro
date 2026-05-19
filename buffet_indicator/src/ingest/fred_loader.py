@@ -65,6 +65,24 @@ FRED_CATALOG: dict[str, dict[str, str]] = {
     },
 }
 
+# Spec v7: optional FRED series for Q-Ratio and EY-Deficit. Loaded best-effort
+# (skipped on 404 / network failure with a WARNING) so the core pipeline keeps
+# working when a series is decommissioned or temporarily unavailable.
+FRED_OPTIONAL_CATALOG: dict[str, dict[str, str]] = {
+    "nonfin_net_worth": {
+        "series_id": "TNWMVBSNNCB",
+        "frequency": "Q",
+        "units": "Billions USD NSA",
+        "role": "Q-Ratio denominator (replacement cost net worth)",
+    },
+    "tips_10y": {
+        "series_id": "DFII10",
+        "frequency": "D",
+        "units": "Percent",
+        "role": "Real 10Y yield (TIPS), 2003+",
+    },
+}
+
 BuffettFredKey = Literal["gdp", "equities_all", "equities_public", "equities_nonfin"]
 
 
@@ -408,9 +426,54 @@ def load_buffett_fred(
     return out
 
 
+def load_fred_optional(
+    api_key: str,
+    *,
+    cache_dir: Path = RAW_CACHE,
+    cache_ttl_hours: int = 24,
+    force_refresh: bool = False,
+    observation_start: str = "1945-01-01",
+    keys: tuple[str, ...] | None = None,
+) -> dict[str, FredSeries]:
+    """Best-effort loader for optional Spec v7 FRED series.
+
+    Each key is independently retried; failures are logged as WARNING and the
+    series is omitted from the output dict.
+    """
+    _validate_api_key(api_key)
+    out: dict[str, FredSeries] = {}
+    selected = keys if keys is not None else tuple(FRED_OPTIONAL_CATALOG.keys())
+    for key in selected:
+        info = FRED_OPTIONAL_CATALOG.get(key)
+        if info is None:
+            logger.warning("Unknown optional FRED key: %s", key)
+            continue
+        # TIPS daily series needs a different observation_start (no pre-2003 data).
+        start = "2003-01-01" if info.get("frequency") == "D" else observation_start
+        try:
+            out[key] = load_fred_series(
+                info["series_id"],
+                api_key,
+                cache_dir=cache_dir,
+                cache_ttl_hours=cache_ttl_hours,
+                observation_start=start,
+                force_refresh=force_refresh,
+            )
+        except IngestError as exc:
+            logger.warning(
+                "Optional FRED series '%s' (%s) skipped: %s",
+                key,
+                info["series_id"],
+                exc,
+            )
+    return out
+
+
 # Re-export so tests can patch easily.
 __all__ = [
     "FredSeries",
+    "FRED_OPTIONAL_CATALOG",
+    "load_fred_optional",
     "load_fred_series",
     "load_buffett_fred",
     "FRED_CATALOG",

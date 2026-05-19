@@ -1,0 +1,70 @@
+{% import "_macros.html" as m %}
+<section data-tab="mean_reversion" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">Mean Reversion &mdash; Real S&amp;P 500 vs Exponential Trend</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      The real (inflation-adjusted) S&amp;P 500 plotted on a log scale, with the
+      long-run exponential trend overlaid. When the market deviates substantially
+      from this trend, it has historically reverted.
+    </p>
+    <div id="hero-chart-mean-reversion" class="hero-chart-container"></div>
+    {{ m.interp_grid(mr.interpretation.hero) }}
+  </div>
+
+  {{ m.why_it_matters_card("Mean Reversion", mr.interpretation.why_it_matters) }}
+
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ mr.regime_color }};">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div><div class="text-xs text-gray-500">Real S&amp;P 500</div><div class="text-xl font-semibold">{{ mr.value_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Z-score (LR)</div><div class="text-xl font-semibold">{{ mr.z_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ mr.pct_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ mr.regime }}</div></div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel A &mdash; Z-Score Time Series</h3>
+    <div id="mean-reversion-panel-a-mean_reversion" class="panel-chart-container"></div>
+    {{ m.interp_grid(mr.interpretation.panel_a) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel B &mdash; Z vs 10-Year Forward CAGR</h3>
+    <div id="mean-reversion-panel-b-mean_reversion" class="panel-chart-container"></div>
+    {{ m.interp_grid(mr.interpretation.panel_b) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 by MVCI Regime</h3>
+    <div id="mean-reversion-panel-c-mean_reversion" class="panel-chart-container"></div>
+    {{ m.interp_grid(mr.interpretation.panel_c) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Predictive Regression (10Y, primary FR)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ mr.beta_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ mr.t_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_in</td><td>{{ mr.r2_in_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_OOS</td><td>{{ mr.r2_oos_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">Full conviction (10Y)</td><td>{{ mr.conviction_fmt }} / 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">About Mean Reversion</h3>
+    <p class="text-sm leading-relaxed">
+      CMV-style indicator: real (CPI-adjusted) S&amp;P 500 composite plotted on a
+      log scale, with the long-run log-linear trend fit through the entire
+      1871&ndash;present history. The valuation reading is the percent deviation
+      of the current real price from the fitted trend. Distinct from
+      <code>bi_spx_proxy</code> (SPX/GDP); this variant is purely autoregressive
+      against the price's own long-run trajectory.
+    </p>
+  </div>
+</section>

@@ -1,0 +1,94 @@
+{% import "_macros.html" as m %}
+<section data-tab="buffett" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">Buffett Indicator &mdash; Selected variant</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Switch between the three variants below. The hero chart updates to show
+      the active variant's z-score history with regime bands.
+    </p>
+    <div id="hero-chart-buffett" class="hero-chart-container"></div>
+  </div>
+
+  {% if buffett_subtabs %}
+  {{ m.why_it_matters_card("the Buffett Indicator", buffett_subtabs[0].interpretation.why_it_matters) }}
+  {% endif %}
+
+  <div class="flex flex-wrap gap-2 mb-4">
+    {% for sub in buffett_subtabs %}
+    <button class="tab-button" data-buffett-subtab="{{ sub.key }}">
+      {{ sub.label }}
+    </button>
+    {% endfor %}
+  </div>
+
+  {% for sub in buffett_subtabs %}
+  <div data-buffett-panel="{{ sub.key }}" style="display: none;">
+    <div class="rounded-lg border p-4 mb-4 bg-white"
+         style="border-left: 4px solid {{ sub.regime_color }};">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div><div class="text-xs text-gray-500">Headline value</div><div class="text-xl font-semibold">{{ sub.value_fmt }}</div></div>
+        <div><div class="text-xs text-gray-500">Z-score (LR)</div><div class="text-xl font-semibold">{{ sub.z_fmt }}</div></div>
+        <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ sub.pct_fmt }}</div></div>
+        <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ sub.regime }}</div></div>
+      </div>
+    </div>
+
+    {{ m.interp_grid(sub.interpretation.hero) }}
+
+    <div class="rounded-lg border p-4 mb-4 mt-4 bg-white chart-card">
+      <h3 class="text-lg font-semibold mb-2">Panel A &mdash; Z-Score Time Series</h3>
+      <div id="buffett-panel-a-{{ sub.key }}" class="panel-chart-container"></div>
+      {{ m.interp_grid(sub.interpretation.panel_a) }}
+    </div>
+
+    <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+      <h3 class="text-lg font-semibold mb-2">Panel B &mdash; Z vs 10-Year Forward CAGR</h3>
+      <div id="buffett-panel-b-{{ sub.key }}" class="panel-chart-container"></div>
+      {{ m.interp_grid(sub.interpretation.panel_b) }}
+    </div>
+
+    <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+      <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 by MVCI Regime</h3>
+      <div id="buffett-panel-c-{{ sub.key }}" class="panel-chart-container"></div>
+      {{ m.interp_grid(sub.interpretation.panel_c) }}
+    </div>
+
+    <div class="rounded-lg border p-4 mb-4 bg-white">
+      <h3 class="text-lg font-semibold mb-2">Predictive Regression (10Y, primary FR)</h3>
+      <table class="text-sm">
+        <tbody>
+          <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ sub.beta_fmt }}</td></tr>
+          <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ sub.t_nw_fmt }}</td></tr>
+          <tr><td class="pr-6 text-gray-500">R&sup2;_in</td><td>{{ sub.r2_in_fmt }}</td></tr>
+          <tr><td class="pr-6 text-gray-500">R&sup2;_OOS</td><td>{{ sub.r2_oos_fmt }}</td></tr>
+          <tr><td class="pr-6 text-gray-500">Full conviction (10Y)</td><td>{{ sub.conviction_fmt }} / 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Notes on the three variants</h3>
+    <p class="text-sm leading-relaxed">
+      <strong>All-Equity</strong> uses Federal Reserve Z.1 data covering all
+      US corporate equity (public + private), 1945+. It is the broadest
+      market-cap-to-GDP measure and Buffett's original framing.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>Wilshire</strong> uses the Wilshire 5000 (the broadest US public
+      equity index) divided by GDP, 1971+. Narrower coverage but a cleaner
+      market signal.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>SPX proxy</strong> uses the S&amp;P 500 level divided by GDP,
+      mean-matched to the Wilshire ratio over their common window. Useful
+      for the deepest history (1871+ via the Shiller-spliced SPX series)
+      but the absolute level is not a market-cap ratio &mdash; only its
+      scale-invariant statistics (z, percentile) are valid valuation
+      signals.
+    </p>
+  </div>
+</section>

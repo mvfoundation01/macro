@@ -1,0 +1,63 @@
+{% import "_macros.html" as m %}
+<section data-tab="overview" class="tab-content active px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">MV Composite Index &mdash; Historical Context</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      The composite signal from 7 valuation indicators, standardized as z-score
+      deviations from the long-run trend. Colored zones mark valuation regimes
+      (red &gt; +2&sigma;, orange +1 to +2&sigma;, grey fair value, greens undervalued).
+    </p>
+    <div id="hero-chart-overview" class="hero-chart-container"></div>
+    {{ m.interp_grid(hero_interpretation) }}
+  </div>
+
+  {{ m.why_it_matters_card("the MVCI", why_mvci) }}
+
+  <h2 class="text-xl font-semibold mb-3">7-variant snapshot</h2>
+  <p class="text-sm text-gray-600 mb-3">Click any card to jump to that variant's dedicated tab.</p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-6">
+    {% for card in overview_cards %}
+    <div class="variant-card rounded-lg border p-4 cursor-pointer"
+         style="border-left: 4px solid {{ card.regime_color }};"
+         data-tab-target="{{ card.tab_target }}">
+      <div class="text-sm text-gray-500">{{ card.label }}</div>
+      <div class="text-2xl font-bold">{{ card.value_fmt }}</div>
+      <div class="flex justify-between text-xs mt-1">
+        <span>z = {{ card.z_fmt }}</span>
+        <span>{{ card.percentile_fmt }}</span>
+      </div>
+      <div class="mt-2">
+        <span class="regime-pill" style="background-color: {{ card.regime_color }};">
+          {{ card.regime }}
+        </span>
+      </div>
+      <div id="sparkline-{{ card.variant_key }}" class="plot-container mt-3"
+           style="min-height: 80px; height: 80px;"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-6 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Cross-variant agreement (6 constituents, long-run frame)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-4 text-gray-500">Mean z-score</td><td>{{ xv_mean_z_fmt }} &#963;</td></tr>
+        <tr><td class="pr-4 text-gray-500">Agreement (1.0 = perfect)</td><td>{{ xv_agreement_fmt }}</td></tr>
+        <tr><td class="pr-4 text-gray-500">Combined regime</td><td>{{ xv_combined_regime }}</td></tr>
+        <tr><td class="pr-4 text-gray-500">Same sign across variants</td><td>{{ xv_same_sign }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">How is the market doing?</h3>
+    <p class="text-sm leading-relaxed whitespace-pre-line">{{ interpretation_narrative }}</p>
+    <p class="text-xs text-gray-500 mt-3">
+      Headline narrative_code: <code>{{ interpretation_code }}</code>. See the
+      <strong>Methodology</strong> tab for the full statistical framework.
+    </p>
+  </div>
+</section>

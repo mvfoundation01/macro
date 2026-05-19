@@ -1,0 +1,219 @@
+<section data-tab="methodology" class="tab-content px-4 py-4 methodology">
+
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm">
+    <h1 class="text-2xl font-bold mb-2">Methodology</h1>
+    <p class="text-sm text-gray-500">
+      Statistical framework, data hierarchy, and per-model implementation details
+      behind every number on this dashboard.
+    </p>
+  </div>
+
+  <div class="methodology-toc">
+    <strong class="mr-3 text-sm text-gray-700">Jump to:</strong>
+    <a href="#meth-data">Data</a>
+    <a href="#meth-framework">Framework</a>
+    <a href="#meth-models">Models</a>
+    <a href="#meth-forward">Forward returns</a>
+    <a href="#meth-probability">Probability</a>
+    <a href="#meth-conviction">Conviction</a>
+    <a href="#meth-glossary">Glossary</a>
+  </div>
+
+  <div class="bg-white rounded-lg border p-5 mb-6">
+
+  <h2 id="meth-data">1. Data sources &amp; hierarchy</h2>
+  <p>
+    The pipeline assembles a unified monthly panel from public economic data going back to 1871.
+    Where multiple sources overlap, the data hierarchy preserves the longest series while
+    deferring to higher-frequency, higher-quality vendor data where available:
+  </p>
+  <ul class="list-disc list-inside text-sm leading-relaxed">
+    <li><strong>S&amp;P 500 price &amp; total return</strong> — Shiller composite (1871-1989) spliced with Norgate Diamond total-return series (1990-present) where available; FRED <code>SP500</code> + dividend-adjusted Yahoo <code>^GSPCTR</code> otherwise.</li>
+    <li><strong>CPI &amp; real-dollar deflation</strong> — Shiller monthly CPI (1871-1949) → BLS CPI-U (1950-present).</li>
+    <li><strong>GDP</strong> — Federal Reserve Z.1 nominal GDP, monthly via cubic-spline interpolation from quarterly observations.</li>
+    <li><strong>Corporate equity &amp; replacement cost</strong> — Federal Reserve Z.1 LM103164103 and LM102010005 (Tobin's Q numerator and denominator), 1952-present.</li>
+    <li><strong>Wilshire 5000 &amp; broad market cap</strong> — FRED <code>WILL5000PRFC</code>, 1971-present.</li>
+    <li><strong>10Y real yield</strong> — FRED <code>DFII10</code> (TIPS, 2003-present); Cleveland Fed expected inflation × DGS10 for pre-2003 history.</li>
+  </ul>
+
+  <h3>1.1 Frequency &amp; alignment</h3>
+  <p>
+    All series are aligned to month-end (last business day of each calendar month) before any
+    statistical operation. Quarterly data is forward-filled inside the quarter. Each pipeline
+    step preserves the alignment date; no series is computed with mismatched dates.
+  </p>
+
+  <h2 id="meth-framework">2. Statistical framework</h2>
+
+  <h3>2.1 Z-score construction</h3>
+  <p>
+    Each variant produces a level series (e.g. CAPE = price / 10-yr real EPS). The level series
+    is standardized into a <strong>long-run z-score</strong> using a robust mean and Huber σ
+    over the entire available history of that variant. The Huber σ uses
+    <code>scipy.stats.median_abs_deviation</code> with a tuning constant of c = 1.345, which
+    matches the asymptotic efficiency of the OLS estimator at the normal distribution.
+  </p>
+  <p>
+    The <strong>current_regime</strong> frame uses a Bai-Perron multiple-break detection model
+    to identify the latest regime boundaries (max 5 breaks, BIC penalty); the z-score in this
+    frame is standardized using only observations from the most recent regime.
+  </p>
+
+  <h3>2.2 Predictive regression</h3>
+  <p>
+    Forward-return regressions take the form
+    <code>r_{t+h} = α + β · z_t + ε_{t+h}</code>
+    where <code>r_{t+h}</code> is the annualized total return over the next <code>h</code>
+    months. Inference uses <strong>Newey-West HAC standard errors</strong> with lag set equal
+    to the horizon, controlling for the auto-correlation induced by overlapping
+    observations.
+  </p>
+  <p>
+    The <strong>Stambaugh bias-correction</strong> is applied to β when the predictor
+    z is highly persistent (ρ &gt; 0.95). This corrects the small-sample bias that arises when
+    the regressor is near-integrated and innovations to z are correlated with future returns.
+  </p>
+
+  <h3>2.3 Out-of-sample R<sup>2</sup> (Goyal-Welch)</h3>
+  <p>
+    R<sup>2</sup><sub>OOS</sub> is computed via expanding-window recursive estimation: at each
+    date <em>t</em>, the model is fit on data through <em>t-1</em> and used to predict
+    <em>t</em>. The Goyal-Welch R<sup>2</sup><sub>OOS</sub> compares the recursive-model SSE
+    against the historical-mean SSE; positive values indicate genuine out-of-sample skill,
+    negative values indicate the model underperforms a no-skill mean prediction.
+  </p>
+
+  <h2 id="meth-models">3. Per-model implementations</h2>
+
+  <h3>3.1 Buffett Indicator (3 variants)</h3>
+  <p>
+    Market capitalization / GDP, computed in three variants that trade coverage breadth for
+    series length:
+  </p>
+  <ul class="list-disc list-inside text-sm leading-relaxed">
+    <li><strong>bi_allequity_pct</strong>: Federal Reserve Z.1 total corporate equity (public + private), 1945+.</li>
+    <li><strong>bi_wilshire_pct</strong>: Wilshire 5000 / GDP, 1971+ (cleaner market signal but shorter history).</li>
+    <li><strong>bi_spx_proxy</strong>: S&amp;P 500 / GDP, mean-matched to Wilshire on their common window; series back to 1871 via Shiller's spliced SPX.</li>
+  </ul>
+
+  <h3>3.2 CAPE (Shiller P/E10)</h3>
+  <p>
+    Real S&amp;P 500 price divided by the trailing 10-year average of real EPS. Uses Shiller's
+    monthly CPI for inflation adjustment. The metric is computed end-of-month for every month
+    where the trailing 10-year window has ≥ 100 valid earnings observations.
+  </p>
+
+  <h3>3.3 Tobin's Q-Ratio</h3>
+  <p>
+    Market value of US nonfinancial corporate equity (Z.1 LM103164103) divided by the
+    replacement-cost value of corporate assets (Z.1 LM102010005). Quarterly observations are
+    forward-filled to month-end. Q = 1 is theoretical equilibrium; Q &gt; 1 means investors are
+    paying a premium above replacement cost.
+  </p>
+
+  <h3>3.4 Equity Yield Deficit</h3>
+  <p>
+    Real 10-year Treasury yield (DFII10 / Cleveland Fed proxy for pre-2003) minus the CAPE
+    earnings yield (1 / CAPE × 100). Positive readings indicate bonds offer more real income
+    than equities; negative readings indicate the opposite.
+  </p>
+
+  <h3>3.5 Mean Reversion</h3>
+  <p>
+    Real (CPI-adjusted) S&amp;P 500 composite plotted against its long-run exponential trend
+    (1871-present). The valuation reading is the percent deviation of current real price from
+    the fitted trend; the z-score is standardized over the full history.
+  </p>
+
+  <h3>3.6 MV Composite Index (MVCI)</h3>
+  <p>
+    A standardized aggregation of all variants above. Three weighting schemes:
+  </p>
+  <ul class="list-disc list-inside text-sm leading-relaxed">
+    <li><strong>equal_weight</strong> (default) — robust to over-fitting; each constituent contributes 1/N.</li>
+    <li><strong>inv_variance</strong> — weights inversely proportional to constituent z-score variance over the common window.</li>
+    <li><strong>pca_pc1</strong> — projects constituent z-scores onto the first principal component; reports the explained-variance fraction.</li>
+  </ul>
+
+  <h2 id="meth-forward">4. Forward-return framework</h2>
+  <p>
+    Forward returns at horizon <em>h</em> months are computed as annualized total-return CAGR
+    from the observation date to <em>h</em> months later. The pipeline computes returns for
+    h ∈ {12, 24, 36, 60, 120} months. Predictive regressions report results separately at each
+    horizon; the 120m (10-year) horizon is the headline.
+  </p>
+  <p>
+    The <strong>primary FR series</strong> is the spliced total-return series (Shiller × Norgate).
+    Two robustness FR series are also computed: (a) price-return only and (b) Yahoo-only
+    (no Norgate); cross-checks ensure key statistics are stable across all three.
+  </p>
+
+  <h2 id="meth-probability">5. Probability &amp; CI machinery</h2>
+  <p>
+    Point probabilities (P(neg 10Y), P(&lt; 5% CAGR), P(&gt; 7% CAGR)) are computed from the
+    OLS predictive regression's conditional distribution at the current z. Bootstrap
+    95% CIs use 5000 resampled-with-replacement OLS fits, with block bootstrap blocks sized
+    equal to the horizon to preserve overlapping-observation correlation.
+  </p>
+  <p>
+    Bayesian posteriors use conjugate normal priors with weakly informative hyperparameters
+    centred on historical averages and broad variance; posterior CIs reflect uncertainty about
+    both β and the error variance.
+  </p>
+
+  <h2 id="meth-conviction">6. Conviction score</h2>
+  <p>
+    The "Full Conviction" score (0-5) aggregates evidence quality and signal strength across
+    five components:
+  </p>
+  <ol class="list-decimal list-inside text-sm leading-relaxed">
+    <li><strong>Signal strength</strong> — magnitude of current z-score relative to historical extremes.</li>
+    <li><strong>Statistical significance</strong> — Newey-West t-stat magnitude.</li>
+    <li><strong>In-sample fit</strong> — R<sup>2</sup>.</li>
+    <li><strong>Out-of-sample fit</strong> — Goyal-Welch R<sup>2</sup><sub>OOS</sub>.</li>
+    <li><strong>Cross-variant agreement</strong> — fraction of constituent variants currently in the same regime.</li>
+  </ol>
+  <p>
+    Each component contributes a 0-1 score; the headline is the equally-weighted sum scaled
+    to 0-5. The score is intended as a qualitative summary, not a precise forecast confidence.
+  </p>
+
+  <h2 id="meth-glossary">7. Glossary</h2>
+  <dl class="text-sm leading-relaxed">
+    <dt class="font-semibold mt-3">Z-score (σ)</dt>
+    <dd class="ml-4">Standardized deviation of an observation from the long-run mean, in units of long-run standard deviation. Z = 0 is the long-run mean; |z| = 1 is one σ away.</dd>
+
+    <dt class="font-semibold mt-3">Huber σ</dt>
+    <dd class="ml-4">A robust scale estimator that is less sensitive to outliers than the sample standard deviation. Uses the median absolute deviation (MAD) with tuning constant c = 1.345.</dd>
+
+    <dt class="font-semibold mt-3">Newey-West HAC SE</dt>
+    <dd class="ml-4">Standard errors that correct for both heteroskedasticity (changing variance) and autocorrelation (overlapping observations). Required for valid inference in predictive return regressions.</dd>
+
+    <dt class="font-semibold mt-3">Stambaugh bias-correction</dt>
+    <dd class="ml-4">A small-sample correction for the upward bias in β when the predictor is highly persistent and its innovations are correlated with future returns. Stambaugh (1999, JFE).</dd>
+
+    <dt class="font-semibold mt-3">Bai-Perron break test</dt>
+    <dd class="ml-4">A statistical procedure for detecting multiple unknown structural breaks in a time-series mean. Used in the "current_regime" frame to identify the latest regime boundary.</dd>
+
+    <dt class="font-semibold mt-3">Goyal-Welch R<sup>2</sup><sub>OOS</sub></dt>
+    <dd class="ml-4">Out-of-sample R<sup>2</sup> comparing a recursively-fit predictive model against a no-skill mean prediction. Positive values indicate genuine forecasting skill; negative values indicate the model underperforms a historical-mean benchmark.</dd>
+
+    <dt class="font-semibold mt-3">Percentile rank</dt>
+    <dd class="ml-4">The fraction of historical monthly observations at or below the current reading. Reported as an integer percentile (0-100).</dd>
+
+    <dt class="font-semibold mt-3">MVCI (MV Composite Index)</dt>
+    <dd class="ml-4">A composite z-score aggregating multiple constituent valuation indicators. Three weighting schemes: equal_weight (default), inv_variance, pca_pc1.</dd>
+
+    <dt class="font-semibold mt-3">PCA-PC1 explained variance</dt>
+    <dd class="ml-4">The fraction of joint variation in the constituent z-scores captured by their first principal component. Values above 60% indicate a strong common latent valuation factor.</dd>
+
+    <dt class="font-semibold mt-3">CAGR</dt>
+    <dd class="ml-4">Compound annual growth rate. The annualized rate of return that would produce the realized total return over a horizon.</dd>
+  </dl>
+
+  </div>
+
+  <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="text-sm text-blue-600 hover:underline">
+    ↑ Back to top
+  </button>
+</section>

@@ -1,0 +1,78 @@
+<section data-tab="data" class="tab-content px-4 py-4">
+
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm">
+    <h2 class="text-xl font-bold mb-1">Data &mdash; Inspect &amp; Download</h2>
+    <p class="text-sm text-gray-500">
+      Browse the raw outputs powering this dashboard. Download any time series
+      as CSV for offline analysis. All downloads are client-side
+      (no network requests) — they extract data from the JSON payload already
+      embedded in this page.
+    </p>
+  </div>
+
+  <!-- 1. CSV downloads -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-3">1. Downloadable CSV exports</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      One button per dataset. The CSV string is materialized only on click.
+    </p>
+    <div class="flex flex-wrap gap-2">
+      <button class="csv-download-btn" data-csv-key="z_history" data-csv-filename="mv_z_history.csv">
+        ⬇ z_history.csv
+      </button>
+      <button class="csv-download-btn" data-csv-key="value_history" data-csv-filename="mv_value_history.csv">
+        ⬇ value_history.csv
+      </button>
+      <button class="csv-download-btn" data-csv-key="sp500_with_regime" data-csv-filename="mv_sp500_with_regime.csv">
+        ⬇ sp500_with_regime.csv
+      </button>
+      <button class="csv-download-btn" data-csv-key="scatter_data" data-csv-filename="mv_scatter_data.csv">
+        ⬇ scatter_data.csv
+      </button>
+      <button class="csv-download-btn" id="download-headline-json">
+        ⬇ headline.json
+      </button>
+    </div>
+    <p class="text-xs text-gray-500 mt-3">
+      <strong>z_history</strong>: per-variant, per-frame z-score by month.
+      <strong>value_history</strong>: per-variant raw level (or transformed value) by month.
+      <strong>sp500_with_regime</strong>: S&amp;P 500 monthly close + MVCI regime label.
+      <strong>scatter_data</strong>: per-variant z-score paired with realized forward returns for each horizon.
+    </p>
+  </div>
+
+  <!-- 2. Headline JSON viewer -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-3">2. Headline JSON</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      The full structured output of the orchestrator. Pretty-printed JSON, truncated
+      to 8000 chars in the viewer for performance — use the <em>Download</em> button
+      above for the complete file.
+    </p>
+    <pre id="headline-json-viewer"
+         style="background:#0f172a; color:#e2e8f0; padding:1rem; border-radius:0.5rem; overflow:auto; max-height:480px; font-size:0.78rem; line-height:1.4;"></pre>
+  </div>
+
+  <!-- 3. Bibliography -->
+  <div class="rounded-lg border bg-white p-4">
+    <h3 class="text-lg font-semibold mb-3">3. Data sources &amp; bibliography</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      All data used in this dashboard, with provenance. Subscribe-only sources
+      (Norgate) are accessed via local datasets; the pipeline is fully reproducible
+      with the publicly-available sources alone (Shiller + FRED + Yahoo).
+    </p>
+    <ul class="text-sm leading-relaxed list-disc list-inside space-y-2">
+      {% for src in bibliography %}
+      <li>
+        <strong>{{ src.name }}</strong> &mdash;
+        <a href="{{ src.url }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ src.url }}</a>
+        <br>
+        <span class="text-gray-600 text-xs">
+          {{ src.what }}. <em>Used for:</em> {{ src.used_for }}.
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</section>

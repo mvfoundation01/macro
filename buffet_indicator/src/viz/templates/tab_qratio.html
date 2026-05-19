@@ -1,0 +1,70 @@
+{% import "_macros.html" as m %}
+<section data-tab="qratio" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">Tobin's Q-Ratio &mdash; 1952 onwards</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Z-score deviations from the long-run trend on Tobin's Q (market value of
+      equity / replacement cost of assets).
+    </p>
+    <div id="hero-chart-qratio" class="hero-chart-container"></div>
+    {{ m.interp_grid(q.interpretation.hero) }}
+  </div>
+
+  {{ m.why_it_matters_card("Tobin's Q-Ratio", q.interpretation.why_it_matters) }}
+
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ q.regime_color }};">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div><div class="text-xs text-gray-500">Q-Ratio</div><div class="text-xl font-semibold">{{ q.value_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Z-score (LR)</div><div class="text-xl font-semibold">{{ q.z_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ q.pct_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ q.regime }}</div></div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel A &mdash; Q-Ratio Z-Score Time Series</h3>
+    <div id="qratio-panel-a-qratio" class="panel-chart-container"></div>
+    {{ m.interp_grid(q.interpretation.panel_a) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel B &mdash; Q-Ratio Z vs 10-Year Forward CAGR</h3>
+    <div id="qratio-panel-b-qratio" class="panel-chart-container"></div>
+    {{ m.interp_grid(q.interpretation.panel_b) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 by MVCI Regime</h3>
+    <div id="qratio-panel-c-qratio" class="panel-chart-container"></div>
+    {{ m.interp_grid(q.interpretation.panel_c) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Predictive Regression (10Y, primary FR)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ q.beta_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ q.t_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_in</td><td>{{ q.r2_in_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;_OOS</td><td>{{ q.r2_oos_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">Full conviction (10Y)</td><td>{{ q.conviction_fmt }} / 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">About Tobin's Q-Ratio</h3>
+    <p class="text-sm leading-relaxed">
+      Tobin's Q-Ratio compares the market value of US nonfinancial corporate equity
+      to the replacement cost of the underlying assets. Data comes from the Federal
+      Reserve's Z.1 Financial Accounts release (quarterly, 1952+) and is
+      forward-filled to monthly frequency. Q = 1 is theoretical equilibrium. Q &gt; 1
+      means investors are paying a premium above replacement cost. The metric was
+      popularized in modern markets by Andrew Smithers and was central to
+      Smithers &amp; Wright's <i>Valuing Wall Street</i>.
+    </p>
+  </div>
+</section>

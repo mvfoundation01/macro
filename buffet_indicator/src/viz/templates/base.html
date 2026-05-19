@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MV Valuation Dashboard &mdash; {{ asof_label }}</title>
+
+  <!-- Tailwind CSS (CDN). -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <!-- Plotly basic build (CDN). -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+
+  <style>
+{{ inline_css|safe }}
+  </style>
+</head>
+<body class="bg-gray-50">
+
+{{ header_html|safe }}
+
+<main class="px-2 py-2">
+  {{ tab_overview_html|safe }}
+  {{ tab_mvci_html|safe }}
+  {{ tab_buffett_html|safe }}
+  {{ tab_cape_html|safe }}
+  {{ tab_qratio_html|safe }}
+  {{ tab_ey_deficit_html|safe }}
+  {{ tab_mean_reversion_html|safe }}
+  {{ tab_diagnostics_html|safe }}
+  {{ tab_data_html|safe }}
+  {{ tab_methodology_html|safe }}
+</main>
+
+<footer class="mt-8 py-4 px-4 text-xs text-gray-500 text-center">
+  MV Valuation Dashboard &middot; built {{ build_timestamp }} &middot; Spec v8b
+</footer>
+
+<script id="dashboard-data" type="application/json">{{ dashboard_json|safe }}</script>
+<script>
+{{ inline_js|safe }}
+</script>
+
+</body>
+</html>

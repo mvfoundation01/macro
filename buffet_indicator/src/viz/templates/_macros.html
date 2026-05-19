@@ -1,0 +1,27 @@
+{# Shared macros for v8b interpretation blocks. #}
+
+{% macro interp_grid(interp) %}
+<div class="chart-interpretation">
+  <div class="interp-block interp-what">
+    <div class="interp-header">📊 What this shows</div>
+    <div>{{ interp.what_this_shows }}</div>
+  </div>
+  <div class="interp-block interp-how">
+    <div class="interp-header">🔍 How to read it</div>
+    <div>{{ interp.how_to_read }}</div>
+  </div>
+  <div class="interp-block interp-current">
+    <div class="interp-header">📍 Current reading</div>
+    <div>{{ interp.current_reading }}</div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro why_it_matters_card(indicator_label, body) %}
+{% if body %}
+<details class="why-it-matters">
+  <summary>💡 Why does {{ indicator_label }} matter?</summary>
+  <div class="why-body">{{ body }}</div>
+</details>
+{% endif %}
+{% endmacro %}

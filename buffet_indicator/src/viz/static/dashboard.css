@@ -1,0 +1,492 @@
+/* MV Valuation Dashboard custom styles — v8b polish. */
+
+:root {
+  --color-strongly-overvalued: #C8102E;
+  --color-overvalued: #E87722;
+  --color-fair: #9AA0A6;
+  --color-undervalued: #5DBB63;
+  --color-strongly-undervalued: #1B7A3E;
+  --color-primary-line: #1F77B4;
+  --color-trend-line: #666666;
+}
+
+body {
+  font-family: "Inter", "Helvetica Neue", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.tab-button {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #4b5563;
+  background: transparent;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  font-size: 0.95rem;
+  /* Tap target >= 44px per accessibility guidance. */
+  min-height: 44px;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+}
+
+.tab-button.active {
+  color: var(--color-primary-line);
+  border-bottom-color: var(--color-primary-line);
+}
+
+.dark .tab-button {
+  color: #9ca3af;
+}
+
+.dark .tab-button:hover {
+  color: #e5e7eb;
+}
+
+.dark .tab-button.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.variant-card {
+  transition: transform 0.15s, box-shadow 0.15s;
+  background: white;
+}
+
+.dark .variant-card {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.variant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+.regime-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dark .bg-white {
+  background-color: #1f2937;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
+.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-800 {
+  color: #e5e7eb !important;
+}
+
+.dark .border {
+  border-color: #374151 !important;
+}
+
+.dark .border-b {
+  border-bottom-color: #374151 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #1f2937 !important;
+}
+
+/* ============================================================
+   v8b chart containers — larger, full-width
+   ============================================================ */
+.plot-container {
+  width: 100%;
+  min-height: 380px;
+}
+
+.panel-chart-container {
+  width: 100%;
+  min-height: 450px;
+  height: 450px;
+}
+
+.hero-chart-container {
+  width: 100%;
+  min-height: 600px;
+  height: 600px;
+}
+
+/* Full-width chart cards (override Tailwind max-width constraints) */
+.chart-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+main {
+  max-width: 100% !important;
+}
+
+/* Mobile chart sizes */
+@media (max-width: 768px) {
+  .hero-chart-container {
+    min-height: 450px;
+    height: 450px;
+  }
+  .panel-chart-container {
+    min-height: 350px;
+    height: 350px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-chart-container {
+    min-height: 380px;
+    height: 380px;
+  }
+  .plot-container {
+    min-height: 320px;
+  }
+  .panel-chart-container {
+    min-height: 320px;
+    height: 320px;
+  }
+}
+
+/* Sparkline divs need explicit dimensions for Plotly to render. */
+[id^="sparkline-"] {
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+}
+
+@media (max-width: 640px) {
+  .tab-button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Focus ring for keyboard navigation. */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   v8b: Per-chart interpretation block (3-column grid)
+   ============================================================ */
+.chart-interpretation {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .chart-interpretation {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.interp-block {
+  padding: 0.85rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.interp-block .interp-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.interp-what {
+  background-color: #eff6ff;  /* blue-50 */
+  border-left-color: #3b82f6;  /* blue-500 */
+  color: #1e3a8a;
+}
+
+.interp-how {
+  background-color: #fffbeb;  /* amber-50 */
+  border-left-color: #f59e0b;  /* amber-500 */
+  color: #78350f;
+}
+
+.interp-current {
+  background-color: #ecfdf5;  /* green-50 */
+  border-left-color: #10b981;  /* emerald-500 */
+  color: #064e3b;
+}
+
+.dark .interp-what {
+  background-color: #1e3a8a;
+  color: #dbeafe;
+}
+
+.dark .interp-how {
+  background-color: #78350f;
+  color: #fef3c7;
+}
+
+.dark .interp-current {
+  background-color: #064e3b;
+  color: #d1fae5;
+}
+
+/* ============================================================
+   v8b: "Why does this matter?" expandable card
+   ============================================================ */
+.why-it-matters {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .why-it-matters {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.why-it-matters summary {
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.why-it-matters summary::-webkit-details-marker {
+  display: none;
+}
+
+.why-it-matters summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform 0.15s;
+  color: #6b7280;
+}
+
+.why-it-matters[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.why-it-matters .why-body {
+  margin-top: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #374151;
+}
+
+.dark .why-it-matters .why-body {
+  color: #d1d5db;
+}
+
+/* ============================================================
+   v8b: Tab nav with horizontal scroll on overflow
+   ============================================================ */
+nav.tab-bar {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  white-space: nowrap;
+}
+
+nav.tab-bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+nav.tab-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Coming-in-v8b modal placeholder (legacy; v8b removes the modal entirely) */
+.coming-soon-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.coming-soon-modal.open {
+  display: flex;
+}
+
+.coming-soon-modal-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem 2rem;
+  max-width: 24rem;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.dark .coming-soon-modal-card {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+/* ============================================================
+   v8b: Diagnostics tab tables
+   ============================================================ */
+.diag-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.diag-table th,
+.diag-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.diag-table th {
+  font-weight: 600;
+  background-color: #f9fafb;
+  color: #374151;
+}
+
+.dark .diag-table th {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark .diag-table th,
+.dark .diag-table td {
+  border-bottom-color: #374151;
+}
+
+.diag-stationarity-pass {
+  background-color: #d1fae5;
+  color: #064e3b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.diag-stationarity-fail {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ============================================================
+   v8b: Data tab buttons
+   ============================================================ */
+.csv-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  background-color: #1F77B4;
+  color: white;
+  border-radius: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s;
+}
+
+.csv-download-btn:hover {
+  background-color: #1565a0;
+}
+
+/* ============================================================
+   v8b: Methodology tab anchor links
+   ============================================================ */
+.methodology-toc {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  z-index: 10;
+}
+
+.dark .methodology-toc {
+  background-color: rgba(31, 41, 55, 0.95);
+  border-bottom-color: #374151;
+}
+
+.methodology-toc a {
+  display: inline-block;
+  margin-right: 1rem;
+  font-size: 0.875rem;
+  color: #1F77B4;
+  text-decoration: none;
+}
+
+.methodology-toc a:hover {
+  text-decoration: underline;
+}
+
+.methodology h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.methodology h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.methodology p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 0.85rem;
+}
+
+.methodology code {
+  background-color: #f3f4f6;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-family: "SFMono-Regular", "Menlo", "Consolas", monospace;
+  font-size: 0.85em;
+}
+
+.dark .methodology code {
+  background-color: #374151;
+  color: #e5e7eb;
+}

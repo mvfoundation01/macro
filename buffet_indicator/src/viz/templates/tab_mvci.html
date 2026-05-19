@@ -1,0 +1,94 @@
+{% import "_macros.html" as m %}
+<section data-tab="mvci" class="tab-content px-4 py-4">
+
+  <!-- Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">MV Composite Index (MVCI) &mdash; Hero</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Z-score deviations from the long-run trend, color-coded by regime.
+    </p>
+    <div id="hero-chart-mvci" class="hero-chart-container"></div>
+    {{ m.interp_grid(mvci.interpretation.hero) }}
+  </div>
+
+  {{ m.why_it_matters_card("the MVCI", mvci.interpretation.why_it_matters) }}
+
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ mvci.regime_color }};">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div><div class="text-xs text-gray-500">Z-score (long_run)</div><div class="text-xl font-semibold">{{ mvci.z_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Percentile</div><div class="text-xl font-semibold">{{ mvci.pct_fmt }}</div></div>
+      <div><div class="text-xs text-gray-500">Regime</div><div class="text-xl font-semibold">{{ mvci.regime }}</div></div>
+      <div><div class="text-xs text-gray-500">Confidence</div><div class="text-xl font-semibold">{{ mvci.confidence_fmt }}</div></div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel B &mdash; MVCI vs Subsequent 10-Year CAGR</h3>
+    <div id="mvci-panel-b-mvci" class="panel-chart-container"></div>
+    {{ m.interp_grid(mvci.interpretation.panel_b) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white chart-card">
+    <h3 class="text-lg font-semibold mb-2">Panel C &mdash; S&amp;P 500 Colored by MVCI Regime</h3>
+    <div id="mvci-panel-c-mvci" class="panel-chart-container"></div>
+    {{ m.interp_grid(mvci.interpretation.panel_c) }}
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">MVCI Weighting Schemes</h3>
+    <table class="text-sm w-full">
+      <thead>
+        <tr class="text-gray-500 text-left">
+          <th class="pr-4 py-1">Scheme</th>
+          <th class="pr-4 py-1">z-score</th>
+          <th class="pr-4 py-1">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in mvci.schemes_table %}
+        <tr><td class="pr-4 py-1">{{ row.name }}</td><td class="pr-4 py-1">{{ row.z_fmt }}</td><td class="pr-4 py-1">{{ row.note }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="mvci-pca-bar" class="plot-container mt-4" style="min-height: 360px; height: 360px;"></div>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Forward-Return Outlook (10Y horizon, primary FR=spliced)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">Expected CAGR (Bayesian posterior)</td><td>{{ mvci.bayes_mean_fmt }} [{{ mvci.bayes_lo_fmt }}, {{ mvci.bayes_hi_fmt }}]</td></tr>
+        <tr><td class="pr-6 text-gray-500">P(neg 10Y)</td><td>{{ mvci.p_neg_fmt }} [{{ mvci.p_neg_lo_fmt }}, {{ mvci.p_neg_hi_fmt }}]</td></tr>
+        <tr><td class="pr-6 text-gray-500">P(&lt; 5% CAGR)</td><td>{{ mvci.p_below5_fmt }} [{{ mvci.p_below5_lo_fmt }}, {{ mvci.p_below5_hi_fmt }}]</td></tr>
+        <tr><td class="pr-6 text-gray-500">P(&gt; 7% CAGR)</td><td>{{ mvci.p_above7_fmt }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 mb-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">Predictive Regression (z<sub>MVCI</sub> &rarr; 10Y forward TR CAGR)</h3>
+    <table class="text-sm">
+      <tbody>
+        <tr><td class="pr-6 text-gray-500">&beta;</td><td>{{ mvci.beta_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">SE_NW</td><td>{{ mvci.se_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">t_NW</td><td>{{ mvci.t_nw_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">&beta;<sub>Stambaugh</sub></td><td>{{ mvci.beta_stambaugh_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;<sub>in</sub></td><td>{{ mvci.r2_in_fmt }}</td></tr>
+        <tr><td class="pr-6 text-gray-500">R&sup2;<sub>OOS</sub> (Goyal-Welch)</td><td>{{ mvci.r2_oos_fmt }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <h3 class="text-lg font-semibold mb-2">FULL CONVICTION (Master Spec section 6.3, 10Y)</h3>
+    <p class="text-3xl font-bold">{{ mvci.conviction_score_fmt }} / 5.00</p>
+    <table class="text-sm mt-2">
+      <tbody>
+        {% for comp in mvci.conviction_components %}
+        <tr><td class="pr-6 text-gray-500">{{ comp.name }}</td><td>{{ comp.value_fmt }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

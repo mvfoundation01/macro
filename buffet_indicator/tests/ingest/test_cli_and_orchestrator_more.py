@@ -19,9 +19,9 @@ def test_cli_main_minimal(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> No
         calls.append(kw)
         return {}
 
+    # cli.py lazy-imports run_ingestion inside _run_ingestion, so patch the
+    # orchestrator module directly.
     monkeypatch.setattr(orch, "run_ingestion", _fake_run)
-    # Also patch the import the CLI made.
-    monkeypatch.setattr(cli_mod, "run_ingestion", _fake_run)
 
     argv_backup = sys.argv
     try:

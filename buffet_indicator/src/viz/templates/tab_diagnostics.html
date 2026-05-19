@@ -1,0 +1,133 @@
+<section data-tab="diagnostics" class="tab-content px-4 py-4">
+
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm">
+    <h2 class="text-xl font-bold mb-1">Diagnostics &mdash; Statistical Health</h2>
+    <p class="text-sm text-gray-500">
+      Power-user view of the underlying statistical machinery: stationarity tests,
+      cross-variant correlations, predictive R&sup2; properties, and PCA explained
+      variance. Use these to gauge whether the headline signals are robust or
+      whether one or more constituent indicators is drifting away from its
+      historical regime.
+    </p>
+  </div>
+
+  <!-- 1. Stationarity tests -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">1. Stationarity tests (per variant, long-run frame)</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      ADF tests the null of a unit root (alternative: stationary). KPSS tests the
+      null of stationarity. A variant z-score series passes the stationarity check
+      iff ADF rejects (p &lt; 0.05) <em>and</em> KPSS fails to reject (p &gt; 0.05).
+    </p>
+    {% if stationarity_rows %}
+    <table class="diag-table">
+      <thead>
+        <tr>
+          <th>Variant</th>
+          <th>N observations</th>
+          <th>ADF p-value</th>
+          <th>ADF rejects unit root</th>
+          <th>KPSS p-value</th>
+          <th>KPSS fails to reject</th>
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in stationarity_rows %}
+        <tr>
+          <td><code>{{ row.variant }}</code></td>
+          <td>{{ row.n_obs }}</td>
+          <td>{{ row.adf_p_fmt }}</td>
+          <td>{% if row.adf_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
+          <td>{{ row.kpss_p_fmt }}</td>
+          <td>{% if row.kpss_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
+          <td>{% if row.overall_pass %}<span class="diag-stationarity-pass">PASS</span>{% else %}<span class="diag-stationarity-fail">FAIL</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-sm text-gray-500">Stationarity tests unavailable (requires <code>statsmodels.tsa.stattools</code>).</p>
+    {% endif %}
+    <p class="text-xs text-gray-500 mt-3">
+      Interpretation: a FAIL on ADF or KPSS does not necessarily invalidate a variant — many
+      valuation series exhibit structural breaks (regime changes in capital intensity,
+      buyback adoption, free cash flow margins) that legitimately violate stationarity. Use
+      this as a screen for "this variant's distribution may be drifting" rather than a
+      reject/accept decision rule.
+    </p>
+  </div>
+
+  <!-- 2. Cross-variant correlation heatmap -->
+  <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
+    <h3 class="text-lg font-semibold mb-2">2. Cross-variant z-score correlation matrix</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Pearson correlations between the long-run z-score series of every variant,
+      computed over the common observation window. High off-diagonal values
+      indicate redundancy; low values indicate the variants pick up
+      independent valuation signals.
+    </p>
+    <div id="diagnostics-correlation-heatmap" style="width: 100%; height: 480px;"></div>
+    <p class="text-sm text-gray-600 mt-3">
+      <strong>MVCI PCA first-PC explained variance:</strong> {{ pc1_explained_fmt }}.
+      The PC1 fraction quantifies how much of the joint variation is captured by a
+      single latent factor; values above 60% support the use of a composite index.
+    </p>
+  </div>
+
+  <!-- 3. OOS R² evolution chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
+    <h3 class="text-lg font-semibold mb-2">3. Out-of-sample R² evolution (MVCI 10Y, expanding window)</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Goyal-Welch R<sup>2</sup><sub>OOS</sub> computed at each month-end on an expanding
+      window: at each date <em>t</em>, the model is fit on data through <em>t-1</em> and
+      used to predict <em>t</em>. Positive values mean the predictive model outperforms a
+      no-skill mean forecast on the next observation; persistently positive values across
+      decades support the predictive use of the indicator.
+    </p>
+    <div id="diagnostics-oos-r2-chart" style="width:100%; height:450px;"></div>
+  </div>
+
+  <!-- 4. Predictive properties summary -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">4. Predictive properties &mdash; key metrics</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Newey-West t-statistics, in-sample R<sup>2</sup>, and out-of-sample R<sup>2</sup>
+      (Goyal-Welch) are reported per-variant on the dedicated indicator tabs.
+      The relevant headline summary is in the right rail of each tab's
+      "Predictive Regression" block.
+    </p>
+    <p class="text-xs text-gray-500">
+      Goyal-Welch R<sup>2</sup><sub>OOS</sub> compares a recursively-fit model against
+      a no-skill mean prediction; positive values indicate genuine out-of-sample
+      forecasting skill. Negative R<sup>2</sup><sub>OOS</sub> means the recursive model
+      underperforms the unconditional mean — a strong red flag against using the
+      variant for forecasting.
+    </p>
+  </div>
+
+  <!-- 5. Probability engine calibration -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">5. Probability engine calibration</h3>
+    <p class="text-sm text-gray-600">
+      The Bayesian posterior CIs reported on each variant tab are constructed from a
+      conjugate normal model with weakly informative priors. Calibration metrics
+      (Brier score decomposition, PIT histograms, reliability diagrams) are computed
+      during the orchestrator's backtest pass and saved to
+      <code>outputs/tables/calibration_metrics.json</code>. Use the
+      <strong>Data</strong> tab to download those tables for offline analysis.
+    </p>
+  </div>
+
+  <!-- 6. Notes -->
+  <div class="rounded-lg border bg-white p-4">
+    <h3 class="text-lg font-semibold mb-2">6. Caveats</h3>
+    <ul class="text-sm leading-relaxed list-disc list-inside">
+      <li>All test statistics are sample estimates and are themselves subject to sampling variability — interpret p-values as continuous evidence rather than as binary accept/reject decisions.</li>
+      <li>The 10Y forward-return target induces overlapping observations; the Newey-West t-stat with lag = horizon controls for this, but the effective sample size is much smaller than the raw observation count would suggest.</li>
+      <li>The Mean Reversion variant uses a log-linear trend fit over the full sample — by construction the residuals have zero mean over the sample, which is not the same as long-run zero mean for future data.</li>
+      <li>The MVCI composite z-score is constructed equal-weighted by default (most robust); the PCA-PC1 and inverse-variance schemes are reported as sensitivity checks in the MVCI tab's "Weighting Schemes" table.</li>
+    </ul>
+  </div>
+
+</section>
