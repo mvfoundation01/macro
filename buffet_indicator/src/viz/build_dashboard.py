@@ -553,6 +553,74 @@ def _build_diagnostics_context(
 # ---------------------------------------------------------------------------
 
 
+def _build_backtest_context(charts_dir: Path) -> dict[str, Any] | None:
+    """Spec v10.0 §4 — load backtest outputs and build template context."""
+    backtest_dir = charts_dir.parent / "backtest"
+    perf_path = backtest_dir / "performance.json"
+    if not perf_path.exists():
+        return None
+    try:
+        perf = json.loads(perf_path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+    s = perf.get("strategy", {})
+    b = perf.get("benchmark", {})
+    window = perf.get("window", {})
+    n_months = int(window.get("n_months", 0))
+
+    from src.viz.captions import (
+        WHY_IT_MATTERS,
+        backtest_hero_interpretation,
+    )
+
+    hero = backtest_hero_interpretation(
+        strategy_cagr=s.get("cagr"),
+        benchmark_cagr=b.get("cagr"),
+        strategy_sharpe=s.get("sharpe"),
+        benchmark_sharpe=b.get("sharpe"),
+        strategy_dd=s.get("max_drawdown"),
+        benchmark_dd=b.get("max_drawdown"),
+        hit_rate=s.get("hit_rate_vs_benchmark"),
+        n_months=n_months,
+    )
+
+    def _pct(v: float | None, digits: int = 2) -> str:
+        if v is None or (isinstance(v, float) and (math.isnan(v) or math.isinf(v))):
+            return "n/a"
+        return f"{v * 100:+.{digits}f}%"
+
+    def _f(v: float | None, digits: int = 2) -> str:
+        if v is None or (isinstance(v, float) and (math.isnan(v) or math.isinf(v))):
+            return "n/a"
+        return f"{v:+.{digits}f}"
+
+    return {
+        "window_start": window.get("start", "n/a"),
+        "window_end": window.get("end", "n/a"),
+        "n_months": n_months,
+        "n_rebalances": int(perf.get("n_rebalances", 0)),
+        "strategy_cagr_fmt": _pct(s.get("cagr")),
+        "benchmark_cagr_fmt": _pct(b.get("cagr")),
+        "strategy_sharpe_fmt": _f(s.get("sharpe")),
+        "strategy_sharpe_lo_fmt": _f(s.get("sharpe_ci_lower")),
+        "strategy_sharpe_hi_fmt": _f(s.get("sharpe_ci_upper")),
+        "benchmark_sharpe_fmt": _f(b.get("sharpe")),
+        "benchmark_sharpe_lo_fmt": _f(b.get("sharpe_ci_lower")),
+        "benchmark_sharpe_hi_fmt": _f(b.get("sharpe_ci_upper")),
+        "strategy_sortino_fmt": _f(s.get("sortino")),
+        "benchmark_sortino_fmt": _f(b.get("sortino")),
+        "strategy_dd_fmt": _pct(s.get("max_drawdown"), digits=1),
+        "benchmark_dd_fmt": _pct(b.get("max_drawdown"), digits=1),
+        "strategy_calmar_fmt": _f(s.get("calmar")),
+        "benchmark_calmar_fmt": _f(b.get("calmar")),
+        "hit_rate_fmt": _pct(s.get("hit_rate_vs_benchmark"), digits=1),
+        "interpretation": {
+            "hero": hero,
+            "why_it_matters": WHY_IT_MATTERS.get("backtest", ""),
+        },
+    }
+
+
 def _build_data_context(
     headline: dict[str, Any],
     parquets: dict[str, pd.DataFrame],
@@ -718,6 +786,13 @@ def build_dashboard(
     else:
         crestmont_html = ""
 
+    # v10.0: Backtest tab
+    backtest_ctx = _build_backtest_context(charts_dir)
+    if backtest_ctx is not None:
+        backtest_html = env.get_template("tab_backtest.html").render(bt=backtest_ctx)
+    else:
+        backtest_html = ""
+
     # v8b: Diagnostics tab
     diag_ctx = _build_diagnostics_context(headline, parquets, charts_dir)
     diagnostics_html = env.get_template("tab_diagnostics.html").render(**diag_ctx)
@@ -768,6 +843,45 @@ def build_dashboard(
         acf_spec = make_acf_pacf_charts(residuals)
         sanitized["diagnostics_acf_pacf_chart"] = _clean_for_json(acf_spec)
 
+    # v10.0 — backtest charts (equity curve, drawdown, allocation history)
+    backtest_dir = charts_dir.parent / "backtest"
+    equity_path = backtest_dir / "equity_curve.parquet"
+    dd_path = backtest_dir / "drawdown.parquet"
+    weights_path = backtest_dir / "weights.parquet"
+    if equity_path.exists() and dd_path.exists() and weights_path.exists():
+        try:
+            from src.viz.chart_specs import (
+                make_allocation_chart,
+                make_drawdown_chart,
+                make_equity_curve_chart,
+            )
+            eq_df = pd.read_parquet(equity_path)
+            dd_df = pd.read_parquet(dd_path)
+            w_df = pd.read_parquet(weights_path)
+            dates_eq = [pd.Timestamp(d).strftime("%Y-%m-%d") for d in eq_df["date"]]
+            equity_spec = make_equity_curve_chart(
+                dates=dates_eq,
+                strategy_nav=[float(v) for v in eq_df["strategy_nav"]],
+                benchmark_nav=[float(v) for v in eq_df["benchmark_nav"]],
+            )
+            sanitized["backtest_equity_curve"] = _clean_for_json(equity_spec)
+            dd_spec = make_drawdown_chart(
+                dates=[pd.Timestamp(d).strftime("%Y-%m-%d") for d in dd_df["date"]],
+                dd_strategy=[float(v) for v in dd_df["drawdown_strategy"]],
+                dd_benchmark=[float(v) for v in dd_df["drawdown_benchmark"]],
+            )
+            sanitized["backtest_drawdown_chart"] = _clean_for_json(dd_spec)
+            alloc_spec = make_allocation_chart(
+                dates=[pd.Timestamp(d).strftime("%Y-%m-%d") for d in w_df["date"]],
+                weights=[
+                    float(v) if pd.notna(v) else None
+                    for v in w_df["applied_weight"]
+                ],
+            )
+            sanitized["backtest_allocation_chart"] = _clean_for_json(alloc_spec)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[backtest charts] failed to inline: {exc}")
+
     # v8b.1 A.4 — calibration plot
     calib_dict = diag_ctx.get("calibration_dict")
     if calib_dict and calib_dict.get("available"):
@@ -802,6 +916,7 @@ def build_dashboard(
         tab_ey_deficit_html=ey_deficit_html,
         tab_mean_reversion_html=mean_reversion_html,
         tab_diagnostics_html=diagnostics_html,
+        tab_backtest_html=backtest_html,
         tab_data_html=data_html,
         tab_methodology_html=methodology_html,
         inline_css=inline_css,

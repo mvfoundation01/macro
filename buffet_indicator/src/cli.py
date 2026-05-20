@@ -137,6 +137,19 @@ def _run_dashboard(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_backtest(args: argparse.Namespace) -> int:
+    """v10.0: tactical MVCI backtest with bootstrap-CI'd performance metrics."""
+    from src.backtest.run import print_summary, run_real_data_backtest
+
+    summary = run_real_data_backtest(
+        seed=args.seed,
+        bootstrap_reps=args.bootstrap_reps,
+    )
+    print_summary(summary)
+    print("\nOutputs persisted under outputs/backtest/")
+    return 0
+
+
 def _run_emit_diagnostics(args: argparse.Namespace) -> int:
     """v8b.1 A.5: regenerate the diagnostics parquets without re-running modeling."""
     from src.config import OUTPUTS_DIR
@@ -188,6 +201,13 @@ def main() -> int:
 
     sub.add_parser("dashboard", help="Rebuild outputs/dashboard.html (Spec v8a).")
 
+    p_bt = sub.add_parser(
+        "backtest",
+        help="Run tactical MVCI backtest with bootstrap-CI'd Sharpe (Spec v10.0).",
+    )
+    p_bt.add_argument("--seed", type=int, default=42)
+    p_bt.add_argument("--bootstrap-reps", type=int, default=10_000)
+
     p_diag = sub.add_parser(
         "emit-diagnostics",
         help="Regenerate diagnostics parquets + calibration JSON (Spec v8b.1).",
@@ -219,6 +239,8 @@ def main() -> int:
         return _run_dashboard(args)
     if args.cmd == "emit-diagnostics":
         return _run_emit_diagnostics(args)
+    if args.cmd == "backtest":
+        return _run_backtest(args)
     # Default: ingestion (handles both `python -m src.cli` and `... ingest`).
     return _run_ingestion(args)
 

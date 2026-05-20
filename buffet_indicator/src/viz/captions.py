@@ -329,6 +329,52 @@ def crestmont_hero_interpretation(
     }
 
 
+def backtest_hero_interpretation(
+    strategy_cagr: float | None,
+    benchmark_cagr: float | None,
+    strategy_sharpe: float | None,
+    benchmark_sharpe: float | None,
+    strategy_dd: float | None,
+    benchmark_dd: float | None,
+    hit_rate: float | None,
+    n_months: int,
+) -> dict[str, str]:
+    s_cagr = f"{strategy_cagr * 100:+.2f}%" if strategy_cagr is not None else "n/a"
+    b_cagr = f"{benchmark_cagr * 100:+.2f}%" if benchmark_cagr is not None else "n/a"
+    s_sh = f"{strategy_sharpe:+.2f}" if strategy_sharpe is not None else "n/a"
+    b_sh = f"{benchmark_sharpe:+.2f}" if benchmark_sharpe is not None else "n/a"
+    s_dd = f"{strategy_dd * 100:+.1f}%" if strategy_dd is not None else "n/a"
+    b_dd = f"{benchmark_dd * 100:+.1f}%" if benchmark_dd is not None else "n/a"
+    hit = f"{hit_rate * 100:.1f}%" if hit_rate is not None else "n/a"
+    return {
+        "what_this_shows": (
+            "A binary tactical rule that goes 100% T-bills when MVCI z > +2σ, "
+            "100% equities when z < −1σ, and 50/50 otherwise. Rebalanced "
+            "monthly with 10bps round-trip cost. The blue line is the "
+            "strategy's cumulative NAV vs the gray-dashed benchmark "
+            "(100% S&P 500 total return). Log scale so multiplicative growth "
+            "appears as a straight slope."
+        ),
+        "how_to_read": (
+            f"Over the full {n_months}-month sample, the strategy CAGR is "
+            f"{s_cagr} vs benchmark {b_cagr}. Sharpe: {s_sh} vs {b_sh}. The "
+            f"key question is whether the gap between blue and gray reflects "
+            f"signal (MVCI added value) or noise (luck of timing). The "
+            f"95% bootstrap CIs on Sharpe quantify the answer — if they "
+            f"overlap, the signal is not statistically distinguishable from "
+            f"the benchmark."
+        ),
+        "current_reading": (
+            f"Strategy max drawdown: {s_dd}, benchmark max drawdown: {b_dd}. "
+            f"Hit rate (months strategy > benchmark): {hit}. The strategy's "
+            f"value at these thresholds shows up primarily as drawdown "
+            f"reduction — narrower worst-case losses — rather than higher "
+            f"Sharpe. Whether that trade-off is worthwhile depends on the "
+            f"user's risk preferences."
+        ),
+    }
+
+
 def mean_reversion_hero_interpretation(
     deviation_pct: float | None,
     z: float | None,
@@ -504,6 +550,17 @@ WHY_IT_MATTERS: dict[str, str] = {
         "over long periods, Crestmont becomes mathematically close to the Mean "
         "Reversion indicator — the two correlate at ~1.0 in the present "
         "sample, so they contribute partially-overlapping signal to the MVCI."
+    ),
+    "backtest": (
+        "Predictive regressions report R² and t-stats — useful but abstract. "
+        "A real backtest converts those statistics into a portfolio P&L the "
+        "user can intuit. If MVCI has predictive content, the tactical rule "
+        "should outperform buy-and-hold on a Sharpe basis even after "
+        "transaction costs. If it doesn't, the predictive regression's "
+        "statistical significance is a methodological curiosity, not "
+        "investment signal. The v10.0 MVP tests one simple rule; v10.1 will "
+        "add a rule menu and a White's Reality Check correction for "
+        "multiple-testing inflation."
     ),
 }
 

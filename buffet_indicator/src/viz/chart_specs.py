@@ -1276,6 +1276,197 @@ def make_calibration_plot(
     }
 
 
+def make_equity_curve_chart(
+    dates: list[str],
+    strategy_nav: list[float],
+    benchmark_nav: list[float],
+    *,
+    chart_name: str = "equity_curve",
+) -> dict[str, Any]:
+    """v10.0: log-scale strategy vs benchmark NAV chart."""
+    return {
+        "data": [
+            {
+                "x": dates,
+                "y": strategy_nav,
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#1F77B4", "width": 2.5},
+                "name": "Tactical strategy",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>NAV = %{y:.2f}x<extra></extra>",
+            },
+            {
+                "x": dates,
+                "y": benchmark_nav,
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#999999", "width": 2.5, "dash": "dash"},
+                "name": "Benchmark (100% S&P 500 TR)",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>NAV = %{y:.2f}x<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "<b>Tactical strategy vs buy-and-hold (100% S&P 500 TR)</b><br>"
+                "<span style='font-size:13px;color:#666'>"
+                "Cumulative NAV, log scale, 1875-present"
+                "</span>",
+                "x": 0.5,
+                "xanchor": "center",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": _x_axis_block(),
+            "yaxis": {
+                "title": {
+                    "text": "Cumulative NAV (log scale)",
+                    "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                },
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+                "type": "log",
+                "nticks": 8,
+                "gridcolor": "rgba(150, 150, 150, 0.2)",
+            },
+            "hovermode": "x unified",
+            "hoverdistance": 50,
+            "height": HERO_HEIGHT,
+            "margin": {"t": 100, "b": 90, "l": 75, "r": 35},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "legend": {"font": {"size": LEGEND_FONT_SIZE, "family": FONT_FAMILY}},
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_drawdown_chart(
+    dates: list[str],
+    dd_strategy: list[float],
+    dd_benchmark: list[float],
+    *,
+    chart_name: str = "drawdown",
+) -> dict[str, Any]:
+    """v10.0: dual drawdown lines (strategy + benchmark)."""
+    return {
+        "data": [
+            {
+                "x": dates,
+                "y": [v * 100 for v in dd_strategy],
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#1F77B4", "width": 2},
+                "fill": "tozeroy",
+                "fillcolor": "rgba(31, 119, 180, 0.15)",
+                "name": "Strategy drawdown",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>%{y:.1f}%<extra></extra>",
+            },
+            {
+                "x": dates,
+                "y": [v * 100 for v in dd_benchmark],
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#C8102E", "width": 2, "dash": "dash"},
+                "name": "Benchmark drawdown",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>%{y:.1f}%<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Drawdowns over time (strategy vs benchmark)",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                "x": 0.5,
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": _x_axis_block(),
+            "yaxis": {
+                "title": {
+                    "text": "Drawdown (%)",
+                    "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                },
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+                "ticksuffix": "%",
+                "gridcolor": "rgba(150, 150, 150, 0.2)",
+                "zeroline": True,
+                "zerolinecolor": "#333",
+                "zerolinewidth": 1.5,
+            },
+            "hovermode": "x unified",
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 60, "b": 80, "l": 75, "r": 35},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "legend": {"font": {"size": LEGEND_FONT_SIZE, "family": FONT_FAMILY}},
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_allocation_chart(
+    dates: list[str],
+    weights: list[float],
+    *,
+    chart_name: str = "allocation",
+) -> dict[str, Any]:
+    """v10.0: stacked-area showing equity weight over time."""
+    eq_pct = [(w * 100) if w is not None and w == w else None for w in weights]
+    cash_pct = [
+        (100 - (w * 100)) if w is not None and w == w else None for w in weights
+    ]
+    return {
+        "data": [
+            {
+                "x": dates,
+                "y": eq_pct,
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#5DBB63", "width": 0},
+                "stackgroup": "one",
+                "fillcolor": "rgba(93, 187, 99, 0.65)",
+                "name": "Equity %",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>Equity: %{y:.0f}%<extra></extra>",
+            },
+            {
+                "x": dates,
+                "y": cash_pct,
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#9AA0A6", "width": 0},
+                "stackgroup": "one",
+                "fillcolor": "rgba(154, 160, 166, 0.65)",
+                "name": "T-bills %",
+                "hovertemplate": "<b>%{x|%Y-%m}</b><br>T-bills: %{y:.0f}%<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Equity allocation history (0% = full T-bills, 100% = full equity)",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                "x": 0.5,
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": _x_axis_block(),
+            "yaxis": {
+                "title": {
+                    "text": "Allocation (%)",
+                    "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+                },
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+                "ticksuffix": "%",
+                "range": [0, 100],
+                "dtick": 25,
+                "gridcolor": "rgba(150, 150, 150, 0.2)",
+            },
+            "hovermode": "x unified",
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 60, "b": 80, "l": 75, "r": 35},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "legend": {"font": {"size": LEGEND_FONT_SIZE, "family": FONT_FAMILY}},
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
 __all__ = [
     "FONT_FAMILY",
     "TICK_FONT_SIZE",
@@ -1297,4 +1488,7 @@ __all__ = [
     "make_oos_r2_chart",
     "make_acf_pacf_charts",
     "make_calibration_plot",
+    "make_equity_curve_chart",
+    "make_drawdown_chart",
+    "make_allocation_chart",
 ]

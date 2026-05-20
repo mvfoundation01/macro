@@ -186,6 +186,8 @@
       renderVariantPanels("mean_reversion", "mean-reversion");
     } else if (tabName === "diagnostics") {
       renderDiagnostics();
+    } else if (tabName === "backtest") {
+      renderBacktest();
     } else if (tabName === "data") {
       renderDataTab();
     }
@@ -224,6 +226,18 @@
     let panelC = charts.panel_c;
     if (panelC === "__SHARED_PANEL_C__") panelC = DATA.shared_panel_c;
     if (panelC) renderPlot(`${tabName}-panel-c-${variantKey}`, panelC);
+  }
+
+  function renderBacktest() {
+    if (DATA.backtest_equity_curve && !renderedCharts.has("backtest-equity-curve")) {
+      renderPlot("backtest-equity-curve", DATA.backtest_equity_curve);
+    }
+    if (DATA.backtest_drawdown_chart && !renderedCharts.has("backtest-drawdown-chart")) {
+      renderPlot("backtest-drawdown-chart", DATA.backtest_drawdown_chart);
+    }
+    if (DATA.backtest_allocation_chart && !renderedCharts.has("backtest-allocation-chart")) {
+      renderPlot("backtest-allocation-chart", DATA.backtest_allocation_chart);
+    }
   }
 
   function renderDiagnostics() {

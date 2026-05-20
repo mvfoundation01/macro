@@ -139,7 +139,23 @@
     periods, Crestmont becomes mathematically close to the Mean Reversion indicator.
   </p>
 
-  <h3>3.7 MV Composite Index (MVCI)</h3>
+  <h3>3.7 Tactical backtest (v10.0)</h3>
+  <p>
+    The <strong>Backtest</strong> tab applies a simple binary rule using the MVCI z-score:
+    100% T-bills when z &gt; +2σ, 100% equities when z &lt; −1σ, 50/50 in between.
+    Monthly rebalancing with a 10bps round-trip transaction cost charged only on weight
+    changes greater than 1%. <strong>Look-ahead bias</strong> is prevented by lagging
+    the signal one month — the weight in force during month t is computed from z observed
+    at the end of month t−1 (verified by <code>test_run_backtest_no_lookahead</code>).
+    Sharpe ratios are reported with stationary block bootstrap 95% confidence intervals
+    (Politis-Romano 1994, mean block length 12 months, 10,000 reps). Risk-free rate is a
+    short-rate proxy derived from the Shiller long-rate yield × 0.6, adjusted for realized
+    inflation to produce a real monthly log return. This is a <em>sufficiency check</em>
+    — multi-rule comparison with White's Reality Check (testing whether the best rule
+    could have arisen by chance over many candidate rules) is deferred to v10.1.
+  </p>
+
+  <h3>3.8 MV Composite Index (MVCI)</h3>
   <p>
     A standardized aggregation of all variants above. Three weighting schemes:
   </p>

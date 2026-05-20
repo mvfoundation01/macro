@@ -1,0 +1,41 @@
+{
+  "strategy": {
+    "cagr": 0.041423725250311794,
+    "sharpe": 0.37198867526072477,
+    "sharpe_ci_lower": 0.17977795208628766,
+    "sharpe_ci_upper": 0.6031535235775206,
+    "sortino": 0.44553638133779183,
+    "max_drawdown": -0.5709109464710189,
+    "calmar": 0.07255724470929299,
+    "hit_rate_vs_benchmark": 0.29379157427937913,
+    "n_months": 1804,
+    "n_rebalances": 46
+  },
+  "benchmark": {
+    "cagr": 0.0697221198803819,
+    "sharpe": 0.45232219374381766,
+    "sharpe_ci_lower": 0.2336036843529174,
+    "sharpe_ci_upper": 0.6966098159957861,
+    "sortino": 0.5453863679770625,
+    "max_drawdown": -0.7679743672456736,
+    "calmar": 0.09078704036755686,
+    "hit_rate_vs_benchmark": 0.0,
+    "n_months": 1805,
+    "n_rebalances": 0
+  },
+  "config": {
+    "upper_threshold": 2.0,
+    "lower_threshold": -1.0,
+    "mid_weight": 0.5,
+    "transaction_cost_bps": 10.0,
+    "rebalance_threshold": 0.01
+  },
+  "window": {
+    "start": "1875-12-31",
+    "end": "2026-04-30",
+    "n_months": 1805
+  },
+  "n_rebalances": 46,
+  "bootstrap_reps": 10000,
+  "seed": 42
+}
