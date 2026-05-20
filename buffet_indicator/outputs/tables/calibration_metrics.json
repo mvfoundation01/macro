@@ -5,58 +5,58 @@
   "n_observations": 1655,
   "buckets": [
     {
-      "predicted_mean": 0.026606653713238712,
-      "realized_freq": 0.10843373493975904,
+      "predicted_mean": 0.03474226548194148,
+      "realized_freq": 0.07228915662650602,
       "n": 166
     },
     {
-      "predicted_mean": 0.09700547049196395,
-      "realized_freq": 0.030303030303030304,
+      "predicted_mean": 0.0990198802757241,
+      "realized_freq": 0.07272727272727272,
       "n": 165
     },
     {
-      "predicted_mean": 0.13463638267245745,
-      "realized_freq": 0.10843373493975904,
+      "predicted_mean": 0.14090284197388875,
+      "realized_freq": 0.13253012048192772,
       "n": 166
     },
     {
-      "predicted_mean": 0.1658912055781182,
-      "realized_freq": 0.10909090909090909,
-      "n": 165
-    },
-    {
-      "predicted_mean": 0.19298644157563757,
+      "predicted_mean": 0.17257650403882496,
       "realized_freq": 0.11515151515151516,
       "n": 165
     },
     {
-      "predicted_mean": 0.21996283487360455,
-      "realized_freq": 0.10843373493975904,
-      "n": 166
-    },
-    {
-      "predicted_mean": 0.2512942645921397,
-      "realized_freq": 0.12727272727272726,
+      "predicted_mean": 0.1956282318729516,
+      "realized_freq": 0.10303030303030303,
       "n": 165
     },
     {
-      "predicted_mean": 0.2833841572076512,
-      "realized_freq": 0.2891566265060241,
+      "predicted_mean": 0.2229387993818509,
+      "realized_freq": 0.13855421686746988,
       "n": 166
     },
     {
-      "predicted_mean": 0.32510809045122213,
-      "realized_freq": 0.5151515151515151,
+      "predicted_mean": 0.2533522840635625,
+      "realized_freq": 0.08484848484848485,
       "n": 165
     },
     {
-      "predicted_mean": 0.4038732093985087,
-      "realized_freq": 0.5843373493975904,
+      "predicted_mean": 0.284588317590651,
+      "realized_freq": 0.3192771084337349,
+      "n": 166
+    },
+    {
+      "predicted_mean": 0.32708535111272585,
+      "realized_freq": 0.49696969696969695,
+      "n": 165
+    },
+    {
+      "predicted_mean": 0.4082815085028071,
+      "realized_freq": 0.5602409638554217,
       "n": 166
     }
   ],
-  "brier_score": 0.1449890285877275,
-  "reliability": 0.01176145264161348,
-  "resolution": 0.03288496449231576,
+  "brier_score": 0.14577830912799933,
+  "reliability": 0.010260159929249118,
+  "resolution": 0.030205926450557953,
   "uncertainty": 0.16570714031452796
 }
