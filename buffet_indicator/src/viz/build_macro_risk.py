@@ -51,6 +51,13 @@ VARIANT_LABEL = {
     "cs_hy_ccc": "HY CCC OAS",
     "margin_debt_growth": "Margin Debt 12M Growth",
     "mrc": "MV Macro Risk Composite",
+    # v11.0.2: derived spreads
+    "spread_hy_ig": "HY-IG Spread",
+    "spread_ccc_bb": "CCC-BB Distress",
+    "spread_hy_reach_for_yield": "HY Reach-for-Yield",
+    "spread_hy_treasury_traditional": "HY-Treasury (Trad.)",
+    "spread_equity_credit_rp": "Equity-Credit Risk Premium",
+    "spread_hy_oas_3m_delta": "HY OAS 3M Δ",
 }
 
 
@@ -312,23 +319,31 @@ def build_macro_variants(
     if mrc_block is not None:
         out["mrc"] = mrc_block
 
-    # v11.0.1 — derived spreads have no dual_frame_summary.parquet; build a
-    # minimal context block directly from the chart payload metrics.
+    # v11.0.2 — derived spreads now have orchestrator dual_frame_summary
+    # parquets. Use the standard _build_indicator_block() path (same as
+    # the raw macro constituents) so Conviction, Confidence, and the
+    # Predictive Regression table all populate. Fall back to the v11.0.1
+    # chart-payload block only when the orchestrator parquet is missing.
     derived_keys = (
         "spread_hy_ig", "spread_ccc_bb", "spread_hy_reach_for_yield",
         "spread_hy_treasury_traditional", "spread_equity_credit_rp",
         "spread_hy_oas_3m_delta",
     )
     for vk in derived_keys:
+        ph = (variant_charts.get(vk) or {}).get("per_horizon_events")
+        block = _build_indicator_block(vk, per_horizon_events=ph)
+        if block is not None:
+            out[vk] = block
+            continue
+        # Fallback: no orchestrator output for this variant, use the
+        # chart-payload metrics block (v11.0.1 behavior).
         met = macro_metrics.get(vk)
         if not met:
             continue
-        ph = (variant_charts.get(vk) or {}).get("per_horizon_events", {})
-        # Build per-horizon probability rows from the chart payload.
         prob_rows = []
         for h_key, h_label in (("h_12m", "1YR"), ("h_36m", "3YR"),
                                ("h_60m", "5YR"), ("h_120m", "10YR")):
-            ev = ph.get(h_key, {})
+            ev = (ph or {}).get(h_key, {})
             prob_rows.append({
                 "horizon_label": h_label,
                 "p_neg_fmt": _fmt_pct(ev.get("lt_0pct", {}).get("point"), digits=0) if ev else "—",
@@ -343,7 +358,7 @@ def build_macro_variants(
         from src.viz.captions import PANEL_A_CAPTIONS  # local
         out[vk] = {
             "variant_key": vk,
-            "label": met.get("regime", ""),  # placeholder; template uses constant string
+            "label": VARIANT_LABEL.get(vk, vk),
             "regime": met["regime"],
             "regime_color": met["regime_color"],
             "z_fmt": met["z_fmt"],
@@ -356,7 +371,7 @@ def build_macro_variants(
                 "why_it_matters": PANEL_A_CAPTIONS.get(vk, "Derived spread — see About section."),
                 "panel_a": PANEL_A_CAPTIONS.get(vk, "Standardised signal of the derived spread."),
             },
-            "regression_rows": [],  # no orchestrator regression for derived spreads
+            "regression_rows": [],
             "probability_rows": prob_rows,
         }
     return out

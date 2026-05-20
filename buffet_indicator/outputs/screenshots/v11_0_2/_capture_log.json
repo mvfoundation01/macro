@@ -1,0 +1,40 @@
+{
+  "captures": [
+    {
+      "name": "20_tab_spread_hy_ig_desktop",
+      "tab": "spread_hy_ig",
+      "size_bytes": 336207,
+      "errors": []
+    },
+    {
+      "name": "21_tab_spread_ccc_bb_desktop",
+      "tab": "spread_ccc_bb",
+      "size_bytes": 331879,
+      "errors": []
+    },
+    {
+      "name": "22_tab_spread_hy_reach_for_yield_desktop",
+      "tab": "spread_hy_reach_for_yield",
+      "size_bytes": 337501,
+      "errors": []
+    },
+    {
+      "name": "23_tab_spread_hy_treasury_traditional_desktop",
+      "tab": "spread_hy_treasury_traditional",
+      "size_bytes": 334442,
+      "errors": []
+    },
+    {
+      "name": "24_tab_spread_equity_credit_rp_desktop",
+      "tab": "spread_equity_credit_rp",
+      "size_bytes": 328762,
+      "errors": []
+    },
+    {
+      "name": "25_tab_spread_hy_oas_3m_delta_desktop",
+      "tab": "spread_hy_oas_3m_delta",
+      "size_bytes": 388262,
+      "errors": []
+    }
+  ]
+}

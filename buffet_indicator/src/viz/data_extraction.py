@@ -311,8 +311,12 @@ VARIANT_REGISTRY: dict[str, dict[str, str]] = {
         "group": "macro_risk", "label": "HY Reach-for-Yield", "unit": "pp",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "Greenwood & Hanson (2013)",
-        "direction": "high_bearish_trend",
-        "direction_convention": "trend",
+        "direction": "high_bullish_contrarian",
+        # v11.0.2 §C: reclassified from "trend" → "contrarian" because the
+        # raw signal is HY_OAS − DGS10 (level, not direction-encoded). LOW
+        # raw value = complacency = bearish forward equities. High value =
+        # stress = contrarian buy signal. Empirical β confirms.
+        "direction_convention": "contrarian",
         "tier": "B",
     },
     "spread_hy_treasury_traditional": {

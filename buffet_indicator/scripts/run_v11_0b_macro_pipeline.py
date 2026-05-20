@@ -64,6 +64,17 @@ VARIANT_KEYS = (
 )
 MRC_SCHEMES = ("equal_weight", "inv_variance", "pca_pc1")
 
+# v11.0.2 §A — derived spreads to plumb through the full orchestrator pipeline
+# so they emit β / SE / t / R² / Conviction / Confidence on their dashboard tabs.
+DERIVED_SPREAD_KEYS = (
+    "spread_hy_ig",
+    "spread_ccc_bb",
+    "spread_hy_reach_for_yield",
+    "spread_hy_treasury_traditional",
+    "spread_equity_credit_rp",
+    "spread_hy_oas_3m_delta",
+)
+
 
 def main() -> None:
     from src.models.macro_orchestrator import (
@@ -89,6 +100,30 @@ def main() -> None:
         print(f"[run] {vk}: n={len(sig)}")
         block = analyze_macro_indicator(
             vk, sig, forward_returns=fr, bootstrap_n=500, n_bootstrap_prob=500
+        )
+        persist_indicator_block(vk, block, out_dir=out_root)
+        z_series_by_variant[vk] = block["long_run"]["z_score_series"].dropna()
+        summary_rows.append(
+            {
+                "variant_key": vk,
+                "z_long_run": block["long_run"]["z_score"],
+                "regime_long_run": block["long_run"]["regime"],
+                "z_current_regime": block["current_regime"]["z_score"],
+                "n_obs": block["n_observations"],
+                "sample_penalty": block["sample_size_penalty"],
+            }
+        )
+
+    # v11.0.2 §A — 6 derived spreads through the dual-frame pipeline.
+    for vk in DERIVED_SPREAD_KEYS:
+        try:
+            sig = _load_signal(vk)
+        except Exception as exc:
+            print(f"[skip] {vk}: {exc}")
+            continue
+        print(f"[run] {vk}: n={len(sig)}")
+        block = analyze_macro_indicator(
+            vk, sig, forward_returns=fr, bootstrap_n=500, n_bootstrap_prob=500,
         )
         persist_indicator_block(vk, block, out_dir=out_root)
         z_series_by_variant[vk] = block["long_run"]["z_score_series"].dropna()

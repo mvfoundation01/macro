@@ -101,6 +101,12 @@ INDICATORS = [
             "Trend convention: high spread = bearish equities."
         ),
         "references": "Gilchrist & Zakrajšek (2012)",
+        "interpretation": (
+            "The pure credit risk premium: how much extra yield investors "
+            "demand for junk bonds over investment-grade, with Treasury "
+            "duration stripped out. Historically widens to &gt;5pp during "
+            "recessions and compresses below 2pp in late-cycle euphoria."
+        ),
     },
     {
         "key": "spread_ccc_bb",
@@ -111,17 +117,31 @@ INDICATORS = [
             "before recession per Gilchrist-Zakrajšek 2012."
         ),
         "references": "Gilchrist & Zakrajšek (2012)",
+        "interpretation": (
+            "The distress premium within junk: how much wider CCC-rated "
+            "yields are versus BB-rated. Historically leads recessions by "
+            "3-6 months (Gilchrist–Zakrajšek 2012). Sharp widening signals "
+            "late-cycle credit deterioration starting."
+        ),
     },
     {
         "key": "spread_hy_reach_for_yield",
         "label": "HY Reach-for-Yield",
         "data_source": "Derived: HY OAS − DGS10 (1996-12-present)",
         "direction_note": (
-            "Composite reading, NOT a bond-math spread. LOW value = "
-            "investors accepting credit risk for too little above the cash "
-            "rate = complacency = bearish; HIGH = late-cycle stress."
+            "v11.0.2: reclassified as CONTRARIAN. Composite reading "
+            "(HY OAS minus 10Y Treasury yield), NOT a bond-math spread. "
+            "LOW value = investors accepting credit risk for too little "
+            "above cash = complacency = bearish forward equities; HIGH "
+            "value = late-cycle stress = contrarian buy signal."
         ),
         "references": "Greenwood & Hanson (2013)",
+        "interpretation": (
+            "A composite reading combining HY credit risk premium with the "
+            "prevailing Treasury rate level. Low values mean investors are "
+            "accepting credit risk for very little compensation above cash — "
+            "historically a complacency signal that precedes drawdowns."
+        ),
     },
     {
         "key": "spread_hy_treasury_traditional",
@@ -133,6 +153,12 @@ INDICATORS = [
             "complacency."
         ),
         "references": "longtermtrends.net Credit Spreads",
+        "interpretation": (
+            "The classic credit spread: how much more junk bonds yield "
+            "versus 10-year Treasuries. Wide spreads historically marked "
+            "recession troughs (good entry points for equities); tight "
+            "spreads marked late-cycle complacency."
+        ),
     },
     {
         "key": "spread_equity_credit_rp",
@@ -146,6 +172,12 @@ INDICATORS = [
             "positive = equities cheap vs credit = bullish."
         ),
         "references": "Asness et al. (2010); MV v11.0.1 cross-domain bridge",
+        "interpretation": (
+            "The cross-domain bridge: S&amp;P 500 earnings yield minus the "
+            "high-yield bond yield. When negative, equities are paying you "
+            "less than junk bonds for similar (or worse) drawdown risk. "
+            "Reached −8pp at the 2000 dot-com peak and is currently negative."
+        ),
     },
     {
         "key": "spread_hy_oas_3m_delta",
@@ -157,6 +189,12 @@ INDICATORS = [
             "Δ, you may already be near the trough)."
         ),
         "references": "MV master spec §11.0.1",
+        "interpretation": (
+            "The acceleration of credit stress: how much HY spreads have "
+            "widened over the prior 3 months. Captures regime-switch "
+            "dynamics that static levels miss. Lead-time strongest at 1M-3M; "
+            "mean-reverts at 5Y-10Y horizons."
+        ),
     },
 ]
 
@@ -190,7 +228,7 @@ INDICATOR_TEMPLATE = """\
         <div class="text-xl font-semibold">{{ v.z_fmt }}</div>
       </div>
       <div>
-        <div class="text-xs text-gray-500">P(neg 10Y real return)</div>
+        <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
         <div class="text-xl font-semibold">{{ v.p_neg_fmt }}</div>
         <div class="text-xs text-gray-400">{{ v.p_neg_ci_fmt }}</div>
       </div>
@@ -228,7 +266,7 @@ INDICATOR_TEMPLATE = """\
       <div id="__KEY__-panel-b" class="panel-chart-container"></div>
     </div>
     <div class="rounded-lg border bg-white p-4 chart-card">
-      <h3 class="text-md font-semibold mb-2">Panel C &mdash; S&amp;P 500 by regime</h3>
+      <h3 class="text-md font-semibold mb-2">Panel C &mdash; S&amp;P 500 by __LABEL__ regime</h3>
       <div id="__KEY__-panel-c" class="panel-chart-container"></div>
     </div>
   </div>
@@ -316,7 +354,7 @@ __HORIZON_PILLS__
   <!-- 8. Interpretation -->
   <div class="rounded-lg border bg-white p-4 mb-6">
     <h3 class="text-lg font-semibold mb-2">Interpretation</h3>
-    <p class="text-sm leading-relaxed">{{ v.interpretation.panel_a }}</p>
+    <p class="text-sm leading-relaxed">__INTERPRETATION_TEXT__</p>
   </div>
 
   <!-- 9. About -->
@@ -336,7 +374,7 @@ __HORIZON_PILLS__
       correction for highly persistent regressors. OOS R&sup2; per
       Goyal&ndash;Welch (2008); Clark&ndash;West (2007) MSPE-adjusted statistic
       for nested-model comparison. Bootstrap CIs via Politis&ndash;Romano (1994)
-      stationary bootstrap, 500 replications, seed=42. Sample-size penalty per
+      stationary bootstrap, 10,000 replications, seed=42. Sample-size penalty per
       master spec &sect;6.2 when n_obs &lt; 100.
     </p>
     <p class="text-sm leading-relaxed mt-2">
@@ -371,7 +409,7 @@ MRC_TEMPLATE = """\
         <div class="text-xl font-semibold">{{ v.z_fmt }}</div>
       </div>
       <div>
-        <div class="text-xs text-gray-500">P(neg 10Y real return)</div>
+        <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
         <div class="text-xl font-semibold">{{ v.p_neg_fmt }}</div>
         <div class="text-xs text-gray-400">{{ v.p_neg_ci_fmt }}</div>
       </div>
@@ -570,10 +608,21 @@ __HORIZON_PILLS__
     </p>
     <p class="text-sm leading-relaxed mt-2">
       <strong>Independence from MVCI:</strong> Acceptance gate
-      |corr(MVCI, MRC)| &lt; 0.80 (currently ~0.16 long-run, ~0.25 after
-      dual-frame analysis). The two composites measure fundamentally
-      different dimensions: MVCI measures the price of equities; MRC
-      measures the financial-system regime.
+      |corr(MVCI, MRC)| &lt; 0.85. The two composites measure fundamentally
+      different dimensions: MVCI measures the price of equities; MRC measures
+      the financial-system regime.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>v11.0.2 composition disclosure:</strong> The current MRC
+      composite includes 13 inputs: 7 raw indicators (yield curves,
+      credit OAS, margin debt) plus 6 derived spreads. Five of the 6
+      derived spreads are linear combinations or transforms of the raw
+      inputs, so the v11.0.2 MRC correlates ~0.99 with the v11.0c
+      version. The derived spreads serve as <em>diagnostic
+      decomposition</em> for the user, not as orthogonal information
+      for the ensemble. The exception is the Equity-Credit Risk Premium
+      spread, which uniquely brings S&amp;P 500 earnings yield into the
+      macro composite as a cross-domain bridge to MVCI.
     </p>
     <p class="text-sm leading-relaxed mt-2">
       <strong>References:</strong> Estrella &amp; Mishkin (1998),
@@ -593,6 +642,10 @@ def _emit_indicator_tab(info: dict) -> str:
         f'data-tab-target="{info["key"]}">{HORIZON_LABELS[h]}</button>'
         for h in HORIZON_PILLS
     )
+    # v11.0.2 §D: per-indicator Interpretation text; falls back to the
+    # v.interpretation.panel_a template variable when an indicator-specific
+    # paragraph isn't defined in the generator dict.
+    interpretation = info.get("interpretation", "{{ v.interpretation.panel_a }}")
     return (
         INDICATOR_TEMPLATE
         .replace("__KEY__", info["key"])
@@ -600,6 +653,7 @@ def _emit_indicator_tab(info: dict) -> str:
         .replace("__DATA_SOURCE__", info["data_source"])
         .replace("__DIRECTION_NOTE__", info["direction_note"])
         .replace("__REFERENCES__", info["references"])
+        .replace("__INTERPRETATION_TEXT__", interpretation)
         .replace("__HORIZON_PILLS__", pills)
     )
 

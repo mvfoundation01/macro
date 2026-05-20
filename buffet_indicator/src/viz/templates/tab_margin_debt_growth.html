@@ -19,7 +19,7 @@
         <div class="text-xl font-semibold">{{ v.z_fmt }}</div>
       </div>
       <div>
-        <div class="text-xs text-gray-500">P(neg 10Y real return)</div>
+        <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
         <div class="text-xl font-semibold">{{ v.p_neg_fmt }}</div>
         <div class="text-xs text-gray-400">{{ v.p_neg_ci_fmt }}</div>
       </div>
@@ -57,7 +57,7 @@
       <div id="margin_debt_growth-panel-b" class="panel-chart-container"></div>
     </div>
     <div class="rounded-lg border bg-white p-4 chart-card">
-      <h3 class="text-md font-semibold mb-2">Panel C &mdash; S&amp;P 500 by regime</h3>
+      <h3 class="text-md font-semibold mb-2">Panel C &mdash; S&amp;P 500 by Margin Debt 12M Growth regime</h3>
       <div id="margin_debt_growth-panel-c" class="panel-chart-container"></div>
     </div>
   </div>
@@ -171,7 +171,7 @@
       correction for highly persistent regressors. OOS R&sup2; per
       Goyal&ndash;Welch (2008); Clark&ndash;West (2007) MSPE-adjusted statistic
       for nested-model comparison. Bootstrap CIs via Politis&ndash;Romano (1994)
-      stationary bootstrap, 500 replications, seed=42. Sample-size penalty per
+      stationary bootstrap, 10,000 replications, seed=42. Sample-size penalty per
       master spec &sect;6.2 when n_obs &lt; 100.
     </p>
     <p class="text-sm leading-relaxed mt-2">
