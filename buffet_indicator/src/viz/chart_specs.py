@@ -1821,6 +1821,68 @@ def make_constituent_contributions(
     }
 
 
+def _aic_select_parametric_fit(arr: np.ndarray) -> dict[str, Any]:
+    """Fit Gaussian, Student-t, skew-normal to arr; AIC-select; return
+    a dict with the chosen family + smooth PDF (x, y) ready to overlay.
+
+    v11.0.1 §D. Falls back gracefully if scipy.stats fitting fails on any
+    family (skew-normal in particular can struggle with bimodal samples).
+    """
+    try:
+        from scipy import stats as sps
+    except ImportError:
+        return {}
+    if len(arr) < 12:
+        return {}
+    candidates: list[dict[str, Any]] = []
+    # Gaussian
+    try:
+        mu, sigma = float(np.mean(arr)), float(np.std(arr, ddof=1))
+        if sigma > 0:
+            ll = float(np.sum(sps.norm.logpdf(arr, loc=mu, scale=sigma)))
+            aic = 2 * 2 - 2 * ll  # k=2 params
+            candidates.append({"family": "gaussian", "params": (mu, sigma), "aic": aic})
+    except Exception:
+        pass
+    # Student-t
+    try:
+        nu, mu, sigma = sps.t.fit(arr)
+        if sigma > 0 and nu > 1:
+            ll = float(np.sum(sps.t.logpdf(arr, df=nu, loc=mu, scale=sigma)))
+            aic = 2 * 3 - 2 * ll
+            candidates.append({"family": "student_t", "params": (nu, mu, sigma), "aic": aic})
+    except Exception:
+        pass
+    # Skew-normal
+    try:
+        a, loc, sc = sps.skewnorm.fit(arr)
+        if sc > 0:
+            ll = float(np.sum(sps.skewnorm.logpdf(arr, a, loc=loc, scale=sc)))
+            aic = 2 * 3 - 2 * ll
+            candidates.append({"family": "skewed_t", "params": (a, loc, sc), "aic": aic})
+    except Exception:
+        pass
+    if not candidates:
+        return {}
+    best = min(candidates, key=lambda c: c["aic"])
+    # Sample 200 points across the empirical range for the overlay curve.
+    x_lo, x_hi = float(np.min(arr)), float(np.max(arr))
+    span = max(x_hi - x_lo, 0.001)
+    x_grid = np.linspace(x_lo - 0.10 * span, x_hi + 0.10 * span, 200)
+    if best["family"] == "gaussian":
+        mu, sigma = best["params"]
+        pdf = sps.norm.pdf(x_grid, loc=mu, scale=sigma)
+    elif best["family"] == "student_t":
+        nu, mu, sigma = best["params"]
+        pdf = sps.t.pdf(x_grid, df=nu, loc=mu, scale=sigma)
+    else:  # skewed_t
+        a, loc, sc = best["params"]
+        pdf = sps.skewnorm.pdf(x_grid, a, loc=loc, scale=sc)
+    best["x"] = x_grid.tolist()
+    best["pdf"] = pdf.tolist()
+    return best
+
+
 def make_conditional_distribution(
     bucket_returns: list[float],
     *,
@@ -1830,13 +1892,15 @@ def make_conditional_distribution(
     chart_name: str = "cond_dist",
 ) -> dict[str, Any]:
     """Histogram of forward returns observed in the current z-bucket, with
-    optional Bayesian posterior mean + VaR(5%) annotations."""
+    optional Bayesian posterior mean + VaR(5%) annotations and (v11.0.1)
+    AIC-selected parametric overlay (Gaussian / Student-t / skew-normal)."""
     if not bucket_returns:
         return {"data": [], "layout": {"title": {"text": f"{title} — n/a"}}}
     arr = np.array(bucket_returns, dtype="float64")
     arr = arr[~np.isnan(arr)]
     if len(arr) < 5:
         return {"data": [], "layout": {"title": {"text": f"{title} — n<5"}}}
+    fit = _aic_select_parametric_fit(arr)
     annotations: list[dict[str, Any]] = []
     shapes: list[dict[str, Any]] = []
     if bayesian_mean is not None and np.isfinite(bayesian_mean):
@@ -1863,6 +1927,54 @@ def make_conditional_distribution(
             "text": f"VaR(5%) = {var_5*100:+.1f}%",
             "font": {"size": 12, "color": "#C8102E", "family": FONT_FAMILY},
         })
+    # Build the parametric overlay trace if a fit succeeded. We rescale the
+    # PDF y-axis so the curve overlays meaningfully on top of the histogram
+    # counts: histogram y = count per bin; we approximate count ~ pdf * n *
+    # bin_width. Using a y2 axis would be cleaner but we keep one axis for
+    # simplicity and just scale the PDF.
+    overlay_traces: list[dict[str, Any]] = []
+    fit_annot_text = ""
+    if fit:
+        n = int(len(arr))
+        # Approximate bin width = (max - min) / 25 (Plotly's nbinsx default).
+        bin_width_pct = max((float(np.max(arr)) - float(np.min(arr))) / 25, 0.005) * 100
+        x_pct = [v * 100 for v in fit["x"]]
+        # Each PDF value is per-unit-of-return; multiply by bin width (already
+        # in % units) and total n to get expected count per bin.
+        y_scaled = [v * n * bin_width_pct / 100 for v in fit["pdf"]]
+        overlay_traces.append(
+            {
+                "x": x_pct,
+                "y": y_scaled,
+                "type": "scatter",
+                "mode": "lines",
+                "line": {"color": "#C8102E", "width": 2.5},
+                "name": fit["family"].replace("_", " ").title() + " fit",
+                "hovertemplate": "%{x:.1f}%<extra></extra>",
+            }
+        )
+        if fit["family"] == "student_t":
+            fit_annot_text = (
+                f"Best fit: Student-t (ν={fit['params'][0]:.2f}), "
+                f"AIC={fit['aic']:.1f}"
+            )
+        elif fit["family"] == "gaussian":
+            fit_annot_text = (
+                f"Best fit: Gaussian (μ={fit['params'][0]*100:.2f}%, "
+                f"σ={fit['params'][1]*100:.2f}%), AIC={fit['aic']:.1f}"
+            )
+        else:
+            fit_annot_text = (
+                f"Best fit: Skew-Normal (a={fit['params'][0]:.2f}), "
+                f"AIC={fit['aic']:.1f}"
+            )
+
+    subtitle_block = ""
+    if fit_annot_text:
+        subtitle_block = (
+            f"<br><span style='font-size:12px;color:#666'>{fit_annot_text}</span>"
+        )
+
     return {
         "data": [
             {
@@ -1872,10 +1984,11 @@ def make_conditional_distribution(
                 "nbinsx": 25,
                 "name": "Empirical",
                 "hovertemplate": "%{x:.1f}%: n=%{y}<extra></extra>",
-            }
+            },
+            *overlay_traces,
         ],
         "layout": {
-            "title": {"text": title, "x": 0.5,
+            "title": {"text": title + subtitle_block, "x": 0.5,
                       "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
             "font": {"family": FONT_FAMILY},
             "xaxis": {

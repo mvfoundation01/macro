@@ -14,7 +14,8 @@ REQUIRED_FIELDS = ("group", "label", "unit", "sample_start", "sample_end", "ref_
 
 
 def test_variant_registry_has_eight_valuation_constituents_and_eight_macro() -> None:
-    """8 valuation constituents (excluding MVCI composite) + 7 macro constituents
+    """8 valuation constituents (excluding MVCI composite) + ≥ 7 macro
+    constituents (v11.0c had 7; v11.0.1 added 6 derived → 13)
     + 1 MRC composite alias + 3 MRC weighting variants."""
     val = list_indicators(group="valuation")
     mac = list_indicators(group="macro_risk")
@@ -23,7 +24,8 @@ def test_variant_registry_has_eight_valuation_constituents_and_eight_macro() -> 
         k for k in mac if not k.startswith("mrc")
     )
     assert len(val_constituents) == 8, f"got {val_constituents}"
-    assert len(mac_constituents) == 7, f"got {mac_constituents}"
+    # v11.0c = 7 macro constituents; v11.0.1 added 6 derived spreads → 13.
+    assert len(mac_constituents) >= 7, f"got {mac_constituents}"
     # Composites
     assert "mvci" in val
     assert "mrc" in mac

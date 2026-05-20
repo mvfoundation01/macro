@@ -91,6 +91,73 @@ INDICATORS = [
         ),
         "references": "Schwab and Yardeni sentiment frameworks; FINRA monthly releases",
     },
+    # v11.0.1 — 6 derived credit/cross-domain spreads.
+    {
+        "key": "spread_hy_ig",
+        "label": "HY-IG Spread",
+        "data_source": "Derived: BAMLH0A0HYM2 − BAMLC0A0CM (1996-12-present)",
+        "direction_note": (
+            "Pure credit risk premium — strips out the Treasury rate level. "
+            "Trend convention: high spread = bearish equities."
+        ),
+        "references": "Gilchrist & Zakrajšek (2012)",
+    },
+    {
+        "key": "spread_ccc_bb",
+        "label": "CCC-BB Distress",
+        "data_source": "Derived: BAMLH0A3HYC − BAMLH0A1HYBB (1996-12-present)",
+        "direction_note": (
+            "Distress premium within junk. Trend convention; lead time 3-6M "
+            "before recession per Gilchrist-Zakrajšek 2012."
+        ),
+        "references": "Gilchrist & Zakrajšek (2012)",
+    },
+    {
+        "key": "spread_hy_reach_for_yield",
+        "label": "HY Reach-for-Yield",
+        "data_source": "Derived: HY OAS − DGS10 (1996-12-present)",
+        "direction_note": (
+            "Composite reading, NOT a bond-math spread. LOW value = "
+            "investors accepting credit risk for too little above the cash "
+            "rate = complacency = bearish; HIGH = late-cycle stress."
+        ),
+        "references": "Greenwood & Hanson (2013)",
+    },
+    {
+        "key": "spread_hy_treasury_traditional",
+        "label": "HY-Treasury (Trad.)",
+        "data_source": "Derived: HY YTW − DGS10 (HY YTW = HY OAS + DGS10; 1996-12-present)",
+        "direction_note": (
+            "The longtermtrends 'Credit Spreads' standard. CONTRARIAN "
+            "empirically: wide = trough/buy signal; tight = late-cycle "
+            "complacency."
+        ),
+        "references": "longtermtrends.net Credit Spreads",
+    },
+    {
+        "key": "spread_equity_credit_rp",
+        "label": "Equity-Credit Risk Premium",
+        "data_source": (
+            "Derived: SP500 trailing earnings yield − HY YTW (1996-12-present)"
+        ),
+        "direction_note": (
+            "Cross-domain bridge between MVCI and MRC. CONTRARIAN: deeply "
+            "negative = equities expensive vs credit = bearish; near zero or "
+            "positive = equities cheap vs credit = bullish."
+        ),
+        "references": "Asness et al. (2010); MV v11.0.1 cross-domain bridge",
+    },
+    {
+        "key": "spread_hy_oas_3m_delta",
+        "label": "HY OAS 3M Δ",
+        "data_source": "Derived: HY OAS.diff(3) (1997-03-present)",
+        "direction_note": (
+            "Acceleration measure. Trend at 1M-6M horizons (positive Δ = "
+            "stress building, dangerous); contrarian at 5Y-10Y (after a big "
+            "Δ, you may already be near the trough)."
+        ),
+        "references": "MV master spec §11.0.1",
+    },
 ]
 
 

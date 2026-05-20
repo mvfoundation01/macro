@@ -1,0 +1,183 @@
+{% import "_macros.html" as m %}
+<section data-tab="spread_hy_ig" data-tab-group="macro_risk" class="tab-content px-4 py-4">
+
+  {% set v = variants.get("spread_hy_ig") %}
+  {% if not v %}
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm">
+    <p class="text-sm text-gray-500">No data for HY-IG Spread (variant missing).</p>
+  </div>
+  {% else %}
+
+  <!-- 1. Header strip -->
+  <div class="rounded-lg border p-4 mb-4 bg-white"
+       style="border-left: 4px solid {{ v.regime_color }};">
+    <div class="text-sm text-gray-500 mb-1">HY-IG Spread</div>
+    <div class="text-2xl font-bold mb-3">{{ v.regime }}</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div>
+        <div class="text-xs text-gray-500">Z-score (long-run)</div>
+        <div class="text-xl font-semibold">{{ v.z_fmt }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">P(neg 10Y real return)</div>
+        <div class="text-xl font-semibold">{{ v.p_neg_fmt }}</div>
+        <div class="text-xs text-gray-400">{{ v.p_neg_ci_fmt }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">Confidence</div>
+        <div class="text-xl font-semibold">{{ v.confidence_fmt }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">Conviction</div>
+        <div class="text-xl font-semibold">{{ v.conviction_fmt }} / 5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Hero chart -->
+  <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
+    <h2 class="text-xl font-bold mb-1">HY-IG Spread &mdash; full history</h2>
+    <p class="text-sm text-gray-500 mb-3">
+      Raw signal level on left axis; standardised z-score on right.
+      NBER recession bands shaded.
+    </p>
+    <div id="hero-chart-spread_hy_ig" class="hero-chart-container"></div>
+  </div>
+
+  {{ m.why_it_matters_card("HY-IG Spread", v.interpretation.why_it_matters) }}
+
+  <!-- 3. Three-panel block -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <div class="rounded-lg border bg-white p-4 chart-card">
+      <h3 class="text-md font-semibold mb-2">Panel A &mdash; Standardised signal</h3>
+      <div id="spread_hy_ig-panel-a" class="panel-chart-container"></div>
+    </div>
+    <div class="rounded-lg border bg-white p-4 chart-card">
+      <h3 class="text-md font-semibold mb-2">Panel B &mdash; Z vs forward return</h3>
+      <div id="spread_hy_ig-panel-b" class="panel-chart-container"></div>
+    </div>
+    <div class="rounded-lg border bg-white p-4 chart-card">
+      <h3 class="text-md font-semibold mb-2">Panel C &mdash; S&amp;P 500 by regime</h3>
+      <div id="spread_hy_ig-panel-c" class="panel-chart-container"></div>
+    </div>
+  </div>
+
+  <!-- 4. Horizon selector pills -->
+  <div class="mb-4 flex flex-wrap gap-2">
+    <span class="text-xs text-gray-500 self-center mr-2">Horizon:</span>
+      <button class="horizon-pill" data-horizon="1m" data-tab-target="spread_hy_ig">1MO</button>
+      <button class="horizon-pill" data-horizon="3m" data-tab-target="spread_hy_ig">3MO</button>
+      <button class="horizon-pill" data-horizon="12m" data-tab-target="spread_hy_ig">1YR</button>
+      <button class="horizon-pill" data-horizon="36m" data-tab-target="spread_hy_ig">3YR</button>
+      <button class="horizon-pill" data-horizon="60m" data-tab-target="spread_hy_ig">5YR</button>
+      <button class="horizon-pill" data-horizon="84m" data-tab-target="spread_hy_ig">7YR</button>
+      <button class="horizon-pill" data-horizon="120m" data-tab-target="spread_hy_ig">10YR</button>
+  </div>
+
+  <!-- 5. Predictive regression results table -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-3">Predictive regression results</h3>
+    <table class="text-sm w-full">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="py-1 pr-3">Horizon</th>
+          <th class="py-1 pr-3">&beta;</th>
+          <th class="py-1 pr-3">SE_HH</th>
+          <th class="py-1 pr-3">t_HH</th>
+          <th class="py-1 pr-3">p</th>
+          <th class="py-1 pr-3">R&sup2;_in</th>
+          <th class="py-1 pr-3">R&sup2;_OOS</th>
+          <th class="py-1 pr-3">n_obs</th>
+          <th class="py-1 pr-3">Conviction</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in v.regression_rows %}
+        <tr class="border-b text-xs">
+          <td class="py-1 pr-3 font-medium">{{ row.horizon_label }}</td>
+          <td class="py-1 pr-3">{{ row.beta_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.se_hh_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.t_hh_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.p_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.r2_in_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.r2_oos_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.n_obs }}</td>
+          <td class="py-1 pr-3">{{ row.conviction_fmt }} / 5</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. Conditional distribution panel -->
+  <div class="rounded-lg border bg-white p-4 mb-6 chart-card">
+    <h3 class="text-lg font-semibold mb-2">Conditional return distribution (current bucket)</h3>
+    <p class="text-sm text-gray-500 mb-2">
+      Empirical histogram of forward returns observed when this indicator was in
+      the current quintile, overlaid with the parametric AIC-selected fit.
+    </p>
+    <div id="spread_hy_ig-cond-dist" class="panel-chart-container"></div>
+  </div>
+
+  <!-- 7. Probability table -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-3">Conditional outcome probabilities</h3>
+    <table class="text-sm w-full">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="py-1 pr-3">Horizon</th>
+          <th class="py-1 pr-3">P(neg)</th>
+          <th class="py-1 pr-3">CI95</th>
+          <th class="py-1 pr-3">P(&lt; RF)</th>
+          <th class="py-1 pr-3">P(&lt; 5%)</th>
+          <th class="py-1 pr-3">P(&gt; 7%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in v.probability_rows %}
+        <tr class="border-b text-xs">
+          <td class="py-1 pr-3 font-medium">{{ row.horizon_label }}</td>
+          <td class="py-1 pr-3">{{ row.p_neg_fmt }}</td>
+          <td class="py-1 pr-3 text-gray-500">{{ row.p_neg_ci_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.p_below_rf_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.p_below_5_fmt }}</td>
+          <td class="py-1 pr-3">{{ row.p_above_7_fmt }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 8. Interpretation -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">Interpretation</h3>
+    <p class="text-sm leading-relaxed">{{ v.interpretation.panel_a }}</p>
+  </div>
+
+  <!-- 9. About -->
+  <div class="rounded-lg border bg-white p-4">
+    <h3 class="text-lg font-semibold mb-2">About this indicator</h3>
+    <p class="text-sm leading-relaxed">
+      <strong>Source:</strong> Derived: BAMLH0A0HYM2 − BAMLC0A0CM (1996-12-present)
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>Direction convention:</strong> Pure credit risk premium — strips out the Treasury rate level. Trend convention: high spread = bearish equities.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>Methodology:</strong> Daily series resampled to month-end. Z-score
+      via expanding-window Huber on the canonical signal column. Predictive
+      regression uses Hansen&ndash;Hodrick (1980) HAC standard errors as primary
+      SE, with Newey&ndash;West (1987) as cross-check and Stambaugh (1999) bias
+      correction for highly persistent regressors. OOS R&sup2; per
+      Goyal&ndash;Welch (2008); Clark&ndash;West (2007) MSPE-adjusted statistic
+      for nested-model comparison. Bootstrap CIs via Politis&ndash;Romano (1994)
+      stationary bootstrap, 500 replications, seed=42. Sample-size penalty per
+      master spec &sect;6.2 when n_obs &lt; 100.
+    </p>
+    <p class="text-sm leading-relaxed mt-2">
+      <strong>References:</strong> Gilchrist & Zakrajšek (2012)
+    </p>
+  </div>
+
+  {% endif %}
+</section>

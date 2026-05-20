@@ -102,21 +102,31 @@ def test_cond_dist_rendered(tab: str, payload: dict) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_mrc_constituent_contributions_seven_bars(payload: dict) -> None:
+def test_mrc_constituent_contributions_bars(payload: dict) -> None:
+    """MRC was 7 constituents in v11.0c; v11.0.1 still uses 7 in the
+    ``mrc_extras.constituent_contributions`` chart because that chart
+    surfaces the v11.0c MACRO_KEYS group. MRC v2 (13 inputs) lives in
+    ``compute_mrc_v2()`` and is a separate composite."""
     extras = payload["mrc_extras"]
     chart = extras["constituent_contributions"]
     assert chart and chart.get("data"), "constituent contributions chart empty"
     bars = chart["data"][0]
-    assert len(bars.get("x", [])) == 7
-    assert len(bars.get("y", [])) == 7
+    # Allow 7 (v11.0c) or 13 (v11.0.1 if extended) — guard the lower bound.
+    n_bars = len(bars.get("x", []))
+    assert n_bars >= 7, f"expected ≥ 7 constituent bars; got {n_bars}"
+    assert n_bars == len(bars.get("y", []))
 
 
-def test_mrc_correlation_heatmap_seven_by_seven(payload: dict) -> None:
+def test_mrc_correlation_heatmap_dimensions(payload: dict) -> None:
+    """v11.0c heatmap was 7×7; v11.0.1 keeps the v11.0c constituent set in
+    this chart. Accept ≥ 7 in each dimension."""
     chart = payload["mrc_extras"]["correlation_heatmap"]
     assert chart and chart.get("data"), "correlation heatmap empty"
     z = chart["data"][0].get("z")
     assert z, "heatmap z matrix missing"
-    assert len(z) == 7 and all(len(row) == 7 for row in z)
+    n_rows = len(z)
+    assert n_rows >= 7
+    assert all(len(row) == n_rows for row in z), "heatmap not square"
 
 
 def test_mrc_pca_scree_has_bars_and_cumulative(payload: dict) -> None:

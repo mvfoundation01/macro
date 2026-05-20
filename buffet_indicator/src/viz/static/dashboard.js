@@ -198,9 +198,13 @@
   }
 
   // v11.0c — set of all macro-risk tabs (constituents + composite).
+  // v11.0.1 — extended with 6 derived spread tabs.
   const MACRO_TABS = new Set([
     "mrc", "yc_10y3m", "yc_10y2y", "cs_hy_master", "cs_ig_master",
     "cs_hy_bb", "cs_hy_ccc", "margin_debt_growth",
+    "spread_hy_ig", "spread_ccc_bb", "spread_hy_reach_for_yield",
+    "spread_hy_treasury_traditional", "spread_equity_credit_rp",
+    "spread_hy_oas_3m_delta",
   ]);
 
   function renderMacroChartsForTab(tabName) {

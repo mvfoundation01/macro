@@ -203,6 +203,7 @@ VARIANT_REGISTRY: dict[str, dict[str, str]] = {
         "sample_start": "1945-Q4", "sample_end": "present",
         "ref_paper": "Tobin & Brainard (1977); Smithers & Wright (2000)",
         "direction": "high_bearish",
+        "direction_convention": "trend",
     },
     "ey_deficit": {
         "group": "valuation", "label": "Equity Yield Deficit", "unit": "%",
@@ -220,65 +221,135 @@ VARIANT_REGISTRY: dict[str, dict[str, str]] = {
         "sample_start": "1954-01", "sample_end": "present",
         "ref_paper": "Estrella & Mishkin (1998); Bauer & Mertens (2018)",
         "direction": "high_bearish_inverted",
+        "direction_convention": "trend",
     },
     "yc_10y2y": {
         "group": "macro_risk", "label": "Yield Curve 10Y-2Y", "unit": "pp",
         "sample_start": "1976-06", "sample_end": "present",
         "ref_paper": "Estrella & Mishkin (1998)",
         "direction": "high_bearish_inverted",
+        "direction_convention": "trend",
     },
     "cs_hy_master": {
         "group": "macro_risk", "label": "HY OAS (master)", "unit": "pp",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "ICE BofA OAS methodology",
         "direction": "high_bearish_log",
+        "direction_convention": "contrarian",
     },
     "cs_ig_master": {
         "group": "macro_risk", "label": "IG OAS (master)", "unit": "pp",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "ICE BofA OAS methodology",
         "direction": "high_bearish_log",
+        "direction_convention": "contrarian",
     },
     "cs_hy_bb": {
         "group": "macro_risk", "label": "HY BB OAS", "unit": "pp",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "ICE BofA OAS methodology",
         "direction": "high_bearish_log",
+        "direction_convention": "contrarian",
     },
     "cs_hy_ccc": {
         "group": "macro_risk", "label": "HY CCC OAS", "unit": "pp",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "ICE BofA OAS methodology",
         "direction": "high_bearish_log",
+        "direction_convention": "contrarian",
     },
     "margin_debt_growth": {
         "group": "macro_risk", "label": "Margin Debt 12M Growth", "unit": "log",
         "sample_start": "1997-01", "sample_end": "present",
         "ref_paper": "Schwab / Yardeni / FINRA monthly releases",
         "direction": "high_bearish_log_growth",
+        "direction_convention": "trend",
     },
     # MRC composite + 3 weighting variants
     "mrc": {
         "group": "macro_risk", "label": "MV Macro Risk Composite", "unit": "sigma",
         "sample_start": "1976-06", "sample_end": "present",
         "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+        "direction_convention": "trend",
     },
     "mrc_equal_weight": {
         "group": "macro_risk", "label": "MRC (equal weight)", "unit": "sigma",
         "sample_start": "1976-06", "sample_end": "present",
         "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+        "direction_convention": "trend",
     },
     "mrc_inv_variance": {
         "group": "macro_risk", "label": "MRC (inverse variance)", "unit": "sigma",
         "sample_start": "1996-12", "sample_end": "present",
         "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+        "direction_convention": "trend",
     },
     "mrc_pca_pc1": {
         "group": "macro_risk", "label": "MRC (PCA PC1)", "unit": "sigma",
         "sample_start": "2001-12", "sample_end": "present",
         "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+        "direction_convention": "trend",
+    },
+    # v11.0.1 — 6 derived credit / cross-domain spreads
+    "spread_hy_ig": {
+        "group": "macro_risk", "label": "HY-IG Spread", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "Gilchrist & Zakrajšek (2012)",
+        "direction": "high_bearish_trend",
+        "direction_convention": "trend",
+        "tier": "A",
+    },
+    "spread_ccc_bb": {
+        "group": "macro_risk", "label": "CCC-BB Distress", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "Gilchrist & Zakrajšek (2012)",
+        "direction": "high_bearish_trend",
+        "direction_convention": "trend",
+        "tier": "A",
+    },
+    "spread_hy_reach_for_yield": {
+        "group": "macro_risk", "label": "HY Reach-for-Yield", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "Greenwood & Hanson (2013)",
+        "direction": "high_bearish_trend",
+        "direction_convention": "trend",
+        "tier": "B",
+    },
+    "spread_hy_treasury_traditional": {
+        "group": "macro_risk", "label": "HY-Treasury (Trad.)", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "longtermtrends.net Credit Spreads",
+        "direction": "high_bearish_log",
+        "direction_convention": "contrarian",
+        "tier": "B",
+    },
+    "spread_equity_credit_rp": {
+        "group": "macro_risk", "label": "Equity-Credit RP", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "Asness et al. (2010); MV v11.0.1 cross-domain bridge",
+        "direction": "high_bullish",
+        "direction_convention": "contrarian",
+        "tier": "A",
+    },
+    "spread_hy_oas_3m_delta": {
+        "group": "macro_risk", "label": "HY OAS 3M Δ", "unit": "pp",
+        "sample_start": "1997-03", "sample_end": "present",
+        "ref_paper": "Acceleration measure (master spec §11.0.1)",
+        "direction": "high_bearish_trend",
+        "direction_convention": "trend",
+        "tier": "B",
     },
 }
+
+# v11.0.1 — derived spread tab keys (for downstream iteration).
+_DERIVED_SPREAD_VARIANTS = (
+    "spread_hy_ig",
+    "spread_ccc_bb",
+    "spread_hy_reach_for_yield",
+    "spread_hy_treasury_traditional",
+    "spread_equity_credit_rp",
+    "spread_hy_oas_3m_delta",
+)
 
 
 def list_indicators(group: str | None = None) -> tuple[str, ...]:

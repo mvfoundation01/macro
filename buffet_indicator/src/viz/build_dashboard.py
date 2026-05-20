@@ -812,10 +812,11 @@ def build_dashboard(
         build_macro_variants,
         build_macro_risk_snapshot,
     )
-    macro_variants = build_macro_variants()
 
     # v11.0c: build the chart-spec payload (hero, panel A/B/C, cond-dist,
     # MRC extras, overview mini, per-tab metric pills).
+    # v11.0.1: build the payload BEFORE the macro variants so we can thread
+    # per-horizon probability events into the template probability table.
     macro_chart_payload: dict[str, Any] = {}
     try:
         from src.viz.build_macro_charts import build_macro_chart_payload
@@ -835,20 +836,27 @@ def build_dashboard(
         macro_chart_payload = build_macro_chart_payload(
             fr, z_history=parquets.get("z_history")
         )
-        # Inject the v11.0c metrics into the per-tab variant context so the
-        # tab templates render real numbers instead of n/a placeholders.
-        for vk, met in (macro_chart_payload.get("macro_metrics") or {}).items():
-            if vk in macro_variants:
-                macro_variants[vk]["z_fmt"] = met["z_fmt"]
-                macro_variants[vk]["p_neg_fmt"] = met["p_neg_fmt"]
-                macro_variants[vk]["p_neg_ci_fmt"] = met["p_neg_ci_fmt"]
-                macro_variants[vk]["confidence_fmt"] = met["confidence_fmt"]
-                macro_variants[vk]["conviction_fmt"] = met["conviction_fmt"]
-                macro_variants[vk]["regime"] = met["regime"]
-                macro_variants[vk]["regime_color"] = met["regime_color"]
     except Exception as exc:  # pragma: no cover
         print(f"[v11.0c macro chart payload] skipped: {exc}")
         macro_chart_payload = {}
+
+    # v11.0.1: pass the payload so the template probability table can use
+    # per-horizon events instead of "—" placeholders.
+    macro_variants = build_macro_variants(macro_chart_payload)
+    # Re-apply metric overrides (the build_macro_variants call above doesn't
+    # carry the chart-payload metrics, so re-merge them here).
+    for vk, met in (macro_chart_payload.get("macro_metrics") or {}).items():
+        if vk in macro_variants:
+            macro_variants[vk]["z_fmt"] = met["z_fmt"]
+            macro_variants[vk]["p_neg_fmt"] = met["p_neg_fmt"]
+            macro_variants[vk]["p_neg_ci_fmt"] = met["p_neg_ci_fmt"]
+            macro_variants[vk]["confidence_fmt"] = met["confidence_fmt"]
+            macro_variants[vk]["conviction_fmt"] = met["conviction_fmt"]
+            macro_variants[vk]["regime"] = met["regime"]
+            macro_variants[vk]["regime_color"] = met["regime_color"]
+            macro_variants[vk]["direction_convention"] = met.get(
+                "direction_convention", "trend"
+            )
 
     overview_ctx["macro_risk_snapshot"] = build_macro_risk_snapshot(macro_variants)
     # If we have a real P(neg 10Y) from the chart payload, override the
@@ -875,6 +883,13 @@ def build_dashboard(
         "cs_hy_bb",
         "cs_hy_ccc",
         "margin_debt_growth",
+        # v11.0.1 — 6 derived credit/cross-domain spreads
+        "spread_hy_ig",
+        "spread_ccc_bb",
+        "spread_hy_reach_for_yield",
+        "spread_hy_treasury_traditional",
+        "spread_equity_credit_rp",
+        "spread_hy_oas_3m_delta",
     )
     macro_tab_html: dict[str, str] = {}
     for key in macro_tab_keys:
@@ -1027,6 +1042,13 @@ def build_dashboard(
         tab_cs_hy_bb_html=macro_tab_html.get("cs_hy_bb", ""),
         tab_cs_hy_ccc_html=macro_tab_html.get("cs_hy_ccc", ""),
         tab_margin_debt_growth_html=macro_tab_html.get("margin_debt_growth", ""),
+        # v11.0.1 — 6 derived spread tabs
+        tab_spread_hy_ig_html=macro_tab_html.get("spread_hy_ig", ""),
+        tab_spread_ccc_bb_html=macro_tab_html.get("spread_ccc_bb", ""),
+        tab_spread_hy_reach_for_yield_html=macro_tab_html.get("spread_hy_reach_for_yield", ""),
+        tab_spread_hy_treasury_traditional_html=macro_tab_html.get("spread_hy_treasury_traditional", ""),
+        tab_spread_equity_credit_rp_html=macro_tab_html.get("spread_equity_credit_rp", ""),
+        tab_spread_hy_oas_3m_delta_html=macro_tab_html.get("spread_hy_oas_3m_delta", ""),
         inline_css=inline_css,
         inline_js=inline_js,
         dashboard_json=dashboard_json,

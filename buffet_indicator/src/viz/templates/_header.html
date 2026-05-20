@@ -22,7 +22,7 @@
       <div class="text-lg font-semibold" data-pill="z">{{ mvci_z_fmt }}</div>
     </div>
     <div class="bg-gray-100 rounded p-2 text-center">
-      <div class="text-xs text-gray-500">P(neg 10Y)</div>
+      <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
       <div class="text-lg font-semibold" data-pill="p_neg">{{ p_below5_fmt }}</div>
     </div>
     <div class="bg-gray-100 rounded p-2 text-center">
@@ -63,14 +63,24 @@
               data-group-toggle="macro_risk">
         Macro Risk <span class="group-chevron">&#9662;</span>
       </button>
-      <div class="group-tabs flex items-stretch" data-group-tabs="macro_risk">
+      <div class="group-tabs flex flex-wrap items-stretch" data-group-tabs="macro_risk">
         <button data-tab="mrc" data-tab-group="macro_risk" class="tab-button">MRC</button>
+        <span class="nav-subheader text-[10px] uppercase tracking-wide text-gray-400 self-center mx-1">Macro</span>
         <button data-tab="yc_10y3m" data-tab-group="macro_risk" class="tab-button">YC 10Y-3M</button>
         <button data-tab="yc_10y2y" data-tab-group="macro_risk" class="tab-button">YC 10Y-2Y</button>
+        <span class="nav-subheader text-[10px] uppercase tracking-wide text-gray-400 self-center mx-1">Credit (raw)</span>
         <button data-tab="cs_hy_master" data-tab-group="macro_risk" class="tab-button">HY OAS</button>
         <button data-tab="cs_ig_master" data-tab-group="macro_risk" class="tab-button">IG OAS</button>
         <button data-tab="cs_hy_bb" data-tab-group="macro_risk" class="tab-button">HY BB</button>
         <button data-tab="cs_hy_ccc" data-tab-group="macro_risk" class="tab-button">HY CCC</button>
+        <span class="nav-subheader text-[10px] uppercase tracking-wide text-gray-400 self-center mx-1">Credit (derived)</span>
+        <button data-tab="spread_hy_ig" data-tab-group="macro_risk" class="tab-button">HY-IG</button>
+        <button data-tab="spread_ccc_bb" data-tab-group="macro_risk" class="tab-button">CCC-BB</button>
+        <button data-tab="spread_hy_reach_for_yield" data-tab-group="macro_risk" class="tab-button">Reach-for-Yield</button>
+        <button data-tab="spread_hy_treasury_traditional" data-tab-group="macro_risk" class="tab-button">HY-Treasury</button>
+        <button data-tab="spread_equity_credit_rp" data-tab-group="macro_risk" class="tab-button" title="Cross-domain bridge">EY-Credit RP ⭐</button>
+        <button data-tab="spread_hy_oas_3m_delta" data-tab-group="macro_risk" class="tab-button">HY 3M Δ</button>
+        <span class="nav-subheader text-[10px] uppercase tracking-wide text-gray-400 self-center mx-1">Sentiment</span>
         <button data-tab="margin_debt_growth" data-tab-group="macro_risk" class="tab-button">Margin Debt</button>
       </div>
     </div>

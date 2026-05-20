@@ -63,6 +63,13 @@ MACRO_KEYS = (
     "cs_hy_bb",
     "cs_hy_ccc",
     "margin_debt_growth",
+    # v11.0.1 — 6 derived spreads
+    "spread_hy_ig",
+    "spread_ccc_bb",
+    "spread_hy_reach_for_yield",
+    "spread_hy_treasury_traditional",
+    "spread_equity_credit_rp",
+    "spread_hy_oas_3m_delta",
 )
 
 VARIANT_LABEL = {
@@ -73,10 +80,49 @@ VARIANT_LABEL = {
     "cs_hy_bb": "HY BB OAS",
     "cs_hy_ccc": "HY CCC OAS",
     "margin_debt_growth": "Margin Debt 12M Growth",
+    "spread_hy_ig": "HY-IG Spread",
+    "spread_ccc_bb": "CCC-BB Distress",
+    "spread_hy_reach_for_yield": "HY Reach-for-Yield",
+    "spread_hy_treasury_traditional": "HY-Treasury (Trad.)",
+    "spread_equity_credit_rp": "Equity-Credit Risk Premium",
+    "spread_hy_oas_3m_delta": "HY OAS 3M Δ",
 }
 
 
-def _classify_regime(z: float) -> tuple[str, str]:
+def _classify_regime(z: float, *, convention: str = "trend") -> tuple[str, str]:
+    """Map z-score to (label, color).
+
+    Trend indicators (most valuation; yield curve; margin debt): high z =
+    bearish equities → red callout. Label uses 'overvalued'/'undervalued'
+    terminology.
+
+    Contrarian indicators (credit spreads where empirical β > 0): high z =
+    stress widening → contrarian buy signal → expected forward returns
+    above average → GREEN callout. Label uses 'stressed'/'tight' terminology.
+    The COLOR encodes the expected-forward-return direction (red=below
+    average, green=above), so a user can always read it as "is this good
+    or bad for stocks?" without knowing the convention.
+    """
+    if convention == "contrarian":
+        # Map z to "expected forward return" direction inverted relative to
+        # trend: high z = above-average forward (green); low z = below.
+        if z >= 2.0:
+            label = "Strongly Stressed"
+            color_key = "Strongly Undervalued"  # green
+        elif z >= 1.0:
+            label = "Stressed"
+            color_key = "Undervalued"  # light green
+        elif z >= -1.0:
+            label = "Fair Value"
+            color_key = "Fair Value"
+        elif z >= -2.0:
+            label = "Tight"
+            color_key = "Overvalued"  # orange
+        else:
+            label = "Strongly Tight"
+            color_key = "Strongly Overvalued"  # red
+        return label, REGIME_COLORS.get(color_key, "#9AA0A6")
+    # Trend convention (default).
     if z >= 2.0:
         label = "Strongly Overvalued"
     elif z >= 1.0:
@@ -153,19 +199,22 @@ def _quadrant_means(qsum_path: Path) -> dict[str, float]:
     return {str(k): float(df.loc[k, "mean"]) for k in df.index if "mean" in df.columns}
 
 
-def _compute_p_neg_at_horizon(
+def _compute_p_event_at_horizon(
     z_series: pd.Series,
     forward_returns: pd.Series,
-    horizon_months: int = 120,
     *,
-    bucket_quantile: float = 0.20,
-    n_bootstrap: int = 500,
+    event: str = "lt_5pct",
+    horizon_months: int = 120,
+    risk_free_rate: float = 0.045,
+    n_bootstrap: int = 10_000,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Conditional P(forward return < 0) at the current z-bucket + bootstrap CI.
+    """Conditional P(event) at the current z-bucket + bootstrap CI.
+
+    Master spec §3.6: 10,000 reps minimum for any reported bootstrap CI.
+    Master spec §5.3: events include {lt_5pct, lt_rf, gt_7pct, lt_0pct}.
 
     Bucket = quintile of historical z; current observation falls in one bucket.
-    Empirical P(neg) within that bucket; Politis-Romano stationary bootstrap CI.
     """
     z = z_series.dropna()
     fr = forward_returns.dropna()
@@ -194,30 +243,71 @@ def _compute_p_neg_at_horizon(
     if len(bucket_returns) == 0:
         return {"point": float("nan"), "ci_low": float("nan"),
                 "ci_high": float("nan"), "n": 0, "bucket_returns": []}
-    point = float(np.mean(bucket_returns < 0))
+
+    # Event predicate per master spec §5.3.
+    def _event_indicator(arr: np.ndarray) -> np.ndarray:
+        if event == "lt_0pct":
+            return arr < 0
+        if event == "lt_rf":
+            return arr < risk_free_rate
+        if event == "lt_5pct":
+            return arr < 0.05
+        if event == "gt_7pct":
+            return arr > 0.07
+        raise ValueError(f"Unknown event {event!r}")
+
+    point = float(np.mean(_event_indicator(bucket_returns)))
     # Politis-Romano stationary bootstrap (mean block length ~ sqrt(n)).
     rng = np.random.default_rng(seed)
     n = len(bucket_returns)
     mbl = max(4, int(np.sqrt(n)))
     p_prob = 1.0 / mbl
-    boots = []
-    for _ in range(n_bootstrap):
-        idx = []
-        while len(idx) < n:
+    boots = np.empty(n_bootstrap, dtype="float64")
+    for b in range(n_bootstrap):
+        idx = np.empty(n, dtype="int64")
+        i = 0
+        while i < n:
             start = int(rng.integers(0, n))
             block_len = int(rng.geometric(p_prob))
             for k in range(block_len):
-                idx.append((start + k) % n)
-                if len(idx) >= n:
+                if i >= n:
                     break
+                idx[i] = (start + k) % n
+                i += 1
         sample = bucket_returns[idx]
-        boots.append(float(np.mean(sample < 0)))
-    ci_low, ci_high = float(np.quantile(boots, 0.025)), float(np.quantile(boots, 0.975))
+        boots[b] = float(np.mean(_event_indicator(sample)))
+    ci_low = float(np.quantile(boots, 0.025))
+    ci_high = float(np.quantile(boots, 0.975))
     return {
-        "point": point, "ci_low": ci_low, "ci_high": ci_high,
+        "point": point,
+        "ci_low": ci_low,
+        "ci_high": ci_high,
         "n": int(len(bucket_returns)),
         "bucket_returns": [float(v) for v in bucket_returns],
+        "event": event,
     }
+
+
+# Backwards-compatible alias (v11.0c name) — defaults to the lt_5pct event so
+# existing tests + dashboard binding default to the v11.0.1 spec-compliant
+# computation.
+def _compute_p_neg_at_horizon(
+    z_series: pd.Series,
+    forward_returns: pd.Series,
+    horizon_months: int = 120,
+    *,
+    bucket_quantile: float = 0.20,
+    n_bootstrap: int = 10_000,
+    seed: int = 42,
+    event: str = "lt_5pct",
+) -> dict[str, Any]:
+    """Backward-compatible wrapper. Default event switched to ``lt_5pct``
+    per v11.0.1 spec (matches MVCI's headline pill label)."""
+    return _compute_p_event_at_horizon(
+        z_series, forward_returns,
+        event=event, horizon_months=horizon_months,
+        n_bootstrap=n_bootstrap, seed=seed,
+    )
 
 
 def build_macro_chart_payload(
@@ -279,14 +369,55 @@ def build_macro_chart_payload(
             title=f"{VARIANT_LABEL[key]} z vs 10Y forward CAGR",
         )
 
-        # Conditional distribution + P(neg 10Y) at current z.
-        p_neg = _compute_p_neg_at_horizon(z, r_120, horizon_months=120)
+        # Conditional distribution + P(<5% 10Y CAGR) at current z (v11.0.1
+        # spec §A.2 — matches MVCI's headline pill convention).
+        p_evt = _compute_p_event_at_horizon(
+            z, r_120, event="lt_5pct", horizon_months=120, n_bootstrap=10_000,
+        )
+        # Per-horizon probability events (master spec §5.3) — wired to the
+        # probability table on each tab (Stage B). Trim heavy bucket_returns
+        # from each event dict before serialisation to keep the bundle small.
+        per_horizon_events: dict[str, dict[str, Any]] = {}
+
+        def _slim(ev: dict[str, Any]) -> dict[str, Any]:
+            return {
+                "point": ev.get("point"),
+                "ci_low": ev.get("ci_low"),
+                "ci_high": ev.get("ci_high"),
+                "n": ev.get("n"),
+            }
+
+        for h_label, h_col in (
+            ("h_12m", "r_12m"), ("h_36m", "r_36m"),
+            ("h_60m", "r_60m"), ("h_120m", "r_120m"),
+        ):
+            if fr is None or h_col not in fr.columns:
+                continue
+            r_h = fr[h_col].dropna()
+            per_horizon_events[h_label] = {
+                "lt_0pct": _slim(_compute_p_event_at_horizon(
+                    z, r_h, event="lt_0pct", horizon_months=int(h_col[2:-1]),
+                    n_bootstrap=10_000,
+                )),
+                "lt_rf": _slim(_compute_p_event_at_horizon(
+                    z, r_h, event="lt_rf", horizon_months=int(h_col[2:-1]),
+                    n_bootstrap=10_000,
+                )),
+                "lt_5pct": _slim(_compute_p_event_at_horizon(
+                    z, r_h, event="lt_5pct", horizon_months=int(h_col[2:-1]),
+                    n_bootstrap=10_000,
+                )),
+                "gt_7pct": _slim(_compute_p_event_at_horizon(
+                    z, r_h, event="gt_7pct", horizon_months=int(h_col[2:-1]),
+                    n_bootstrap=10_000,
+                )),
+            }
         cond_dist = make_conditional_distribution(
-            p_neg["bucket_returns"],
-            bayesian_mean=float(np.mean(p_neg["bucket_returns"]))
-            if p_neg["bucket_returns"] else None,
-            var_5=float(np.quantile(p_neg["bucket_returns"], 0.05))
-            if p_neg["bucket_returns"] else None,
+            p_evt["bucket_returns"],
+            bayesian_mean=float(np.mean(p_evt["bucket_returns"]))
+            if p_evt["bucket_returns"] else None,
+            var_5=float(np.quantile(p_evt["bucket_returns"], 0.05))
+            if p_evt["bucket_returns"] else None,
             title=f"{VARIANT_LABEL[key]} — conditional 10Y return distribution",
             chart_name=f"{key}_cond_dist",
         )
@@ -296,6 +427,7 @@ def build_macro_chart_payload(
             "panel_b": panel_b,
             "panel_c": "__SHARED_PANEL_C__",
             "cond_dist": cond_dist,
+            "per_horizon_events": per_horizon_events,
         }
 
         # Pull conviction + confidence from the dual_frame_summary.parquet.
@@ -310,18 +442,25 @@ def build_macro_chart_payload(
             if not h120.empty:
                 conviction_10y = float(h120.iloc[0].get("conviction", float("nan")))
 
-        regime, color = _classify_regime(current_z)
+        # v11.0.1 §E: regime label + color use direction convention.
+        from src.viz.data_extraction import VARIANT_REGISTRY  # local to avoid cycles
+        direction_conv = VARIANT_REGISTRY.get(key, {}).get(
+            "direction_convention", "trend"
+        )
+        regime, color = _classify_regime(current_z, convention=direction_conv)
         metrics[key] = {
             "z": current_z,
             "z_fmt": _fmt_signed(current_z, suffix="σ"),
-            "p_neg": p_neg["point"],
-            "p_neg_fmt": _fmt_pct(p_neg["point"]),
-            "p_neg_ci_fmt": _fmt_ci(p_neg["ci_low"], p_neg["ci_high"]),
+            "p_neg": p_evt["point"],
+            "p_neg_fmt": _fmt_pct(p_evt["point"]),
+            "p_neg_ci_fmt": _fmt_ci(p_evt["ci_low"], p_evt["ci_high"]),
+            "p_neg_label": "P(< 5% 10Y CAGR)",
             "confidence_fmt": _fmt_pct(confidence_pct / 100.0) if np.isfinite(confidence_pct) else "n/a",
             "conviction_fmt": f"{conviction_10y:.2f}" if np.isfinite(conviction_10y) else "n/a",
             "regime": regime,
             "regime_color": color,
-            "n_obs": int(p_neg["n"]),
+            "direction_convention": direction_conv,
+            "n_obs": int(p_evt["n"]),
         }
 
     # ---------- MRC composite -----------
@@ -355,13 +494,42 @@ def build_macro_chart_payload(
             current_z=current_mrc, regression=regression,
             title="MRC z-score vs 10Y forward CAGR",
         )
-        p_neg_mrc = _compute_p_neg_at_horizon(mrc_z, r_120, horizon_months=120)
+        # v11.0.1 §A: P(<5% 10Y CAGR) for MRC tile.
+        p_evt_mrc = _compute_p_event_at_horizon(
+            mrc_z, r_120, event="lt_5pct", horizon_months=120, n_bootstrap=10_000,
+        )
+        per_horizon_events_mrc: dict[str, dict[str, Any]] = {}
+        for h_label, h_col in (
+            ("h_12m", "r_12m"), ("h_36m", "r_36m"),
+            ("h_60m", "r_60m"), ("h_120m", "r_120m"),
+        ):
+            if fr is None or h_col not in fr.columns:
+                continue
+            r_h = fr[h_col].dropna()
+            per_horizon_events_mrc[h_label] = {
+                "lt_0pct": _compute_p_event_at_horizon(
+                    mrc_z, r_h, event="lt_0pct",
+                    horizon_months=int(h_col[2:-1]), n_bootstrap=10_000,
+                ),
+                "lt_rf": _compute_p_event_at_horizon(
+                    mrc_z, r_h, event="lt_rf",
+                    horizon_months=int(h_col[2:-1]), n_bootstrap=10_000,
+                ),
+                "lt_5pct": _compute_p_event_at_horizon(
+                    mrc_z, r_h, event="lt_5pct",
+                    horizon_months=int(h_col[2:-1]), n_bootstrap=10_000,
+                ),
+                "gt_7pct": _compute_p_event_at_horizon(
+                    mrc_z, r_h, event="gt_7pct",
+                    horizon_months=int(h_col[2:-1]), n_bootstrap=10_000,
+                ),
+            }
         cond_dist = make_conditional_distribution(
-            p_neg_mrc["bucket_returns"],
-            bayesian_mean=float(np.mean(p_neg_mrc["bucket_returns"]))
-            if p_neg_mrc["bucket_returns"] else None,
-            var_5=float(np.quantile(p_neg_mrc["bucket_returns"], 0.05))
-            if p_neg_mrc["bucket_returns"] else None,
+            p_evt_mrc["bucket_returns"],
+            bayesian_mean=float(np.mean(p_evt_mrc["bucket_returns"]))
+            if p_evt_mrc["bucket_returns"] else None,
+            var_5=float(np.quantile(p_evt_mrc["bucket_returns"], 0.05))
+            if p_evt_mrc["bucket_returns"] else None,
             title="MRC — conditional 10Y return distribution",
             chart_name="mrc_cond_dist",
         )
@@ -370,6 +538,7 @@ def build_macro_chart_payload(
             "panel_b": panel_b,
             "panel_c": "__SHARED_PANEL_C__",
             "cond_dist": cond_dist,
+            "per_horizon_events": per_horizon_events_mrc,
         }
 
         # MRC metrics (headline tile).
@@ -387,14 +556,16 @@ def build_macro_chart_payload(
         metrics["mrc"] = {
             "z": current_mrc,
             "z_fmt": _fmt_signed(current_mrc, suffix="σ"),
-            "p_neg": p_neg_mrc["point"],
-            "p_neg_fmt": _fmt_pct(p_neg_mrc["point"]),
-            "p_neg_ci_fmt": _fmt_ci(p_neg_mrc["ci_low"], p_neg_mrc["ci_high"]),
+            "p_neg": p_evt_mrc["point"],
+            "p_neg_fmt": _fmt_pct(p_evt_mrc["point"]),
+            "p_neg_ci_fmt": _fmt_ci(p_evt_mrc["ci_low"], p_evt_mrc["ci_high"]),
+            "p_neg_label": "P(< 5% 10Y CAGR)",
             "confidence_fmt": _fmt_pct(confidence_pct / 100.0) if np.isfinite(confidence_pct) else "n/a",
             "conviction_fmt": f"{conviction_10y:.2f}" if np.isfinite(conviction_10y) else "n/a",
             "regime": regime,
             "regime_color": color,
-            "n_obs": int(p_neg_mrc["n"]),
+            "direction_convention": "trend",
+            "n_obs": int(p_evt_mrc["n"]),
         }
 
         # ---------- MRC special elements -----------

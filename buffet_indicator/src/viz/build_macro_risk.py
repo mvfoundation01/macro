@@ -129,9 +129,16 @@ def _regression_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
     return rows
 
 
-def _probability_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
-    """Per-horizon probability table rows (placeholder fills until probability
-    columns are persisted; for now we surface P(neg) and an empty CI95."""
+def _probability_rows(
+    df: pd.DataFrame,
+    per_horizon_events: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Per-horizon probability table rows.
+
+    v11.0.1 §B: when ``per_horizon_events`` is provided (computed by the
+    macro chart payload builder with 10,000-rep bootstrap), surface real
+    P(<RF), P(<5%), P(>7%) numbers instead of '—' placeholders.
+    """
     if df.empty:
         return []
     sub = df[df["frame"] == "long_run"].copy()
@@ -141,20 +148,36 @@ def _probability_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
     rows = []
     for h, row in sub.iterrows():
         p_neg = row.get("p_neg_return")
+        h_key = f"h_{h}m"
+        ev = (per_horizon_events or {}).get(h_key, {})
         rows.append(
             {
                 "horizon_label": HORIZON_LABEL[h],
-                "p_neg_fmt": _fmt_pct(p_neg, digits=0),
-                "p_neg_ci_fmt": "",
-                "p_below_rf_fmt": "—",
-                "p_below_5_fmt": "—",
-                "p_above_7_fmt": "—",
+                "p_neg_fmt": _fmt_pct(p_neg, digits=0)
+                if not ev
+                else _fmt_pct(ev.get("lt_0pct", {}).get("point"), digits=0),
+                "p_neg_ci_fmt": _fmt_ci(
+                    ev.get("lt_0pct", {}).get("ci_low"),
+                    ev.get("lt_0pct", {}).get("ci_high"),
+                ) if ev else "",
+                "p_below_rf_fmt": _fmt_pct(
+                    ev.get("lt_rf", {}).get("point"), digits=0
+                ) if ev else "—",
+                "p_below_5_fmt": _fmt_pct(
+                    ev.get("lt_5pct", {}).get("point"), digits=0
+                ) if ev else "—",
+                "p_above_7_fmt": _fmt_pct(
+                    ev.get("gt_7pct", {}).get("point"), digits=0
+                ) if ev else "—",
             }
         )
     return rows
 
 
-def _build_indicator_block(variant_key: str) -> dict[str, Any] | None:
+def _build_indicator_block(
+    variant_key: str,
+    per_horizon_events: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
     df = _load_dual_frame_summary(variant_key)
     if df.empty:
         return None
@@ -193,15 +216,17 @@ def _build_indicator_block(variant_key: str) -> dict[str, Any] | None:
             "panel_a": PANEL_A_CAPTIONS.get(variant_key, ""),
         },
         "regression_rows": _regression_rows(df),
-        "probability_rows": _probability_rows(df),
+        "probability_rows": _probability_rows(df, per_horizon_events),
     }
 
 
-def _build_mrc_block() -> dict[str, Any] | None:
+def _build_mrc_block(
+    per_horizon_events: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
     """Assemble the MRC tab context, including cross-variant comparison table
     and quadrant-conditional forward returns."""
     # Equal-weight is the headline scheme.
-    block = _build_indicator_block("mrc_equal_weight")
+    block = _build_indicator_block("mrc_equal_weight", per_horizon_events=per_horizon_events)
     if block is None:
         return None
     block["variant_key"] = "mrc"
@@ -262,8 +287,12 @@ def _build_mrc_block() -> dict[str, Any] | None:
     return block
 
 
-def build_macro_variants() -> dict[str, Any]:
+def build_macro_variants(
+    macro_chart_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Return a dict keyed by variant_key with each tab's render context."""
+    variant_charts = (macro_chart_payload or {}).get("macro_variant_charts", {})
+    macro_metrics = (macro_chart_payload or {}).get("macro_metrics", {})
     out: dict[str, Any] = {}
     for vk in (
         "yc_10y3m",
@@ -274,12 +303,62 @@ def build_macro_variants() -> dict[str, Any]:
         "cs_hy_ccc",
         "margin_debt_growth",
     ):
-        b = _build_indicator_block(vk)
+        ph = (variant_charts.get(vk) or {}).get("per_horizon_events")
+        b = _build_indicator_block(vk, per_horizon_events=ph)
         if b is not None:
             out[vk] = b
-    mrc_block = _build_mrc_block()
+    mrc_ph = (variant_charts.get("mrc") or {}).get("per_horizon_events")
+    mrc_block = _build_mrc_block(per_horizon_events=mrc_ph)
     if mrc_block is not None:
         out["mrc"] = mrc_block
+
+    # v11.0.1 — derived spreads have no dual_frame_summary.parquet; build a
+    # minimal context block directly from the chart payload metrics.
+    derived_keys = (
+        "spread_hy_ig", "spread_ccc_bb", "spread_hy_reach_for_yield",
+        "spread_hy_treasury_traditional", "spread_equity_credit_rp",
+        "spread_hy_oas_3m_delta",
+    )
+    for vk in derived_keys:
+        met = macro_metrics.get(vk)
+        if not met:
+            continue
+        ph = (variant_charts.get(vk) or {}).get("per_horizon_events", {})
+        # Build per-horizon probability rows from the chart payload.
+        prob_rows = []
+        for h_key, h_label in (("h_12m", "1YR"), ("h_36m", "3YR"),
+                               ("h_60m", "5YR"), ("h_120m", "10YR")):
+            ev = ph.get(h_key, {})
+            prob_rows.append({
+                "horizon_label": h_label,
+                "p_neg_fmt": _fmt_pct(ev.get("lt_0pct", {}).get("point"), digits=0) if ev else "—",
+                "p_neg_ci_fmt": _fmt_ci(
+                    ev.get("lt_0pct", {}).get("ci_low"),
+                    ev.get("lt_0pct", {}).get("ci_high"),
+                ) if ev else "",
+                "p_below_rf_fmt": _fmt_pct(ev.get("lt_rf", {}).get("point"), digits=0) if ev else "—",
+                "p_below_5_fmt": _fmt_pct(ev.get("lt_5pct", {}).get("point"), digits=0) if ev else "—",
+                "p_above_7_fmt": _fmt_pct(ev.get("gt_7pct", {}).get("point"), digits=0) if ev else "—",
+            })
+        from src.viz.captions import PANEL_A_CAPTIONS  # local
+        out[vk] = {
+            "variant_key": vk,
+            "label": met.get("regime", ""),  # placeholder; template uses constant string
+            "regime": met["regime"],
+            "regime_color": met["regime_color"],
+            "z_fmt": met["z_fmt"],
+            "p_neg_fmt": met["p_neg_fmt"],
+            "p_neg_ci_fmt": met["p_neg_ci_fmt"],
+            "confidence_fmt": met["confidence_fmt"],
+            "conviction_fmt": met["conviction_fmt"],
+            "direction_convention": met.get("direction_convention", "trend"),
+            "interpretation": {
+                "why_it_matters": PANEL_A_CAPTIONS.get(vk, "Derived spread — see About section."),
+                "panel_a": PANEL_A_CAPTIONS.get(vk, "Standardised signal of the derived spread."),
+            },
+            "regression_rows": [],  # no orchestrator regression for derived spreads
+            "probability_rows": prob_rows,
+        }
     return out
 
 
@@ -351,6 +430,51 @@ def build_macro_risk_snapshot(
                 row = qsum.loc[state["quadrant"]]
                 out["mean_forward_ret_fmt"] = _fmt_pct(row.get("mean"))
                 out["quadrant_n_months"] = int(row.get("n_months", 0))
+
+    # v11.0.1 — Cross-Composite Bridge tile (Equity-Credit Risk Premium).
+    eq_credit_path = Path("outputs/charts/spread_equity_credit_rp_value_history.parquet")
+    if eq_credit_path.exists():
+        try:
+            df = pd.read_parquet(eq_credit_path).set_index("date")
+            v = float(df["value_raw"].iloc[-1])
+            from src.viz.build_macro_charts import _classify_regime
+            # Contrarian convention for Equity-Credit RP.
+            # We compute the indicator's z directly so the regime label tracks
+            # the same expanding-window Huber z used in macro orchestrator.
+            from src.models.zscore import expanding_zscore
+            z = float(
+                expanding_zscore(
+                    df["signal"].astype("float64").dropna(),
+                    min_periods=60, scale_method="huber",
+                ).dropna().iloc[-1]
+            )
+            regime, color = _classify_regime(z, convention="contrarian")
+            # Plain-language interpretation.
+            if v < -7.5:
+                interp = (
+                    "Equities expensive vs credit: rare extreme — historically "
+                    "preceded bear markets (2000, 2009)."
+                )
+            elif v < -3.0:
+                interp = (
+                    "Equities richly valued vs credit; "
+                    "typical late-cycle complacency reading."
+                )
+            elif v < 0:
+                interp = "Equity-credit balance in the neutral band."
+            else:
+                interp = (
+                    "Equities cheap vs credit — contrarian buy signal "
+                    "historically."
+                )
+            out["cross_composite_bridge"] = {
+                "value_fmt": f"{v:+.2f} pp",
+                "regime": regime,
+                "regime_color": color,
+                "interpretation": interp,
+            }
+        except Exception:  # pragma: no cover
+            pass
     return out
 
 

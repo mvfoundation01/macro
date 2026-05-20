@@ -158,6 +158,29 @@
       &mdash; the composites measure distinct risk dimensions
       (gate: |corr| &lt; 0.80).
     </p>
+
+    {# v11.0.1 — Cross-Composite Bridge tile #}
+    {% if macro_risk_snapshot.cross_composite_bridge %}
+    <div class="mt-4 rounded-lg border bg-gradient-to-br from-purple-50 to-blue-50 p-4 cursor-pointer"
+         data-tab-target="spread_equity_credit_rp">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-purple-700">⭐ Cross-Composite Bridge</div>
+          <div class="text-md font-semibold mt-1">Equity-Credit Risk Premium</div>
+          <div class="text-xs text-gray-600 mt-1">{{ macro_risk_snapshot.cross_composite_bridge.interpretation }}</div>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold" style="color: {{ macro_risk_snapshot.cross_composite_bridge.regime_color }};">
+            {{ macro_risk_snapshot.cross_composite_bridge.value_fmt }}
+          </div>
+          <div class="text-xs text-gray-500">{{ macro_risk_snapshot.cross_composite_bridge.regime }}</div>
+        </div>
+      </div>
+      <div class="text-xs text-gray-400 mt-2 italic">
+        Click for the dedicated tab — historical 2000=−8.3pp; 2009=−13.5pp.
+      </div>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </section>
