@@ -53,6 +53,18 @@ HEADLINE_LABELS: dict[str, tuple[str, str]] = {
     "mean_reversion": ("Mean Reversion (Real S&P)", ""),
     # Spec v9.0 addition: Crestmont P/E (Easterling 2010) — trend-earnings normalization.
     "crestmont": ("Crestmont P/E", ""),
+    # Spec v11.0b additions: Macro Risk Module.
+    "yc_10y3m": ("Yield Curve 10Y-3M", "pp"),
+    "yc_10y2y": ("Yield Curve 10Y-2Y", "pp"),
+    "cs_hy_master": ("HY OAS (master)", "pp"),
+    "cs_ig_master": ("IG OAS (master)", "pp"),
+    "cs_hy_bb": ("HY BB OAS", "pp"),
+    "cs_hy_ccc": ("HY CCC OAS", "pp"),
+    "margin_debt_growth": ("Margin Debt 12M Growth", "log"),
+    "mrc": ("MV Macro Risk Composite", "sigma"),
+    "mrc_equal_weight": ("MRC (equal weight)", "sigma"),
+    "mrc_inv_variance": ("MRC (inverse variance)", "sigma"),
+    "mrc_pca_pc1": ("MRC (PCA PC1)", "sigma"),
 }
 
 # All variants currently use the convention HIGH = OVERVALUED. EY-Deficit is
@@ -67,6 +79,18 @@ HEADLINE_DIRECTION: dict[str, int] = {
     "mvci": +1,
     "mean_reversion": +1,
     "crestmont": +1,
+    # v11.0b macro additions (all already direction-encoded via signal column).
+    "yc_10y3m": +1,
+    "yc_10y2y": +1,
+    "cs_hy_master": +1,
+    "cs_ig_master": +1,
+    "cs_hy_bb": +1,
+    "cs_hy_ccc": +1,
+    "margin_debt_growth": +1,
+    "mrc": +1,
+    "mrc_equal_weight": +1,
+    "mrc_inv_variance": +1,
+    "mrc_pca_pc1": +1,
 }
 
 

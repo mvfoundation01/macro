@@ -34,20 +34,71 @@ logger = get_logger("buffett.transform.yield_curve")
 REQUIRED_COLUMNS = ("us10y_yield", "short_yield", "spread_raw", "signal")
 
 
+YIELD_MIN_PCT = -1.5
+YIELD_MAX_PCT = 25.0
+
+
+class YieldValidationError(ValueError):
+    """Raised when a yield series violates a yield-aware validator."""
+
+
+def _validate_yield_series(s: pd.Series, label: str) -> None:
+    """v11.0b yield-aware validator suite (replaces the v11.0a bypass).
+
+    Each validator is intentionally small and named so a failing test points
+    at the specific contract that broke.
+
+    Rules:
+
+    - **monotonic**: index must be strictly increasing
+    - **no duplicates**: a duplicated date is a data error (ingest layer
+      should dedupe upstream)
+    - **min_rows**: at least 100 observations after cleaning
+    - **nan_fraction**: no more than 5% missing values across the cleaned
+      window
+    - **range**: closing yields must lie in [-1.5%, 25.0%]. The lower bound
+      accommodates briefly-negative short-dated T-bills (2015 stress); the
+      upper bound covers the 1981 yield-curve peak (~16% on 10Y, ~20% on
+      short-dated). Anything outside this is almost certainly a unit error
+      (e.g., decimal vs percent) or a corrupted row.
+    """
+    if not s.index.is_monotonic_increasing:
+        raise YieldValidationError(
+            f"{label}: index not monotonic increasing"
+        )
+    if s.index.duplicated().any():
+        n_dup = int(s.index.duplicated().sum())
+        raise YieldValidationError(
+            f"{label}: {n_dup} duplicate dates in series"
+        )
+    if len(s) < 100:
+        raise YieldValidationError(
+            f"{label}: only {len(s)} rows after cleaning (<100)"
+        )
+    nan_frac = float(s.isna().mean())
+    if nan_frac > 0.05:
+        raise YieldValidationError(
+            f"{label}: NaN fraction {nan_frac:.2%} exceeds 5% ceiling"
+        )
+    clean = s.dropna()
+    bad_mask = (clean < YIELD_MIN_PCT) | (clean > YIELD_MAX_PCT)
+    if bad_mask.any():
+        n_bad = int(bad_mask.sum())
+        sample = clean[bad_mask].head(3).to_dict()
+        raise YieldValidationError(
+            f"{label}: {n_bad} values outside "
+            f"[{YIELD_MIN_PCT}, {YIELD_MAX_PCT}]% range; first: {sample}"
+        )
+
+
 def _load_daily_yield(path: Path, label: str) -> pd.Series:
-    """Load a TradingView daily yield CSV.
+    """Load a TradingView daily yield CSV with yield-aware validation.
 
-    Bypasses the price-style validators in :mod:`src.ingest.csv_loader`
-    (positive-close / 14-day-gap checks) because:
-
-    1. T-bill yields legitimately fall to 0 (and occasionally below) during
-       ZIRP-era stress periods. The strict positivity check would reject
-       those legitimate readings.
-    2. The TradingView yield CSVs blend sparse quarterly early-history
-       observations with the modern daily window, producing >14-day gaps.
-
-    We still enforce monotonic, non-duplicate index, ≥100 rows, and finite
-    values.
+    The v11.0a bypass of :func:`src.ingest.csv_loader.load_tradingview_file`
+    was driven by two real constraints (T-bill yields can dip to 0 during
+    ZIRP eras; TV yield CSVs blend sparse quarterly early-history into a
+    later daily series with > 14-day gaps). v11.0b replaces the bypass
+    with the explicit :func:`_validate_yield_series` checks below.
     """
     if not path.exists():
         raise SourceMissingError(
@@ -68,11 +119,10 @@ def _load_daily_yield(path: Path, label: str) -> pd.Series:
         .drop_duplicates(subset="time", keep="last")
         .sort_values("time")
     )
-    if len(df) < 100:
-        raise SourceMissingError(
-            f"{path.name}: only {len(df)} observations after cleaning (<100)."
-        )
-    s = pd.Series(df["close"].to_numpy(), index=pd.DatetimeIndex(df["time"]), name=label)
+    s = pd.Series(
+        df["close"].to_numpy(), index=pd.DatetimeIndex(df["time"]), name=label
+    )
+    _validate_yield_series(s, label)
     return s
 
 

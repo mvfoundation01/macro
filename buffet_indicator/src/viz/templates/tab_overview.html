@@ -60,4 +60,104 @@
       <strong>Methodology</strong> tab for the full statistical framework.
     </p>
   </div>
+
+  {# ----------------------------------------------------------------------
+     v11.0b — Macro Risk Snapshot
+     ---------------------------------------------------------------------- #}
+  {% if macro_risk_snapshot %}
+  <div class="mt-8 mb-2 border-t pt-6">
+    <h2 class="text-xl font-semibold mb-3">Macro Risk Snapshot</h2>
+    <p class="text-sm text-gray-600 mb-3">
+      Complementary to the MVCI valuation signal above: the Macro Risk Composite
+      aggregates yield curve, credit spread, and margin-debt growth signals into
+      one z-score. Joint MVCI &times; MRC quadrant is the cleanest way to read
+      the current regime.
+    </p>
+
+    <!-- MRC headline tile -->
+    <div class="rounded-lg border p-4 mb-4 bg-white"
+         style="border-left: 4px solid {{ macro_risk_snapshot.regime_color }};">
+      <div class="text-sm text-gray-500 mb-1">MV Macro Risk Composite (MRC)</div>
+      <div class="text-2xl font-bold mb-3">{{ macro_risk_snapshot.regime }}</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <div class="text-xs text-gray-500">Z (equal weight, long-run)</div>
+          <div class="text-xl font-semibold">{{ macro_risk_snapshot.z_fmt }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">P(neg 10Y real return)</div>
+          <div class="text-xl font-semibold">{{ macro_risk_snapshot.p_neg_fmt }}</div>
+          <div class="text-xs text-gray-400">{{ macro_risk_snapshot.p_neg_ci_fmt }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">Confidence</div>
+          <div class="text-xl font-semibold">{{ macro_risk_snapshot.confidence_fmt }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">Conviction</div>
+          <div class="text-xl font-semibold">{{ macro_risk_snapshot.conviction_fmt }} / 5</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini cross-composite chart (MVCI + MRC over time) -->
+    <div class="rounded-lg border bg-white p-4 mb-4 chart-card">
+      <h3 class="text-md font-semibold mb-2">MVCI and MRC over time</h3>
+      <div id="overview-cross-composite-mini" class="panel-chart-container"></div>
+      <p class="text-xs text-gray-500 mt-2">
+        Long-run z-scores of MVCI and MRC on shared x-axis, NBER bands shaded,
+        current observation marked.
+      </p>
+    </div>
+
+    <!-- Quadrant indicator -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="rounded-lg border bg-white p-4">
+        <h3 class="text-md font-semibold mb-3">Current quadrant</h3>
+        <div class="grid grid-cols-2 gap-2 text-xs text-center">
+          <div class="p-3 rounded border {{ 'bg-red-50 border-red-300 font-semibold' if macro_risk_snapshot.quadrant == 'high_val_high_stress' else 'bg-white' }}">
+            High Val &times; High Stress
+          </div>
+          <div class="p-3 rounded border {{ 'bg-orange-50 border-orange-300 font-semibold' if macro_risk_snapshot.quadrant == 'high_val_low_stress' else 'bg-white' }}">
+            High Val &times; Low Stress
+          </div>
+          <div class="p-3 rounded border {{ 'bg-yellow-50 border-yellow-300 font-semibold' if macro_risk_snapshot.quadrant == 'low_val_high_stress' else 'bg-white' }}">
+            Low Val &times; High Stress
+          </div>
+          <div class="p-3 rounded border {{ 'bg-green-50 border-green-300 font-semibold' if macro_risk_snapshot.quadrant == 'low_val_low_stress' else 'bg-white' }}">
+            Low Val &times; Low Stress
+          </div>
+        </div>
+        {% if macro_risk_snapshot.quadrant_label %}
+        <p class="text-xs text-gray-500 mt-3">
+          Currently in <strong>{{ macro_risk_snapshot.quadrant_label }}</strong> &mdash;
+          historically the average forward 10Y total return from this regime has
+          been <strong>{{ macro_risk_snapshot.mean_forward_ret_fmt }}</strong>
+          (n = {{ macro_risk_snapshot.quadrant_n_months }} months).
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Top 3 contributors -->
+      <div class="rounded-lg border bg-white p-4">
+        <h3 class="text-md font-semibold mb-3">Top 3 macro-risk contributors right now</h3>
+        <ol class="text-sm">
+          {% for c in macro_risk_snapshot.top_contributors %}
+          <li class="border-b py-2 cursor-pointer" data-tab-target="{{ c.variant_key }}">
+            <span class="font-medium">{{ c.label }}</span>
+            <span class="text-xs text-gray-500 ml-2">|z| = {{ c.abs_z_fmt }} ({{ c.z_fmt }})</span>
+          </li>
+          {% endfor %}
+        </ol>
+        <p class="text-xs text-gray-400 mt-2">Sorted by |z|. Click to jump to the dedicated tab.</p>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-600">
+      <strong>corr(MVCI, MRC) = {{ macro_risk_snapshot.corr_fmt }}</strong>
+      &mdash; the composites measure distinct risk dimensions
+      (gate: |corr| &lt; 0.80).
+    </p>
+  </div>
+  {% endif %}
 </section>

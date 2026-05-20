@@ -147,6 +147,153 @@ _OVERVIEW_VARIANTS = (
     "mvci",
 )
 
+# v11.0b — macro-risk indicators (one tab each, surfaced via the new nav group).
+_MACRO_VARIANTS = (
+    "yc_10y3m",
+    "yc_10y2y",
+    "cs_hy_master",
+    "cs_ig_master",
+    "cs_hy_bb",
+    "cs_hy_ccc",
+    "margin_debt_growth",
+)
+_MRC_WEIGHTING_VARIANTS = (
+    "mrc_equal_weight",
+    "mrc_inv_variance",
+    "mrc_pca_pc1",
+)
+
+# Variant metadata registry (master spec §6.1). Used by tests and downstream
+# data extraction. Sample windows derive from the raw data; references cite
+# the methodology paper for each indicator.
+VARIANT_REGISTRY: dict[str, dict[str, str]] = {
+    # Valuation (8) ----------------------------------------------------------
+    "mvci": {
+        "group": "valuation", "label": "MV Composite Index", "unit": "sigma",
+        "sample_start": "1955-09", "sample_end": "present",
+        "ref_paper": "MV master spec v8b §3.5", "direction": "high_bearish",
+    },
+    "bi_allequity_pct": {
+        "group": "valuation", "label": "Buffett (All Equity)", "unit": "%",
+        "sample_start": "1945-Q4", "sample_end": "present",
+        "ref_paper": "Buffett (2001 Fortune)", "direction": "high_bearish",
+    },
+    "bi_wilshire_pct": {
+        "group": "valuation", "label": "Buffett (Wilshire)", "unit": "%",
+        "sample_start": "1970-12", "sample_end": "present",
+        "ref_paper": "Buffett (2001 Fortune)", "direction": "high_bearish",
+    },
+    "bi_spx_proxy": {
+        "group": "valuation", "label": "Buffett (SPX proxy)", "unit": "ratio",
+        "sample_start": "1871-01", "sample_end": "present",
+        "ref_paper": "Buffett (2001) + Shiller TR splice", "direction": "high_bearish",
+    },
+    "cape": {
+        "group": "valuation", "label": "CAPE / Shiller P/E10", "unit": "ratio",
+        "sample_start": "1881-01", "sample_end": "present",
+        "ref_paper": "Campbell & Shiller (1988)", "direction": "high_bearish",
+    },
+    "crestmont": {
+        "group": "valuation", "label": "Crestmont P/E", "unit": "ratio",
+        "sample_start": "1900-01", "sample_end": "present",
+        "ref_paper": "Easterling (2010)", "direction": "high_bearish",
+    },
+    "qratio": {
+        "group": "valuation", "label": "Tobin's Q-Ratio", "unit": "ratio",
+        "sample_start": "1945-Q4", "sample_end": "present",
+        "ref_paper": "Tobin & Brainard (1977); Smithers & Wright (2000)",
+        "direction": "high_bearish",
+    },
+    "ey_deficit": {
+        "group": "valuation", "label": "Equity Yield Deficit", "unit": "%",
+        "sample_start": "2003-01", "sample_end": "present",
+        "ref_paper": "Real-yield arbitrage framework", "direction": "high_bearish",
+    },
+    "mean_reversion": {
+        "group": "valuation", "label": "Mean Reversion (Real S&P)", "unit": "%",
+        "sample_start": "1871-01", "sample_end": "present",
+        "ref_paper": "Shiller (1981); v8a.1 spec", "direction": "high_bearish",
+    },
+    # Macro Risk (8 — 7 constituents + 1 composite with 3 weighting variants) ----
+    "yc_10y3m": {
+        "group": "macro_risk", "label": "Yield Curve 10Y-3M", "unit": "pp",
+        "sample_start": "1954-01", "sample_end": "present",
+        "ref_paper": "Estrella & Mishkin (1998); Bauer & Mertens (2018)",
+        "direction": "high_bearish_inverted",
+    },
+    "yc_10y2y": {
+        "group": "macro_risk", "label": "Yield Curve 10Y-2Y", "unit": "pp",
+        "sample_start": "1976-06", "sample_end": "present",
+        "ref_paper": "Estrella & Mishkin (1998)",
+        "direction": "high_bearish_inverted",
+    },
+    "cs_hy_master": {
+        "group": "macro_risk", "label": "HY OAS (master)", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "ICE BofA OAS methodology",
+        "direction": "high_bearish_log",
+    },
+    "cs_ig_master": {
+        "group": "macro_risk", "label": "IG OAS (master)", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "ICE BofA OAS methodology",
+        "direction": "high_bearish_log",
+    },
+    "cs_hy_bb": {
+        "group": "macro_risk", "label": "HY BB OAS", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "ICE BofA OAS methodology",
+        "direction": "high_bearish_log",
+    },
+    "cs_hy_ccc": {
+        "group": "macro_risk", "label": "HY CCC OAS", "unit": "pp",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "ICE BofA OAS methodology",
+        "direction": "high_bearish_log",
+    },
+    "margin_debt_growth": {
+        "group": "macro_risk", "label": "Margin Debt 12M Growth", "unit": "log",
+        "sample_start": "1997-01", "sample_end": "present",
+        "ref_paper": "Schwab / Yardeni / FINRA monthly releases",
+        "direction": "high_bearish_log_growth",
+    },
+    # MRC composite + 3 weighting variants
+    "mrc": {
+        "group": "macro_risk", "label": "MV Macro Risk Composite", "unit": "sigma",
+        "sample_start": "1976-06", "sample_end": "present",
+        "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+    },
+    "mrc_equal_weight": {
+        "group": "macro_risk", "label": "MRC (equal weight)", "unit": "sigma",
+        "sample_start": "1976-06", "sample_end": "present",
+        "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+    },
+    "mrc_inv_variance": {
+        "group": "macro_risk", "label": "MRC (inverse variance)", "unit": "sigma",
+        "sample_start": "1996-12", "sample_end": "present",
+        "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+    },
+    "mrc_pca_pc1": {
+        "group": "macro_risk", "label": "MRC (PCA PC1)", "unit": "sigma",
+        "sample_start": "2001-12", "sample_end": "present",
+        "ref_paper": "MV spec v11.0", "direction": "high_bearish",
+    },
+}
+
+
+def list_indicators(group: str | None = None) -> tuple[str, ...]:
+    """Return all variant keys, optionally filtered by group label."""
+    if group is None:
+        return tuple(VARIANT_REGISTRY.keys())
+    return tuple(
+        k for k, meta in VARIANT_REGISTRY.items() if meta["group"] == group
+    )
+
+
+def variant_meta(variant_key: str) -> dict[str, str]:
+    """Return the metadata block for one variant; raises KeyError if unknown."""
+    return dict(VARIANT_REGISTRY[variant_key])
+
 
 def _extract_regression_h120(variant_entry: dict[str, Any]) -> dict[str, float]:
     """Pull (alpha, beta, t_nw, r_squared) out of the 10Y forward outlook."""

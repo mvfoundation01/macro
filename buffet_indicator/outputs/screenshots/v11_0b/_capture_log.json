@@ -1,0 +1,195 @@
+{
+  "captures": [
+    {
+      "name": "01_overview_desktop",
+      "hash": "#tab=overview",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 395942,
+      "errors": []
+    },
+    {
+      "name": "02_overview_macro_snapshot_closeup",
+      "hash": "#tab=overview",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 395942,
+      "errors": []
+    },
+    {
+      "name": "03_tab_mrc_desktop",
+      "hash": "#tab=mrc&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 200973,
+      "errors": []
+    },
+    {
+      "name": "04_tab_mrc_mobile",
+      "hash": "#tab=mrc&group=macro_risk",
+      "viewport": [
+        390,
+        844
+      ],
+      "size_bytes": 187888,
+      "errors": []
+    },
+    {
+      "name": "05_tab_yc_10y3m_desktop",
+      "hash": "#tab=yc_10y3m&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 155431,
+      "errors": []
+    },
+    {
+      "name": "06_tab_yc_10y2y_desktop",
+      "hash": "#tab=yc_10y2y&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 152095,
+      "errors": []
+    },
+    {
+      "name": "07_tab_cs_hy_master_desktop",
+      "hash": "#tab=cs_hy_master&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 155029,
+      "errors": []
+    },
+    {
+      "name": "08_tab_cs_ig_master_desktop",
+      "hash": "#tab=cs_ig_master&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 153830,
+      "errors": []
+    },
+    {
+      "name": "09_tab_cs_hy_bb_desktop",
+      "hash": "#tab=cs_hy_bb&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 151585,
+      "errors": []
+    },
+    {
+      "name": "10_tab_cs_hy_ccc_desktop",
+      "hash": "#tab=cs_hy_ccc&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 151874,
+      "errors": []
+    },
+    {
+      "name": "11_tab_margin_debt_desktop",
+      "hash": "#tab=margin_debt_growth&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 157092,
+      "errors": []
+    },
+    {
+      "name": "12_tab_buffett_recession_overlay_check",
+      "hash": "#tab=buffett&group=valuation",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 530302,
+      "errors": []
+    },
+    {
+      "name": "13_tab_cape_recession_overlay_check",
+      "hash": "#tab=cape&group=valuation",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 625111,
+      "errors": []
+    },
+    {
+      "name": "14_tab_mean_reversion_recession_overlay_check",
+      "hash": "#tab=mean_reversion&group=valuation",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 613234,
+      "errors": []
+    },
+    {
+      "name": "15_tab_diagnostics_desktop",
+      "hash": "#tab=diagnostics&group=analysis",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 420167,
+      "errors": []
+    },
+    {
+      "name": "16_tab_backtest_desktop",
+      "hash": "#tab=backtest&group=analysis",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 426575,
+      "errors": []
+    },
+    {
+      "name": "17_tab_methodology_desktop",
+      "hash": "#tab=methodology&group=reference",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 375541,
+      "errors": []
+    },
+    {
+      "name": "18_nav_macro_risk_expanded_desktop",
+      "hash": "#tab=mrc&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 200973,
+      "errors": []
+    },
+    {
+      "name": "19_cross_composite_quadrant_closeup",
+      "hash": "#tab=mrc&group=macro_risk",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "size_bytes": 200973,
+      "errors": []
+    }
+  ],
+  "errors_global": []
+}

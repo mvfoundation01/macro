@@ -804,6 +804,39 @@ def build_dashboard(
     # v8b: Methodology tab
     methodology_html = env.get_template("tab_methodology.html").render()
 
+    # ---------------------------------------------------------------------
+    # v11.0b — Macro Risk tabs (8 new) + Macro Risk Snapshot on Overview
+    # ---------------------------------------------------------------------
+    from src.viz.build_macro_risk import (
+        build_macro_variants,
+        build_macro_risk_snapshot,
+    )
+    macro_variants = build_macro_variants()
+    overview_ctx["macro_risk_snapshot"] = build_macro_risk_snapshot(macro_variants)
+    # Re-render overview with the augmented context (after MR section wired in).
+    overview_html = env.get_template("tab_overview.html").render(**overview_ctx)
+
+    macro_tab_keys = (
+        "mrc",
+        "yc_10y3m",
+        "yc_10y2y",
+        "cs_hy_master",
+        "cs_ig_master",
+        "cs_hy_bb",
+        "cs_hy_ccc",
+        "margin_debt_growth",
+    )
+    macro_tab_html: dict[str, str] = {}
+    for key in macro_tab_keys:
+        template_path = f"tab_{key}.html"
+        try:
+            macro_tab_html[key] = env.get_template(template_path).render(
+                variants=macro_variants
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"[macro tab {key}] failed to render: {exc}")
+            macro_tab_html[key] = ""
+
     inline_css = _read_static(_STATIC_DIR / "dashboard.css")
     inline_js = _read_static(_STATIC_DIR / "dashboard.js")
 
@@ -919,6 +952,15 @@ def build_dashboard(
         tab_backtest_html=backtest_html,
         tab_data_html=data_html,
         tab_methodology_html=methodology_html,
+        # v11.0b macro-risk tabs.
+        tab_mrc_html=macro_tab_html.get("mrc", ""),
+        tab_yc_10y3m_html=macro_tab_html.get("yc_10y3m", ""),
+        tab_yc_10y2y_html=macro_tab_html.get("yc_10y2y", ""),
+        tab_cs_hy_master_html=macro_tab_html.get("cs_hy_master", ""),
+        tab_cs_ig_master_html=macro_tab_html.get("cs_ig_master", ""),
+        tab_cs_hy_bb_html=macro_tab_html.get("cs_hy_bb", ""),
+        tab_cs_hy_ccc_html=macro_tab_html.get("cs_hy_ccc", ""),
+        tab_margin_debt_growth_html=macro_tab_html.get("margin_debt_growth", ""),
         inline_css=inline_css,
         inline_js=inline_js,
         dashboard_json=dashboard_json,
