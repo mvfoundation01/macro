@@ -190,6 +190,105 @@
       renderBacktest();
     } else if (tabName === "data") {
       renderDataTab();
+    } else if (MACRO_TABS.has(tabName)) {
+      renderMacroChartsForTab(tabName);
+    }
+    // v11.0c — update header pills to reflect the active tab's metrics.
+    updateHeaderPills(tabName);
+  }
+
+  // v11.0c — set of all macro-risk tabs (constituents + composite).
+  const MACRO_TABS = new Set([
+    "mrc", "yc_10y3m", "yc_10y2y", "cs_hy_master", "cs_ig_master",
+    "cs_hy_bb", "cs_hy_ccc", "margin_debt_growth",
+  ]);
+
+  function renderMacroChartsForTab(tabName) {
+    // Hero
+    const hero = (DATA.macro_hero_specs || {})[tabName];
+    if (hero) {
+      renderPlot(`hero-chart-${tabName}`, hero);
+    }
+    // Panel A/B/C + conditional distribution
+    const charts = (DATA.macro_variant_charts || {})[tabName];
+    if (charts) {
+      if (charts.panel_a) renderPlot(`${tabName}-panel-a`, charts.panel_a);
+      if (charts.panel_b) renderPlot(`${tabName}-panel-b`, charts.panel_b);
+      let panelC = charts.panel_c;
+      if (panelC === "__SHARED_PANEL_C__") panelC = DATA.shared_panel_c;
+      if (panelC) renderPlot(`${tabName}-panel-c`, panelC);
+      if (charts.cond_dist) renderPlot(`${tabName}-cond-dist`, charts.cond_dist);
+    }
+    // MRC tab special elements.
+    if (tabName === "mrc") {
+      const extras = DATA.mrc_extras || {};
+      if (extras.constituent_contributions) {
+        renderPlot("mrc-constituent-bars", extras.constituent_contributions);
+      }
+      if (extras.correlation_heatmap) {
+        renderPlot("mrc-corr-heatmap", extras.correlation_heatmap);
+      }
+      if (extras.pca_scree) {
+        renderPlot("mrc-pca-scree", extras.pca_scree);
+      }
+      if (extras.cross_composite_quadrant) {
+        renderPlot("mrc-cross-composite", extras.cross_composite_quadrant);
+      }
+    }
+    // Belt-and-braces: resize on next tick (some charts need a re-flow).
+    setTimeout(() => {
+      [
+        `hero-chart-${tabName}`,
+        `${tabName}-panel-a`,
+        `${tabName}-panel-b`,
+        `${tabName}-panel-c`,
+        `${tabName}-cond-dist`,
+        "mrc-constituent-bars",
+        "mrc-corr-heatmap",
+        "mrc-pca-scree",
+        "mrc-cross-composite",
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.data) Plotly.Plots.resize(el).catch(() => {});
+      });
+    }, 50);
+  }
+
+  // v11.0c — update the 4 page-header pills (z-score, P(neg 10Y), Confidence,
+  // Conviction) to reflect the active tab's metrics. Falls back to MVCI when
+  // no per-tab metrics are available (Overview, MVCI, valuation tabs).
+  function updateHeaderPills(tabName) {
+    const macroMetrics = (DATA.macro_metrics || {})[tabName];
+    const elZ = document.querySelector("[data-pill='z']");
+    const elP = document.querySelector("[data-pill='p_neg']");
+    const elC = document.querySelector("[data-pill='confidence']");
+    const elV = document.querySelector("[data-pill='conviction']");
+    if (!elZ && !elP && !elC && !elV) return;
+    if (macroMetrics) {
+      if (elZ) elZ.textContent = macroMetrics.z_fmt || "n/a";
+      if (elP) elP.textContent = macroMetrics.p_neg_fmt || "n/a";
+      if (elC) elC.textContent = macroMetrics.confidence_fmt || "n/a";
+      if (elV) elV.textContent = (macroMetrics.conviction_fmt || "n/a") + " / 5";
+      // Update the regime callout banner to the macro indicator's regime.
+      const banner = document.querySelector("[data-regime-banner]");
+      if (banner && macroMetrics.regime_color) {
+        banner.style.backgroundColor = macroMetrics.regime_color;
+        const txt = banner.querySelector("[data-regime-text]");
+        if (txt) txt.textContent = macroMetrics.regime;
+      }
+    } else {
+      // Reset to MVCI defaults.
+      const mvciDefaults = DATA._header_defaults || {};
+      if (elZ && mvciDefaults.z_fmt) elZ.textContent = mvciDefaults.z_fmt;
+      if (elP && mvciDefaults.p_neg_fmt) elP.textContent = mvciDefaults.p_neg_fmt;
+      if (elC && mvciDefaults.confidence_fmt) elC.textContent = mvciDefaults.confidence_fmt;
+      if (elV && mvciDefaults.conviction_fmt) elV.textContent = mvciDefaults.conviction_fmt + " / 5";
+      const banner = document.querySelector("[data-regime-banner]");
+      if (banner && mvciDefaults.regime_color) {
+        banner.style.backgroundColor = mvciDefaults.regime_color;
+        const txt = banner.querySelector("[data-regime-text]");
+        if (txt && mvciDefaults.regime_label) txt.textContent = mvciDefaults.regime_label;
+      }
     }
   }
 

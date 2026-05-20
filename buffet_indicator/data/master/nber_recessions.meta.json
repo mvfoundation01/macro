@@ -1,7 +1,7 @@
 {
   "source": "nber_business_cycle_reference_dates",
   "equivalent_fred_series": "USREC",
-  "vintage": "2026-05-20T13:58:53.580921",
+  "vintage": "2026-05-20T15:09:01.650313",
   "n_recessions": 34,
   "earliest_peak": "1857-06-01",
   "latest_trough": "2020-04-30",

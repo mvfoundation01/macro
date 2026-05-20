@@ -5,31 +5,33 @@
   </div>
 
   <div class="mx-4 my-3 p-4 rounded-lg text-white shadow"
+       data-regime-banner
        style="background-color: {{ regime_color }};">
     <p class="text-xl">
-      The US stock market is <strong>{{ regime_label }}</strong>
+      The US stock market is <strong data-regime-text>{{ regime_label }}</strong>
     </p>
-    <p class="text-sm opacity-90 mt-1">
-      Long-run frame, primary variant = MV Composite Index.
+    <p class="text-sm opacity-90 mt-1" data-header-subtitle>
+      Long-run frame, primary variant = MV Composite Index. Switch tabs to see
+      per-indicator headline metrics.
     </p>
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 pb-3">
     <div class="bg-gray-100 rounded p-2 text-center">
-      <div class="text-xs text-gray-500">MVCI</div>
-      <div class="text-lg font-semibold">{{ mvci_z_fmt }}</div>
+      <div class="text-xs text-gray-500">Z-score (active tab)</div>
+      <div class="text-lg font-semibold" data-pill="z">{{ mvci_z_fmt }}</div>
     </div>
     <div class="bg-gray-100 rounded p-2 text-center">
-      <div class="text-xs text-gray-500">P(&lt; 5% 10Y CAGR)</div>
-      <div class="text-lg font-semibold">{{ p_below5_fmt }}</div>
+      <div class="text-xs text-gray-500">P(neg 10Y)</div>
+      <div class="text-lg font-semibold" data-pill="p_neg">{{ p_below5_fmt }}</div>
     </div>
     <div class="bg-gray-100 rounded p-2 text-center">
       <div class="text-xs text-gray-500">Confidence</div>
-      <div class="text-lg font-semibold">{{ confidence_fmt }}</div>
+      <div class="text-lg font-semibold" data-pill="confidence">{{ confidence_fmt }}</div>
     </div>
     <div class="bg-gray-100 rounded p-2 text-center">
       <div class="text-xs text-gray-500">Conviction</div>
-      <div class="text-lg font-semibold">{{ conviction_fmt }} / 5</div>
+      <div class="text-lg font-semibold" data-pill="conviction">{{ conviction_fmt }} / 5</div>
     </div>
   </div>
 

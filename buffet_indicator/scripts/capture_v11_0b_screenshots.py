@@ -91,13 +91,57 @@ def main() -> dict:
                 }""",
                 tab,
             )
-            page.wait_for_timeout(1200)
+            page.wait_for_timeout(1800)
             out_path = OUT_DIR / f"{name}.png"
-            # Always full_page so the tall macro tabs (header + hero + 3-panel
-            # + regression table + probability table + interpretation +
-            # about) are captured in their entirety. Mobile renders the
-            # tabs as a vertical stack so full_page is essential there.
-            page.screenshot(path=str(out_path), full_page=True)
+
+            # v11.0c — make 02, 18, 19 distinct from the duplicate-bucket they
+            # shared in v11.0b. The handling here is shot-specific.
+            if name == "02_overview_macro_snapshot_closeup":
+                # Scroll to the Macro Risk Snapshot heading and capture viewport-only.
+                page.evaluate(
+                    """() => {
+                        const headers = document.querySelectorAll('h2');
+                        for (const h of headers) {
+                            if (h.textContent.trim().startsWith('Macro Risk Snapshot')) {
+                                h.scrollIntoView({block: 'start'});
+                                break;
+                            }
+                        }
+                    }"""
+                )
+                page.wait_for_timeout(900)
+                page.screenshot(path=str(out_path), full_page=False)
+            elif name == "18_nav_macro_risk_expanded_desktop":
+                # Capture full-page then crop to top header + nav + first
+                # tab-content rows (focuses on the 4-collapsible-group nav
+                # with the Macro Risk group active).
+                tmp = OUT_DIR / "_tmp_18_full.png"
+                page.screenshot(path=str(tmp), full_page=True)
+                try:
+                    from PIL import Image
+                    full = Image.open(tmp)
+                    crop = full.crop((0, 0, full.width, min(960, full.height)))
+                    crop.save(out_path)
+                    tmp.unlink(missing_ok=True)
+                except Exception:
+                    tmp.replace(out_path)
+            elif name == "19_cross_composite_quadrant_closeup":
+                # Scroll to and element-screenshot the cross-composite chart.
+                try:
+                    page.evaluate(
+                        """() => {
+                            const el = document.getElementById('mrc-cross-composite');
+                            if (el) el.scrollIntoView({block: 'center'});
+                        }"""
+                    )
+                    page.wait_for_timeout(1500)
+                    chart_locator = page.locator("#mrc-cross-composite")
+                    chart_locator.screenshot(path=str(out_path))
+                except Exception:
+                    page.screenshot(path=str(out_path), full_page=False)
+            else:
+                # Default: full-page so tall macro tabs capture in entirety.
+                page.screenshot(path=str(out_path), full_page=True)
             size = out_path.stat().st_size if out_path.exists() else 0
             results["captures"].append(
                 {

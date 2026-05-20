@@ -1526,6 +1526,434 @@ def make_allocation_chart(
     return _maybe_add_recessions(spec, list(dates) if dates else None, show_recessions)
 
 
+# ---------------------------------------------------------------------------
+# v11.0c — macro-risk-specific chart factories
+# ---------------------------------------------------------------------------
+
+
+def make_cross_composite_quadrant(
+    mvci_z: pd.Series,
+    mrc_z: pd.Series,
+    quadrant_means: dict[str, float] | None = None,
+    *,
+    chart_name: str = "cross_composite_quadrant",
+) -> dict[str, Any]:
+    """2D scatter of (MVCI z, MRC z) with quadrant shading + current marker.
+
+    The four quadrants are shaded with colours encoding historical
+    forward-10Y mean returns (greener = higher returns historically), so
+    the reader sees at a glance which quadrant they're currently in.
+
+    Parameters
+    ----------
+    mvci_z, mrc_z : pd.Series
+        Time-aligned z-score series (will be inner-joined on index).
+    quadrant_means : dict | None
+        Optional ``{quadrant_label: mean_forward_return}`` for hover text.
+    """
+    common = mvci_z.dropna().index.intersection(mrc_z.dropna().index)
+    if len(common) < 24:
+        return {"data": [], "layout": {"title": {"text": "Cross-composite — n/a"}}}
+    df = pd.DataFrame(
+        {"mvci": mvci_z.loc[common], "mrc": mrc_z.loc[common]}
+    ).sort_index()
+    quad_labels: list[str] = []
+    for a, b in zip(df["mvci"], df["mrc"]):
+        if a >= 0 and b >= 0:
+            quad_labels.append("high_val_high_stress")
+        elif a >= 0 and b < 0:
+            quad_labels.append("high_val_low_stress")
+        elif a < 0 and b >= 0:
+            quad_labels.append("low_val_high_stress")
+        else:
+            quad_labels.append("low_val_low_stress")
+    years = [pd.Timestamp(d).year for d in df.index]
+    dates_str = [pd.Timestamp(d).strftime("%Y-%m") for d in df.index]
+    means = quadrant_means or {}
+    hover = [
+        f"{ds}<br>MVCI = {a:+.2f}σ<br>MRC = {b:+.2f}σ<br>quadrant = {q}<br>"
+        f"hist mean fwd-10Y = {means.get(q, float('nan'))*100:.1f}%"
+        if not np.isnan(means.get(q, float("nan")))
+        else f"{ds}<br>MVCI = {a:+.2f}σ<br>MRC = {b:+.2f}σ<br>quadrant = {q}"
+        for ds, a, b, q in zip(dates_str, df["mvci"], df["mrc"], quad_labels)
+    ]
+    current = df.iloc[-1]
+    current_quad = quad_labels[-1]
+
+    # Quadrant fill colours (translucent) — light green/green/yellow/red.
+    quad_shapes = [
+        # low_val_low_stress (x < 0, y < 0) — light green
+        {
+            "type": "rect", "xref": "x", "yref": "y",
+            "x0": -6, "x1": 0, "y0": -6, "y1": 0,
+            "fillcolor": "rgba(93, 187, 99, 0.10)",
+            "line": {"width": 0}, "layer": "below",
+        },
+        # low_val_high_stress (x < 0, y > 0) — green
+        {
+            "type": "rect", "xref": "x", "yref": "y",
+            "x0": -6, "x1": 0, "y0": 0, "y1": 6,
+            "fillcolor": "rgba(27, 122, 62, 0.15)",
+            "line": {"width": 0}, "layer": "below",
+        },
+        # high_val_low_stress (x > 0, y < 0) — yellow
+        {
+            "type": "rect", "xref": "x", "yref": "y",
+            "x0": 0, "x1": 6, "y0": -6, "y1": 0,
+            "fillcolor": "rgba(232, 119, 34, 0.12)",
+            "line": {"width": 0}, "layer": "below",
+        },
+        # high_val_high_stress (x > 0, y > 0) — red
+        {
+            "type": "rect", "xref": "x", "yref": "y",
+            "x0": 0, "x1": 6, "y0": 0, "y1": 6,
+            "fillcolor": "rgba(200, 16, 46, 0.15)",
+            "line": {"width": 0}, "layer": "below",
+        },
+        # Zero gridlines
+        {
+            "type": "line", "xref": "x", "yref": "y",
+            "x0": -6, "x1": 6, "y0": 0, "y1": 0,
+            "line": {"color": "#333", "width": 1, "dash": "dot"},
+        },
+        {
+            "type": "line", "xref": "x", "yref": "y",
+            "x0": 0, "x1": 0, "y0": -6, "y1": 6,
+            "line": {"color": "#333", "width": 1, "dash": "dot"},
+        },
+    ]
+
+    return {
+        "data": [
+            {
+                "x": [float(v) for v in df["mvci"]],
+                "y": [float(v) for v in df["mrc"]],
+                "type": "scatter",
+                "mode": "markers",
+                "marker": {
+                    "size": 6,
+                    "color": years,
+                    "colorscale": "Turbo",
+                    "showscale": True,
+                    "colorbar": {
+                        "title": {"text": "Year", "font": {"size": 12, "family": FONT_FAMILY}},
+                        "tickfont": {"size": 11, "family": FONT_FAMILY},
+                    },
+                    "opacity": 0.7,
+                },
+                "text": hover,
+                "hovertemplate": "%{text}<extra></extra>",
+                "name": "Historical months",
+            },
+            {
+                "x": [float(current["mvci"])],
+                "y": [float(current["mrc"])],
+                "type": "scatter",
+                "mode": "markers+text",
+                "marker": {
+                    "size": 18,
+                    "color": "#000",
+                    "line": {"color": "#fff", "width": 2},
+                    "symbol": "star",
+                },
+                "text": [f"Now: {current_quad}"],
+                "textposition": "top center",
+                "textfont": {"size": 13, "family": FONT_FAMILY},
+                "hoverinfo": "skip",
+                "showlegend": False,
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": (
+                    "<b>Cross-composite quadrants: MVCI &times; MRC</b><br>"
+                    "<span style='font-size:13px;color:#666'>"
+                    "Greener quadrants = higher historical forward-10Y returns</span>"
+                ),
+                "x": 0.5, "xanchor": "center",
+                "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": {
+                "title": {"text": "MVCI z-score (valuation)",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "range": [-4, 4],
+                "zeroline": False,
+                "gridcolor": "rgba(150,150,150,0.15)",
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "yaxis": {
+                "title": {"text": "MRC z-score (macro stress)",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "range": [-4, 4],
+                "zeroline": False,
+                "gridcolor": "rgba(150,150,150,0.15)",
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "shapes": quad_shapes,
+            "height": HERO_HEIGHT,
+            "margin": {"t": 90, "b": 70, "l": 75, "r": 90},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "hovermode": "closest",
+            "showlegend": False,
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_pca_scree(
+    explained_variance: list[float] | None,
+    *,
+    chart_name: str = "pca_scree",
+) -> dict[str, Any]:
+    """PCA variance-explained scree plot with cumulative line overlay."""
+    if not explained_variance:
+        return {"data": [], "layout": {"title": {"text": "PCA scree — n/a"}}}
+    ev = [float(v) for v in explained_variance if v is not None and np.isfinite(v)]
+    if not ev:
+        return {"data": [], "layout": {"title": {"text": "PCA scree — n/a"}}}
+    pc_labels = [f"PC{i+1}" for i in range(len(ev))]
+    cumulative = np.cumsum(ev).tolist()
+    return {
+        "data": [
+            {
+                "x": pc_labels, "y": ev, "type": "bar",
+                "marker": {"color": "#1F77B4"},
+                "name": "Variance explained",
+                "hovertemplate": "%{x}: %{y:.1%}<extra></extra>",
+            },
+            {
+                "x": pc_labels, "y": cumulative, "type": "scatter", "mode": "lines+markers",
+                "line": {"color": "#C8102E", "width": 2},
+                "marker": {"size": 8, "color": "#C8102E"},
+                "name": "Cumulative",
+                "yaxis": "y2",
+                "hovertemplate": "%{x} cumulative: %{y:.1%}<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "PCA variance explained (MRC constituents)",
+                "x": 0.5, "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": {
+                "title": {"text": "Principal component",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "yaxis": {
+                "title": {"text": "Variance explained",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickformat": ".0%",
+                "range": [0, 1],
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "yaxis2": {
+                "title": {"text": "Cumulative",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "overlaying": "y", "side": "right",
+                "tickformat": ".0%",
+                "range": [0, 1.05],
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 50, "b": 70, "l": 70, "r": 70},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "legend": {"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_constituent_contributions(
+    z_by_variant: dict[str, float],
+    labels: dict[str, str] | None = None,
+    *,
+    chart_name: str = "constituent_contributions",
+) -> dict[str, Any]:
+    """Horizontal bar chart of each constituent's current z-score.
+
+    Bars are sorted by |z| (descending) and coloured red if z > 0 (pushing
+    composite higher = more bearish for equities) or green if z < 0.
+    """
+    if not z_by_variant:
+        return {"data": [], "layout": {"title": {"text": "Constituents — n/a"}}}
+    items = [(k, float(v)) for k, v in z_by_variant.items() if v is not None and np.isfinite(v)]
+    items.sort(key=lambda kv: abs(kv[1]), reverse=True)
+    keys = [k for k, _ in items]
+    vals = [v for _, v in items]
+    display_labels = [labels.get(k, k) if labels else k for k in keys]
+    colors = ["#C8102E" if v > 0 else "#1B7A3E" for v in vals]
+    return {
+        "data": [
+            {
+                "x": vals, "y": display_labels, "type": "bar", "orientation": "h",
+                "marker": {"color": colors},
+                "hovertemplate": "%{y}: %{x:+.2f}σ<extra></extra>",
+            }
+        ],
+        "layout": {
+            "title": {
+                "text": "Constituent z-scores (current month)",
+                "x": 0.5, "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY},
+            },
+            "font": {"family": FONT_FAMILY},
+            "xaxis": {
+                "title": {"text": "Z-score (σ)",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "zeroline": True, "zerolinecolor": "#333", "zerolinewidth": 1.5,
+                "range": [-4, 4],
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "yaxis": {
+                "autorange": "reversed",
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 50, "b": 60, "l": 170, "r": 30},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_conditional_distribution(
+    bucket_returns: list[float],
+    *,
+    bayesian_mean: float | None = None,
+    var_5: float | None = None,
+    title: str = "Conditional return distribution",
+    chart_name: str = "cond_dist",
+) -> dict[str, Any]:
+    """Histogram of forward returns observed in the current z-bucket, with
+    optional Bayesian posterior mean + VaR(5%) annotations."""
+    if not bucket_returns:
+        return {"data": [], "layout": {"title": {"text": f"{title} — n/a"}}}
+    arr = np.array(bucket_returns, dtype="float64")
+    arr = arr[~np.isnan(arr)]
+    if len(arr) < 5:
+        return {"data": [], "layout": {"title": {"text": f"{title} — n<5"}}}
+    annotations: list[dict[str, Any]] = []
+    shapes: list[dict[str, Any]] = []
+    if bayesian_mean is not None and np.isfinite(bayesian_mean):
+        shapes.append({
+            "type": "line", "xref": "x", "yref": "paper",
+            "x0": bayesian_mean * 100, "x1": bayesian_mean * 100, "y0": 0, "y1": 1,
+            "line": {"color": "#1F77B4", "width": 2, "dash": "dash"},
+        })
+        annotations.append({
+            "x": bayesian_mean * 100, "y": 0.95, "xref": "x", "yref": "paper",
+            "showarrow": True, "arrowhead": 2,
+            "text": f"Bayesian mean = {bayesian_mean*100:+.1f}%",
+            "font": {"size": 12, "color": "#1F77B4", "family": FONT_FAMILY},
+        })
+    if var_5 is not None and np.isfinite(var_5):
+        shapes.append({
+            "type": "line", "xref": "x", "yref": "paper",
+            "x0": var_5 * 100, "x1": var_5 * 100, "y0": 0, "y1": 1,
+            "line": {"color": "#C8102E", "width": 2, "dash": "dot"},
+        })
+        annotations.append({
+            "x": var_5 * 100, "y": 0.85, "xref": "x", "yref": "paper",
+            "showarrow": True, "arrowhead": 2,
+            "text": f"VaR(5%) = {var_5*100:+.1f}%",
+            "font": {"size": 12, "color": "#C8102E", "family": FONT_FAMILY},
+        })
+    return {
+        "data": [
+            {
+                "x": (arr * 100).tolist(),
+                "type": "histogram",
+                "marker": {"color": "#1F77B4", "opacity": 0.7},
+                "nbinsx": 25,
+                "name": "Empirical",
+                "hovertemplate": "%{x:.1f}%: n=%{y}<extra></extra>",
+            }
+        ],
+        "layout": {
+            "title": {"text": title, "x": 0.5,
+                      "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+            "font": {"family": FONT_FAMILY},
+            "xaxis": {
+                "title": {"text": "Forward annualised return (%)",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickformat": ".0f", "ticksuffix": "%",
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "yaxis": {
+                "title": {"text": "Observations",
+                          "font": {"size": AXIS_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+                "tickfont": {"size": TICK_FONT_SIZE, "family": FONT_FAMILY, "color": "#333"},
+            },
+            "shapes": shapes,
+            "annotations": annotations,
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 60, "b": 70, "l": 70, "r": 30},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+        },
+        "config": _interactive_config(chart_name),
+    }
+
+
+def make_dual_z_overlay(
+    z1: pd.Series,
+    z2: pd.Series,
+    *,
+    name1: str = "MVCI",
+    name2: str = "MRC",
+    title: str = "MVCI and MRC over time",
+    chart_name: str = "dual_z_overlay",
+    show_recessions: bool = True,
+) -> dict[str, Any]:
+    """Compact two-line time-series chart (used for Overview Macro Risk Snapshot)."""
+    z1c = z1.dropna()
+    z2c = z2.dropna()
+    common = z1c.index.union(z2c.index).sort_values()
+    if len(common) < 24:
+        return {"data": [], "layout": {"title": {"text": f"{title} — n/a"}}}
+    dates_str = [pd.Timestamp(d).strftime("%Y-%m-%d") for d in common]
+    spec = {
+        "data": [
+            {
+                "x": [pd.Timestamp(d).strftime("%Y-%m-%d") for d in z1c.index],
+                "y": [float(v) for v in z1c.values],
+                "type": "scatter", "mode": "lines",
+                "line": {"color": "#1F77B4", "width": 2},
+                "name": name1,
+                "hovertemplate": f"{name1}: %{{y:+.2f}}σ<extra></extra>",
+            },
+            {
+                "x": [pd.Timestamp(d).strftime("%Y-%m-%d") for d in z2c.index],
+                "y": [float(v) for v in z2c.values],
+                "type": "scatter", "mode": "lines",
+                "line": {"color": "#7E57C2", "width": 2},
+                "name": name2,
+                "hovertemplate": f"{name2}: %{{y:+.2f}}σ<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {"text": title, "x": 0.5,
+                      "font": {"size": CHART_TITLE_FONT_SIZE, "family": FONT_FAMILY}},
+            "font": {"family": FONT_FAMILY},
+            "xaxis": _x_axis_block(with_rangeslider=False),
+            "yaxis": _z_axis_block(),
+            "height": PANEL_HEIGHT,
+            "margin": {"t": 50, "b": 60, "l": 70, "r": 30},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "legend": {"orientation": "h", "y": -0.18, "x": 0.5, "xanchor": "center"},
+            "hovermode": "x unified",
+        },
+        "config": _interactive_config(chart_name),
+    }
+    return _maybe_add_recessions(spec, dates_str, show_recessions)
+
+
 __all__ = [
     "FONT_FAMILY",
     "TICK_FONT_SIZE",

@@ -19,12 +19,19 @@ def _dashboard_html() -> str | None:
 
 
 def test_v8b1_dashboard_html_size_below_target() -> None:
-    """Bundle should be below 8 MB (relaxed acceptance per spec D.4 escape hatch)."""
+    """Bundle ceiling.
+
+    v8b.1 set this at 8 MB; v11.0 master spec relaxed it to 10 MB after
+    adding the macro module (7 indicators + MRC composite + all dual-frame
+    chart specs). The current bundle should remain under that ceiling.
+    """
     p = _ROOT / "outputs" / "dashboard.html"
     if not p.exists():
         return
     size_mb = p.stat().st_size / 1e6
-    assert size_mb < 8.0, f"dashboard.html size {size_mb:.2f} MB exceeds 8 MB ceiling"
+    assert size_mb < 10.0, (
+        f"dashboard.html size {size_mb:.2f} MB exceeds 10 MB ceiling"
+    )
 
 
 def test_v8b1_shared_panel_c_sentinel_present() -> None:

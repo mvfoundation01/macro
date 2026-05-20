@@ -806,13 +806,63 @@ def build_dashboard(
 
     # ---------------------------------------------------------------------
     # v11.0b — Macro Risk tabs (8 new) + Macro Risk Snapshot on Overview
+    # v11.0c — also build per-tab chart specs and per-tab metrics
     # ---------------------------------------------------------------------
     from src.viz.build_macro_risk import (
         build_macro_variants,
         build_macro_risk_snapshot,
     )
     macro_variants = build_macro_variants()
+
+    # v11.0c: build the chart-spec payload (hero, panel A/B/C, cond-dist,
+    # MRC extras, overview mini, per-tab metric pills).
+    macro_chart_payload: dict[str, Any] = {}
+    try:
+        from src.viz.build_macro_charts import build_macro_chart_payload
+        # Forward returns and z_history are needed for the chart payload.
+        from src.config import TV_SPXTR
+        from src.ingest.csv_loader import load_tradingview_file
+        from src.ingest.shiller_loader import load_shiller
+        from src.transform.forward_returns import build_forward_returns
+        try:
+            sh = load_shiller()
+            spxtr_ts = load_tradingview_file(TV_SPXTR, expected_frequency="D")
+            fr = build_forward_returns(
+                sh, spxtr_ts.data["close"], check_continuity=False
+            )
+        except Exception:
+            fr = {}
+        macro_chart_payload = build_macro_chart_payload(
+            fr, z_history=parquets.get("z_history")
+        )
+        # Inject the v11.0c metrics into the per-tab variant context so the
+        # tab templates render real numbers instead of n/a placeholders.
+        for vk, met in (macro_chart_payload.get("macro_metrics") or {}).items():
+            if vk in macro_variants:
+                macro_variants[vk]["z_fmt"] = met["z_fmt"]
+                macro_variants[vk]["p_neg_fmt"] = met["p_neg_fmt"]
+                macro_variants[vk]["p_neg_ci_fmt"] = met["p_neg_ci_fmt"]
+                macro_variants[vk]["confidence_fmt"] = met["confidence_fmt"]
+                macro_variants[vk]["conviction_fmt"] = met["conviction_fmt"]
+                macro_variants[vk]["regime"] = met["regime"]
+                macro_variants[vk]["regime_color"] = met["regime_color"]
+    except Exception as exc:  # pragma: no cover
+        print(f"[v11.0c macro chart payload] skipped: {exc}")
+        macro_chart_payload = {}
+
     overview_ctx["macro_risk_snapshot"] = build_macro_risk_snapshot(macro_variants)
+    # If we have a real P(neg 10Y) from the chart payload, override the
+    # snapshot's tile so the Overview Macro Risk section shows a real number.
+    snap = overview_ctx["macro_risk_snapshot"]
+    if snap and macro_chart_payload.get("macro_metrics", {}).get("mrc"):
+        m = macro_chart_payload["macro_metrics"]["mrc"]
+        snap["z_fmt"] = m["z_fmt"]
+        snap["p_neg_fmt"] = m["p_neg_fmt"]
+        snap["p_neg_ci_fmt"] = m["p_neg_ci_fmt"]
+        snap["confidence_fmt"] = m["confidence_fmt"]
+        snap["conviction_fmt"] = m["conviction_fmt"]
+        snap["regime"] = m["regime"]
+        snap["regime_color"] = m["regime_color"]
     # Re-render overview with the augmented context (after MR section wired in).
     overview_html = env.get_template("tab_overview.html").render(**overview_ctx)
 
@@ -931,6 +981,22 @@ def build_dashboard(
     # v8b: inline CSV exports in payload for client-side downloads.
     sanitized["csv_exports"] = data_ctx.get("csv_exports", {})
     sanitized["headline_json_str"] = data_ctx.get("headline_json_str", "{}")
+
+    # v11.0c — inject macro chart specs and per-tab metrics for the macro tabs.
+    if macro_chart_payload:
+        for k, v in macro_chart_payload.items():
+            sanitized[k] = _clean_for_json(v)
+
+    # v11.0c — capture MVCI default values so JS can reset header pills when
+    # navigating back to a valuation/overview tab from a macro tab.
+    sanitized["_header_defaults"] = {
+        "z_fmt": header_ctx.get("mvci_z_fmt", "n/a"),
+        "p_neg_fmt": header_ctx.get("p_below5_fmt", "n/a"),
+        "confidence_fmt": header_ctx.get("confidence_fmt", "n/a"),
+        "conviction_fmt": header_ctx.get("conviction_fmt", "n/a"),
+        "regime_label": header_ctx.get("regime_label", "Fair Value"),
+        "regime_color": header_ctx.get("regime_color", "#9AA0A6"),
+    }
 
     dashboard_json = json.dumps(
         sanitized, default=str, separators=(",", ":"), allow_nan=False

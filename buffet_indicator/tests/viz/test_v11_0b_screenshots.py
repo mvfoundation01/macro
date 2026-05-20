@@ -55,12 +55,24 @@ def test_all_19_screenshots_exist() -> None:
         assert f.exists(), f"missing screenshot {name}.png"
 
 
-def test_each_screenshot_above_100kb() -> None:
+def test_each_screenshot_above_threshold() -> None:
+    """Most shots are full-page captures > 100 KB; v11.0c §F intentionally
+    produces 3 cropped/element screenshots (02 closeup, 18 nav crop, 19
+    cross-composite element) which can legitimately be smaller. Per
+    v11.0c spec the threshold for those is > 50 KB."""
     _require_artefacts()
+    cropped = {
+        "02_overview_macro_snapshot_closeup",
+        "18_nav_macro_risk_expanded_desktop",
+        "19_cross_composite_quadrant_closeup",
+    }
     for name in EXPECTED:
         f = SCREENSHOTS_DIR / f"{name}.png"
         size = f.stat().st_size
-        assert size > 100_000, f"{name}.png is only {size} bytes (<100KB)"
+        threshold = 50_000 if name in cropped else 100_000
+        assert size > threshold, (
+            f"{name}.png is only {size} bytes (<{threshold//1000}KB)"
+        )
 
 
 def test_each_screenshot_is_valid_png() -> None:
