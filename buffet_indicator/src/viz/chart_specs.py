@@ -16,6 +16,28 @@ import numpy as np
 import pandas as pd
 
 from src.viz.captions import REGIME_COLORS
+from src.viz.chart_overlays import add_recession_bands
+
+
+def _maybe_add_recessions(
+    spec: dict[str, Any],
+    dates: list[str] | None,
+    show_recessions: bool,
+) -> dict[str, Any]:
+    """v11.0: add NBER recession bands to a time-series chart layout.
+
+    No-op when ``show_recessions`` is False or ``dates`` is empty/None.
+    Otherwise filters the band set to ``[min(dates), max(dates)]`` so we
+    don't pollute the layout with rects outside the visible window.
+    """
+    if not show_recessions or not dates:
+        return spec
+    lo = pd.Timestamp(dates[0])
+    hi = pd.Timestamp(dates[-1])
+    if hi < lo:
+        lo, hi = hi, lo
+    add_recession_bands(spec["layout"], x_range=(lo, hi))
+    return spec
 
 
 # ---------------------------------------------------------------------------
@@ -294,8 +316,13 @@ def make_panel_a(
     *,
     title: str = "Z-Score Time Series",
     chart_name: str = "panel_a",
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
-    """Build a Plotly figure dict for Panel A (z-score time series)."""
+    """Build a Plotly figure dict for Panel A (z-score time series).
+
+    v11.0: NBER recession bands rendered behind the trace when
+    ``show_recessions`` is True (default).
+    """
     z_clean = z_series.dropna()
     dates = [pd.Timestamp(d).strftime("%Y-%m-%d") for d in z_clean.index]
     values = [float(v) for v in z_clean.values]
@@ -312,7 +339,7 @@ def make_panel_a(
         pcts = (ranks / denom * 100.0).tolist()
     customdata = list(zip(regime_labels, pcts))
 
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -365,6 +392,7 @@ def make_panel_a(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, dates, show_recessions)
 
 
 # ---------------------------------------------------------------------------
@@ -526,8 +554,17 @@ def make_panel_b(
 # ---------------------------------------------------------------------------
 
 
-def make_panel_c(sp500_df: pd.DataFrame, *, chart_name: str = "panel_c") -> dict[str, Any]:
-    """S&P 500 (log scale) colored by MVCI regime."""
+def make_panel_c(
+    sp500_df: pd.DataFrame,
+    *,
+    chart_name: str = "panel_c",
+    show_recessions: bool = True,
+) -> dict[str, Any]:
+    """S&P 500 (log scale) colored by MVCI regime.
+
+    v11.0: NBER recession bands rendered behind the regime-colored trace when
+    ``show_recessions`` is True (default).
+    """
     df = sp500_df.dropna(subset=["sp500_close"]).copy()
     df = df.sort_values("date").reset_index(drop=True)
     if df.empty:
@@ -569,7 +606,10 @@ def make_panel_c(sp500_df: pd.DataFrame, *, chart_name: str = "panel_c") -> dict
             }
         )
 
-    return {
+    # v11.0: extract date range from df for recession overlay.
+    dates_for_overlay = df["date"].astype(str).tolist()
+
+    spec = {
         "data": traces,
         "layout": {
             "title": {
@@ -610,6 +650,7 @@ def make_panel_c(sp500_df: pd.DataFrame, *, chart_name: str = "panel_c") -> dict
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, dates_for_overlay, show_recessions)
 
 
 def _empty_panel_c(chart_name: str = "panel_c") -> dict[str, Any]:
@@ -729,6 +770,7 @@ def make_hero_chart(
     current_label_format: str = "Current: {value:+.2f} σ",
     chart_name: str = "hero",
     add_historical_annotations: bool = True,
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
     """Hero chart at the top of each tab. Scaled-up Panel A with more
     prominent annotations and regime bands.
@@ -764,7 +806,7 @@ def make_hero_chart(
     if add_historical_annotations:
         annotations = _add_historical_annotations(z_clean, annotations)
 
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -828,6 +870,7 @@ def make_hero_chart(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, dates, show_recessions)
 
 
 # ---------------------------------------------------------------------------
@@ -842,6 +885,7 @@ def make_mean_reversion_hero(
     *,
     height: int = HERO_HEIGHT,
     chart_name: str = "mean_reversion_hero",
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
     """Hero chart for the Mean Reversion tab.
 
@@ -858,8 +902,9 @@ def make_mean_reversion_hero(
 
     annot_color = "#C8102E" if current_deviation_pct > 0 else "#1B7A3E"
     annot_text = f"Currently {current_deviation_pct:+.1f}% from long-run trend"
+    dates_for_overlay = [pd.Timestamp(d).strftime("%Y-%m-%d") for d in sp_clean.index]
 
-    return {
+    spec = {
         "data": [
             {
                 "x": [pd.Timestamp(d).strftime("%Y-%m-%d") for d in sp_clean.index],
@@ -937,6 +982,7 @@ def make_mean_reversion_hero(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, dates_for_overlay, show_recessions)
 
 
 # ---------------------------------------------------------------------------
@@ -996,9 +1042,15 @@ def make_correlation_heatmap(corr_matrix: pd.DataFrame, *, chart_name: str = "co
     }
 
 
-def make_oos_r2_chart(dates: list[str], r2_values: list[float], *, chart_name: str = "oos_r2") -> dict[str, Any]:
+def make_oos_r2_chart(
+    dates: list[str],
+    r2_values: list[float],
+    *,
+    chart_name: str = "oos_r2",
+    show_recessions: bool = True,
+) -> dict[str, Any]:
     """OOS R² (Goyal-Welch) evolution line chart."""
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -1047,6 +1099,7 @@ def make_oos_r2_chart(dates: list[str], r2_values: list[float], *, chart_name: s
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, list(dates) if dates else None, show_recessions)
 
 
 def make_acf_pacf_charts(
@@ -1282,9 +1335,10 @@ def make_equity_curve_chart(
     benchmark_nav: list[float],
     *,
     chart_name: str = "equity_curve",
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
     """v10.0: log-scale strategy vs benchmark NAV chart."""
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -1337,6 +1391,7 @@ def make_equity_curve_chart(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, list(dates) if dates else None, show_recessions)
 
 
 def make_drawdown_chart(
@@ -1345,9 +1400,10 @@ def make_drawdown_chart(
     dd_benchmark: list[float],
     *,
     chart_name: str = "drawdown",
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
     """v10.0: dual drawdown lines (strategy + benchmark)."""
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -1399,6 +1455,7 @@ def make_drawdown_chart(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, list(dates) if dates else None, show_recessions)
 
 
 def make_allocation_chart(
@@ -1406,13 +1463,14 @@ def make_allocation_chart(
     weights: list[float],
     *,
     chart_name: str = "allocation",
+    show_recessions: bool = True,
 ) -> dict[str, Any]:
     """v10.0: stacked-area showing equity weight over time."""
     eq_pct = [(w * 100) if w is not None and w == w else None for w in weights]
     cash_pct = [
         (100 - (w * 100)) if w is not None and w == w else None for w in weights
     ]
-    return {
+    spec = {
         "data": [
             {
                 "x": dates,
@@ -1465,6 +1523,7 @@ def make_allocation_chart(
         },
         "config": _interactive_config(chart_name),
     }
+    return _maybe_add_recessions(spec, list(dates) if dates else None, show_recessions)
 
 
 __all__ = [

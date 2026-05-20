@@ -50,6 +50,15 @@ TV_WILSHIRE = _pick_extension("FRED_WILL5000PRFC, 1D", (".csv", ".xlsx", ".xls")
 TV_GDP_BAK = _pick_extension("FRED_GDP, 3M", (".csv", ".xlsx", ".xls"))
 SHILLER_XLS = _pick_extension("ie_data", (".xls", ".xlsx"))
 
+# v11.0 macro risk inputs ----------------------------------------------------
+TV_US10Y = _pick_extension("TVC_US10Y, 1D", (".csv", ".xlsx", ".xls"))
+TV_US03M = _pick_extension("TVC_US03MY, 1D", (".csv", ".xlsx", ".xls"))
+BAML_HY_MASTER = _pick_extension("FRED_BAMLH0A0HYM2, 1D", (".csv",))
+BAML_IG_MASTER = _pick_extension("FRED_BAMLC0A0CM, 1D", (".csv",))
+BAML_HY_BB = _pick_extension("FRED_BAMLH0A1HYBB, 1D", (".csv",))
+BAML_HY_CCC = _pick_extension("FRED_BAMLH0A3HYC, 1D", (".csv",))
+MARGIN_DEBT_XLSX = SHARED_RAW_DATA / "margin-statistics.xlsx"
+
 GLOBAL_SEED = 42
 
 

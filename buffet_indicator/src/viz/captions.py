@@ -78,6 +78,48 @@ PANEL_A_CAPTIONS: dict[str, str] = {
         "exponential trend of real earnings (vs. CAPE's 10-year moving average). "
         "Higher = stretched relative to the long-run earnings growth path."
     ),
+    # v11.0 — Macro Risk Module ----------------------------------------------
+    "yc_10y3m": (
+        "Yield curve 10Y-3M spread. The signal is the negated spread, so high "
+        "z-score corresponds to an inverted curve — historically one of the "
+        "most reliable equity-bear and recession precursors."
+    ),
+    "yc_10y2y": (
+        "Yield curve 10Y-2Y spread (FRED T10Y2Y). Same direction convention as "
+        "10Y-3M: high signal = inverted curve = bearish signal for equities."
+    ),
+    "cs_hy_master": (
+        "ICE BofA US High Yield OAS — the canonical credit-stress thermometer. "
+        "Log-transformed before z-score; widening spreads (high signal) "
+        "indicate rising default expectations and historically precede equity "
+        "drawdowns."
+    ),
+    "cs_ig_master": (
+        "ICE BofA US Corporate (Investment Grade) OAS. Slower-moving than HY "
+        "but more sensitive to systemic banking stress (e.g., 2008, March "
+        "2020)."
+    ),
+    "cs_hy_bb": (
+        "ICE BofA US HY BB OAS — the highest-quality bucket inside HY. "
+        "Diverges from HY-CCC during late-cycle quality flight, which is itself "
+        "a stress indicator."
+    ),
+    "cs_hy_ccc": (
+        "ICE BofA US HY CCC & Lower OAS — the lowest-quality bucket. The most "
+        "sensitive to default-expectation regime shifts; in 2008 peaked above "
+        "40 percentage points."
+    ),
+    "margin_debt_growth": (
+        "FINRA debit balances in customer margin accounts, expressed as a "
+        "12-month log growth rate. High growth = leveraged buying frenzy = "
+        "historically a precursor of mediocre forward returns (2007, 2021)."
+    ),
+    "mrc": (
+        "MV Macro Risk Composite — aggregate of 7 macro indicators (2 yield "
+        "curves, 4 credit spreads, 1 margin debt growth). Complementary to "
+        "MVCI: the two composites have measured low correlation (~15%), so "
+        "they capture distinct dimensions of risk."
+    ),
 }
 
 
@@ -561,6 +603,78 @@ WHY_IT_MATTERS: dict[str, str] = {
         "investment signal. The v10.0 MVP tests one simple rule; v10.1 will "
         "add a rule menu and a White's Reality Check correction for "
         "multiple-testing inflation."
+    ),
+    # v11.0 — Macro Risk Module ----------------------------------------------
+    "yc_10y3m": (
+        "The 10Y-3M Treasury yield curve is the single most-cited macro "
+        "recession leading indicator, recognized in academic work (Estrella & "
+        "Mishkin 1998, Bauer & Mertens 2018). When short-term yields exceed "
+        "long-term yields ('inversion'), banks' net interest margin compresses, "
+        "credit creation slows, and a recession has historically followed "
+        "within 6-18 months. Every US recession since 1955 was preceded by an "
+        "inversion; only one inversion (1966-67) failed to produce a recession. "
+        "The series inverted in mid-2022 and remained inverted through most of "
+        "2023-2024."
+    ),
+    "yc_10y2y": (
+        "The 10Y-2Y spread (FRED T10Y2Y) is the older, more market-traded "
+        "version of the yield curve indicator. Conceptually equivalent to "
+        "10Y-3M but more responsive to Fed policy expectations (the 2Y is "
+        "anchored by anticipated Fed funds path). Powell's Fed cited 10Y-2Y "
+        "explicitly in 2022-2023 communications. Both curves carry similar "
+        "long-run signal but can disagree in the few months around a Fed "
+        "pivot — having both reduces noise."
+    ),
+    "cs_hy_master": (
+        "ICE BofA US High Yield OAS is the canonical credit-stress thermometer. "
+        "When markets expect more defaults, HY OAS widens — typically before "
+        "equities reprice. In 2008 it peaked at ~20pp, in March 2020 at ~10pp, "
+        "and around the 2015-16 oil sell-off at ~9pp. Tight spreads (<4pp) "
+        "historically have been late-cycle complacency signals; spreads above "
+        "8pp typically coincide with bear markets in equities."
+    ),
+    "cs_ig_master": (
+        "Investment Grade OAS is slower-moving than HY but reacts most "
+        "sharply during systemic banking stress (2008, March 2020). When IG "
+        "spreads widen meaningfully, the credit channel itself is impaired — "
+        "a tighter financial condition than even high HY spreads (which can "
+        "be local to the energy or retail sector)."
+    ),
+    "cs_hy_bb": (
+        "BB-rated HY is the best quality inside the speculative-grade bucket. "
+        "When BB OAS approaches IG levels, investors are demanding less yield "
+        "to take the same default risk — a stretched-valuation signal. When "
+        "BB widens sharply, even the highest-quality 'junk' is being repriced, "
+        "which is a stronger bear-market indicator than a CCC-only blowout."
+    ),
+    "cs_hy_ccc": (
+        "CCC and below is the lowest-quality bucket. CCC OAS spikes during "
+        "default waves (2002, 2008, 2015-16 energy, 2020) and is the most "
+        "sensitive to default-expectation regime shifts. When CCC pulls "
+        "sharply higher while BB is calm, the market is signaling targeted "
+        "distress (the 'tail') rather than a broad bear; when both widen "
+        "together, expect equity reprice."
+    ),
+    "margin_debt_growth": (
+        "FINRA debit balances in customer margin accounts measure how much "
+        "investors are borrowing to buy stocks. Schwab and Yardeni use the "
+        "12-month rate of change rather than the level, because the level "
+        "trends secularly with market cap. Positive 12M growth above ~30% has "
+        "historically marked late-cycle leverage frenzies (1999, 2007, 2021); "
+        "deeply negative growth (-40% or worse) has marked the bottoms in "
+        "2008-09 and 2020-Q1. Currently elevated again."
+    ),
+    "mrc": (
+        "The MV Macro Risk Composite aggregates seven independent macro stress "
+        "signals — two yield curves, four credit spreads, one margin-debt "
+        "growth — into a single z-score. Why not roll these into MVCI? "
+        "Because they capture a fundamentally different dimension: MVCI "
+        "measures the price of equities; MRC measures the financial-system "
+        "regime in which those prices live. The correlation between MVCI "
+        "(equal-weight) and MRC (equal-weight) in our backtest is ~15% — "
+        "they carry largely independent information, and combining them "
+        "(rather than averaging them away) is the cleanest way to read "
+        "joint regimes."
     ),
 }
 

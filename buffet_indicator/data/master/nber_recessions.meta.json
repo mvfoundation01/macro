@@ -1,0 +1,10 @@
+{
+  "source": "nber_business_cycle_reference_dates",
+  "equivalent_fred_series": "USREC",
+  "vintage": "2026-05-20T12:49:27.127693",
+  "n_recessions": 34,
+  "earliest_peak": "1857-06-01",
+  "latest_trough": "2020-04-30",
+  "url": "https://www.nber.org/research/business-cycle-dating",
+  "note": "Hardcoded 1857-2020 reference dates; refresh module when NBER posts new cycles."
+}
