@@ -363,9 +363,15 @@ def test_persistence_file_exists_for_all_variants() -> None:
 
 
 def test_v11_0b_summary_parquet_has_expected_rows() -> None:
+    """The summary parquet must include the v11.0b core set; v11.0.2 added 6
+    derived spreads which are also expected to be present once the pipeline
+    has been run after v11.0.2 Stage A."""
     df = pd.read_parquet("outputs/indicators/v11_0b_summary.parquet")
-    expected = set(VARIANT_KEYS) | {f"mrc_{s}" for s in MRC_SCHEMES}
-    assert set(df["variant_key"]) == expected
+    v11_0b_expected = set(VARIANT_KEYS) | {f"mrc_{s}" for s in MRC_SCHEMES}
+    present = set(df["variant_key"])
+    assert v11_0b_expected.issubset(present), (
+        f"missing v11.0b variants: {v11_0b_expected - present}"
+    )
 
 
 def test_cross_composite_current_state_persisted() -> None:
