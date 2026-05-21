@@ -512,6 +512,7 @@ def build_rolling_metrics_surface(
         return {"available": False, "reason": "no strategy returns available", "per_strategy": []}
 
     per_strategy: list[dict[str, Any]] = []
+    rolling_series: list[dict[str, Any]] = []  # v11.2.3 Surface 3 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if len(r) < window + 1:
@@ -529,6 +530,16 @@ def build_rolling_metrics_surface(
                 "reason": "rolling computation returned empty",
             })
             continue
+        # v11.2.3 — expose rolling time series so the chart can plot
+        # 3 sub-panels (sharpe / vol / sortino) per strategy.
+        rolling_series.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "dates": [d.strftime("%Y-%m-%d") for d in roll.index],
+            "sharpe": [None if pd.isna(v) else float(v) for v in roll["rolling_sharpe"]],
+            "vol": [None if pd.isna(v) else float(v) for v in roll["rolling_vol"]],
+            "sortino": [None if pd.isna(v) else float(v) for v in roll["rolling_sortino"]],
+        })
         per_strategy.append({
             "label": label,
             "is_v2": _is_v2(label),
@@ -562,6 +573,7 @@ def build_rolling_metrics_surface(
         "available": True,
         "window_months": window,
         "per_strategy": per_strategy,
+        "rolling_series": rolling_series,  # v11.2.3 Surface 3 chart
     }
 
 
