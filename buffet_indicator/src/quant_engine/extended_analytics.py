@@ -880,19 +880,22 @@ def build_seasonality_surface(
         r = sr.monthly.dropna()
         if r.empty:
             continue
-        by_month: list[dict[str, str]] = []
+        by_month: list[dict[str, Any]] = []
         for i, m_label in enumerate(months, start=1):
             mask = r.index.month == i
             if mask.any():
                 vals = r[mask].to_numpy(dtype=np.float64)
+                # v11.2.2.9 — also emit raw `mean` (decimal) so a Plotly heatmap
+                # can plot numeric values without parsing formatted strings.
                 by_month.append({
                     "month": m_label,
+                    "mean": float(vals.mean()),
                     "mean_fmt": _fmt_pct(float(vals.mean()), digits=2),
                     "n": int(len(vals)),
                     "pct_positive_fmt": f"{(vals > 0).mean() * 100:.0f}%",
                 })
             else:
-                by_month.append({"month": m_label, "mean_fmt": "n/a", "n": 0, "pct_positive_fmt": "n/a"})
+                by_month.append({"month": m_label, "mean": None, "mean_fmt": "n/a", "n": 0, "pct_positive_fmt": "n/a"})
         rows.append({
             "label": label, "is_v2": _is_v2(label),
             "by_month": by_month,

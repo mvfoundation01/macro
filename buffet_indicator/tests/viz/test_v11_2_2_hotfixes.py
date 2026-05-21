@@ -201,3 +201,41 @@ def test_b3_v1_equity_grows_at_least_2x_from_2000():
     assert finite[-1] > 20_000, (
         f"V1 final {finite[-1]:.0f} too low — equity curve broken?"
     )
+
+
+# ============================================================
+# v11.2.2.9 — Seasonality heatmap (first per-surface chart sub-ship)
+# ============================================================
+
+
+def test_v11_2_2_9_seasonality_heatmap_div_in_dashboard():
+    """Seasonality EA surface has the Plotly heatmap div."""
+    html = _read_dashboard()
+    assert 'id="ea-surface-9-seasonality-heatmap"' in html
+
+
+def test_v11_2_2_9_seasonality_rows_payload_attached():
+    """Heatmap div carries data-seasonality-rows attribute for client-side rendering."""
+    html = _read_dashboard()
+    assert "data-seasonality-rows" in html
+
+
+def test_v11_2_2_9_seasonality_emits_raw_mean_field():
+    """Seasonality build emits raw `mean` (decimal) alongside mean_fmt — required for heatmap z-values."""
+    import sys
+    sys.path.insert(0, str(REPO_ROOT))
+    try:
+        from src.quant_engine.extended_analytics import build_seasonality_surface
+    except Exception:
+        pytest.skip("extended_analytics module not importable")
+    s = build_seasonality_surface()
+    if not s.get("available"):
+        pytest.skip(f"seasonality surface unavailable: {s.get('reason')}")
+    assert s.get("rows"), "Seasonality rows missing"
+    first_row = s["rows"][0]
+    assert "by_month" in first_row
+    by_month = first_row["by_month"]
+    assert len(by_month) == 12, f"Expected 12 months, got {len(by_month)}"
+    # At least the first non-empty month must have a numeric `mean` field
+    numeric_months = [m for m in by_month if isinstance(m.get("mean"), (int, float))]
+    assert len(numeric_months) >= 1, "No numeric `mean` field in by_month entries"
