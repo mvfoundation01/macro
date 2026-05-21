@@ -1,0 +1,73 @@
+<!-- v11.2.1.1 — Extended Analytics Surface 1: Summary (per PROMPT_v11_2 §6.3) -->
+{% if se.extended_analytics and se.extended_analytics.summary and se.extended_analytics.summary.available %}
+{% set s1 = se.extended_analytics.summary %}
+<details id="ea-surface-1-summary" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 1: Summary KPIs
+    <span class="text-xs font-normal text-gray-500 ml-2">
+      ({{ s1.meta.n_strategies }} strategies &middot; ${{ "{:,}".format(s1.meta.starting_value) }} initial &middot;
+      bootstrap CI 95% via {{ s1.meta.n_bootstrap }} stationary reps, block={{ s1.meta.block_length }})
+    </span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test
+      (see <a href="#v2-diagnostic-banner" class="underline">DIAGNOSTIC banner</a> below). V2 metrics shown for transparency only.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="text-sm w-full">
+        <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1.5">Strategy</th>
+            <th class="px-2 py-1.5 text-right">Ending $</th>
+            <th class="px-2 py-1.5 text-right">CAGR <span class="text-gray-400">[95% CI]</span></th>
+            <th class="px-2 py-1.5 text-right">Vol (ann)</th>
+            <th class="px-2 py-1.5 text-right">Sharpe <span class="text-gray-400">[95% CI]</span></th>
+            <th class="px-2 py-1.5 text-right">Sortino</th>
+            <th class="px-2 py-1.5 text-right">MaxDD <span class="text-gray-400">[95% CI]</span></th>
+            <th class="px-2 py-1.5 text-right">Calmar</th>
+            <th class="px-2 py-1.5 text-right">Ulcer</th>
+            <th class="px-2 py-1.5 text-right">N (mo)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in s1.rows %}
+          <tr class="{% if row.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1.5 font-medium">
+              {{ row.label }}
+              {% if row.is_v2 %}<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-orange-200 text-orange-900">DIAGNOSTIC</span>{% endif %}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.ending_value_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ row.cagr_fmt }}<br>
+              <span class="text-xs text-gray-500">{{ row.cagr_ci_fmt }}</span>
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.vol_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ row.sharpe_fmt }}<br>
+              <span class="text-xs text-gray-500">{{ row.sharpe_ci_fmt }}</span>
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.sortino_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ row.maxdd_fmt }}<br>
+              <span class="text-xs text-gray-500">{{ row.maxdd_ci_fmt }}</span>
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.calmar_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.ulcer_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.n_months }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-500 mt-3">
+      KPI values computed from monthly nominal returns (v50 V11_2_EXPORT_RETURNS).
+      CAGR / Sharpe / MaxDD CIs from stationary bootstrap (Politis-Romano 1994).
+      V2 strategy rows highlighted in orange &mdash; rules <strong>REJECTED</strong> per
+      pre-registration &sect;3.3 falsifiability test (commit <code>a90b02d</code>).
+      Surfaces 2&ndash;9 will add Drawdown enumeration, Rolling Metrics, Risk Deep,
+      Returns, Lump Sum, Risk-vs-Return, Withdrawal, Seasonality + Allocation Pies.
+    </p>
+  </div>
+</details>
+{% endif %}

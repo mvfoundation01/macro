@@ -139,6 +139,18 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
 
     n_sheets_total = sum(group_counts.values())
 
+    # v11.2.1: Extended Analytics surfaces (Stages 4-8 of mega-spec).
+    # Each surface returns a self-contained context dict; failures are
+    # demoted to "unavailable" so V1 35 sections always render even if a
+    # surface's data isn't there yet.
+    extended_analytics: Dict[str, Any] = {}
+    try:
+        from src.quant_engine.extended_analytics import build_summary_surface
+        extended_analytics["summary"] = build_summary_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 1 summary] failed to build: {exc}")
+        extended_analytics["summary"] = {"available": False, "reason": str(exc), "rows": []}
+
     return {
         "headline_sharpe_fmt": _fmt_signed(headline.get("sharpe")),
         "headline_cagr_fmt": _fmt_pct(headline.get("cagr"), digits=2),
@@ -157,4 +169,5 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
         "last_refresh_label": _last_refresh_label(last_refresh_ts),
         "days_since_refresh": _days_since_refresh(last_refresh_ts),
         "norgate_available": norgate_available,
+        "extended_analytics": extended_analytics,
     }
