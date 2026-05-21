@@ -17,3 +17,9 @@ logs/*
 Thumbs.db
 .vscode/
 .idea/
+
+# v11.1 quant pipeline integration
+# D:\macro\quant_pipeline\ lives OUTSIDE this repo root (cache too large)
+# Inside repo, outputs/quant_engine/ IS tracked via Git LFS (see .gitattributes)
+logs/v11_1_*.log
+logs/v11_1_*.txt

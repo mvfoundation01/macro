@@ -1,0 +1,10 @@
+=== ENVIRONMENT LOCK ===
+python_version: 3.14.3
+platform: Windows-11-10.0.26200-SP0
+timestamp: 20260520_1951
+numpy: 2.4.4
+pandas: 3.0.2
+lightgbm: 4.6.0
+scipy: 1.17.1
+openpyxl: 3.1.5
+norgatedata: 1.0.74

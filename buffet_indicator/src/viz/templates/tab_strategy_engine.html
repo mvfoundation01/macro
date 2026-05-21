@@ -1,0 +1,239 @@
+{% import "_macros.html" as m %}
+<section data-tab="strategy_engine" class="tab-content px-4 py-4">
+
+  <!-- ===== Header strip: KPIs + refresh + download ===== -->
+  <div class="strategy-engine-header rounded-lg border bg-white p-5 mb-6 shadow-sm">
+    <h2 class="text-2xl font-bold mb-1">Strategy Engine v50 — Institutional Backtest</h2>
+    <p class="text-sm text-gray-600 mb-4 max-w-4xl">
+      26-year out-of-sample (2000–2026) systematic factor pipeline. Headline
+      <strong>DD-TARGET Sharpe {{ se.headline_sharpe_fmt }}</strong> on
+      {{ se.headline_years_fmt }} years. 4-layer 10K-simulation robustness suite.
+      PIT-compliant via <code>.shift(1)</code>; survivorship-bias-free Norgate
+      Diamond data. {{ se.n_strategies }} active strategies + 2 indices +
+      {{ se.n_benchmark_stocks }} buy-and-hold stocks.
+    </p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div class="rounded-lg border p-3 bg-blue-50 border-blue-200">
+        <div class="text-xs text-gray-600">DD-TARGET Sharpe</div>
+        <div class="text-2xl font-bold text-blue-900">{{ se.headline_sharpe_fmt }}</div>
+        <div class="text-xs text-gray-500 mt-1">FULL @ 15bps · SPY 0.501</div>
+      </div>
+      <div class="rounded-lg border p-3 bg-white">
+        <div class="text-xs text-gray-600">DD-TARGET MaxDD</div>
+        <div class="text-2xl font-bold">{{ se.headline_maxdd_fmt }}</div>
+        <div class="text-xs text-gray-500 mt-1">vs SPY −55.19%</div>
+      </div>
+      <div class="rounded-lg border p-3 bg-white">
+        <div class="text-xs text-gray-600">DD-TARGET CAGR</div>
+        <div class="text-2xl font-bold">{{ se.headline_cagr_fmt }}</div>
+        <div class="text-xs text-gray-500 mt-1">vs SPY 8.07% · {{ se.headline_years_fmt }} yr</div>
+      </div>
+      <div class="rounded-lg border p-3 bg-emerald-50 border-emerald-200">
+        <div class="text-xs text-gray-600">Institutional Scorecard</div>
+        <div class="text-2xl font-bold text-emerald-900">81 / 100</div>
+        <div class="text-xs text-gray-500 mt-1">PASS (≥80 threshold)</div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 text-sm">
+      <span class="text-gray-600">
+        Last refresh: <strong>{{ se.last_refresh_label }}</strong>
+        ({{ se.days_since_refresh }} days ago)
+      </span>
+      <button id="se-refresh-button"
+              class="px-3 py-1 rounded border bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onclick="refreshQuantEngine()"
+              {% if not se.norgate_available %}disabled title="Norgate not detected — static fallback only"{% endif %}>
+        Refresh data
+      </button>
+      <a href="outputs/quant_engine/latest/latest.xlsx"
+         class="px-3 py-1 rounded border bg-white hover:bg-gray-50"
+         download="strategy_engine_v50_full.xlsx">
+        ⬇ Download full XLSX ({{ se.n_sheets }} sheets)
+      </a>
+      <a href="outputs/quant_engine/latest/latest.csv"
+         class="px-3 py-1 rounded border bg-white hover:bg-gray-50"
+         download="strategy_engine_v50_metrics.csv">
+        ⬇ Download CSV (per-period metrics)
+      </a>
+      {% if not se.norgate_available %}
+      <span class="text-xs text-amber-700">⚠ Norgate not detected — refresh button disabled.</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ===== V1 lineup summary ===== -->
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">V1 lineup</h3>
+    <table class="text-sm w-full">
+      <thead>
+        <tr class="text-left text-gray-500 text-xs uppercase border-b">
+          <th class="pr-3 py-1">Strategy</th>
+          <th class="pr-3 py-1">Tier</th>
+          <th class="pr-3 py-1">Sharpe (FULL @ 15bps)</th>
+          <th class="pr-3 py-1">ΔSharpe vs SPY</th>
+          <th class="pr-3 py-1">ΔMaxDD vs SPY</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in se.spy_h2h_top %}
+        <tr class="border-b border-gray-100">
+          <td class="pr-3 py-1 font-medium">{{ row.label }}</td>
+          <td class="pr-3 py-1">
+            <span class="text-xs px-2 py-0.5 rounded
+              {% if row.tier == 'Strategy' %}bg-blue-100 text-blue-800{% elif row.tier == 'Index' %}bg-gray-100 text-gray-700{% else %}bg-amber-50 text-amber-800{% endif %}">
+              {{ row.tier }}
+            </span>
+          </td>
+          <td class="pr-3 py-1">{{ "%.3f"|format(row.sharpe) }}</td>
+          <td class="pr-3 py-1 {% if row.delta_sharpe_vs_spy > 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
+            {{ "%+.3f"|format(row.delta_sharpe_vs_spy) }}
+          </td>
+          <td class="pr-3 py-1 {% if row.delta_maxdd_vs_spy is not none and row.delta_maxdd_vs_spy > 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
+            {% if row.delta_maxdd_vs_spy is not none %}{{ "%+.2f%%"|format(row.delta_maxdd_vs_spy * 100) }}{% else %}n/a{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="text-xs text-gray-500 mt-2">
+      LowRisk / FACTOR-ONLY / ETF-ROTATION dropped from V1 per user direction.
+      Re-enable with <code>V11_1_DROP_STRATEGIES=0</code> in env + re-run v50.
+    </p>
+  </div>
+
+  <!-- Period heatmap (bonus on Core sub-tab) -->
+  {% if se.period_heatmap_html %}
+  <div class="rounded-lg border bg-white p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">Performance heatmap</h3>
+    {{ se.period_heatmap_html|safe }}
+    <p class="text-xs text-gray-500 mt-2">
+      Per-cycle Sharpe ratio at 15 bps round-trip cost. Red = underperformance,
+      blue = outperformance.
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- ===== Sub-tab nav ===== -->
+  <nav class="se-subnav flex flex-wrap gap-1 border-b mb-4" role="tablist">
+    <button class="se-subnav-btn px-3 py-2 text-sm border-b-2 border-blue-600 font-medium" data-se-group="core"
+            onclick="showSeGroup('core')">
+      Core Analytics ({{ se.group_counts.core }})
+    </button>
+    <button class="se-subnav-btn px-3 py-2 text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900" data-se-group="robustness"
+            onclick="showSeGroup('robustness')">
+      Robustness Suite ({{ se.group_counts.robustness }})
+    </button>
+    <button class="se-subnav-btn px-3 py-2 text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900" data-se-group="institutional"
+            onclick="showSeGroup('institutional')">
+      Institutional Pitch ({{ se.group_counts.institutional }})
+    </button>
+    <button class="se-subnav-btn px-3 py-2 text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900" data-se-group="gap_closers"
+            onclick="showSeGroup('gap_closers')">
+      Gap-Closers + Governance ({{ se.group_counts.gap_closers }})
+    </button>
+    {% if se.group_counts.extras > 0 %}
+    <button class="se-subnav-btn px-3 py-2 text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900" data-se-group="extras"
+            onclick="showSeGroup('extras')">
+      Extras ({{ se.group_counts.extras }})
+    </button>
+    {% endif %}
+  </nav>
+
+  <!-- ===== Sections per group ===== -->
+  {% for group_key, sheets in se.groups.items() %}
+  <div class="se-group" data-se-group-content="{{ group_key }}" {% if not loop.first %}style="display:none"{% endif %}>
+    {% for sheet in sheets %}
+    <details class="se-section rounded-lg border bg-white mb-3 group" data-sheet="{{ sheet.name }}"
+             {% if loop.first %}open{% endif %}>
+      <summary class="cursor-pointer select-none px-4 py-3 flex justify-between items-center hover:bg-gray-50">
+        <div>
+          <div class="font-semibold text-base">{{ sheet.name }}</div>
+          <div class="text-xs text-gray-500">{{ sheet.description }}</div>
+        </div>
+        <span class="se-chevron text-gray-400 group-open:rotate-180 transition-transform">▾</span>
+      </summary>
+      <div class="se-section-body px-4 pb-4 pt-1 border-t bg-gray-50/30">
+        {{ sheet.body_html|safe }}
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <!-- ===== JavaScript: sub-tab nav + refresh button ===== -->
+  <script>
+    function showSeGroup(groupKey) {
+      document.querySelectorAll('[data-se-group-content]').forEach(el => {
+        el.style.display = (el.getAttribute('data-se-group-content') === groupKey) ? '' : 'none';
+      });
+      document.querySelectorAll('.se-subnav-btn').forEach(btn => {
+        const active = btn.getAttribute('data-se-group') === groupKey;
+        btn.classList.toggle('border-blue-600', active);
+        btn.classList.toggle('font-medium', active);
+        btn.classList.toggle('border-transparent', !active);
+        btn.classList.toggle('text-gray-600', !active);
+      });
+    }
+    function refreshQuantEngine() {
+      alert(
+        'Static dashboard mode. To refresh Strategy Engine data:\n\n' +
+        '1. Open PowerShell or cmd\n' +
+        '2. cd D:\\macro\\quant_pipeline\n' +
+        '3. set V11_1_DROP_STRATEGIES=1\n' +
+        '4. python quant_engine_v50_FINAL.py\n' +
+        '5. From buffet_indicator/, run: python -m src.viz.build_dashboard\n\n' +
+        'Hosted refresh endpoint deferred to v11.2.'
+      );
+    }
+    // Governance tab switcher
+    document.addEventListener('click', function(e) {
+      if (e.target.classList && e.target.classList.contains('se-gov-tab')) {
+        const kind = e.target.getAttribute('data-gov-tab');
+        document.querySelectorAll('.se-gov-tab').forEach(t => {
+          t.setAttribute('data-active', String(t === e.target));
+        });
+        document.querySelectorAll('.se-gov-panel').forEach(p => {
+          p.style.display = (p.getAttribute('data-gov-panel') === kind) ? 'block' : 'none';
+        });
+      }
+    });
+    // Render embedded Plotly figs on first expand
+    document.addEventListener('toggle', function(e) {
+      if (e.target.tagName === 'DETAILS' && e.target.open) {
+        e.target.querySelectorAll('.se-plotly-chart[data-plotly-data]').forEach(div => {
+          if (div._rendered) return;
+          try {
+            const spec = JSON.parse(div.getAttribute('data-plotly-data'));
+            Plotly.newPlot(div, spec.data, spec.layout, spec.config || {responsive:true});
+            div._rendered = true;
+          } catch (err) {
+            console.error('Plotly render failed for', div.id, err);
+          }
+        });
+      }
+    }, true);
+    // Initial-render: render any Plotly figs in the first <details open> section
+    window.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('[data-tab="strategy_engine"] details[open] .se-plotly-chart[data-plotly-data]').forEach(div => {
+        try {
+          const spec = JSON.parse(div.getAttribute('data-plotly-data'));
+          Plotly.newPlot(div, spec.data, spec.layout, spec.config || {responsive:true});
+          div._rendered = true;
+        } catch (err) {
+          console.error('Plotly render failed for', div.id, err);
+        }
+      });
+      // Also render the bonus period heatmap if present (outside <details>)
+      document.querySelectorAll('[data-tab="strategy_engine"] #se-period-heatmap-bonus[data-plotly-data]').forEach(div => {
+        try {
+          const spec = JSON.parse(div.getAttribute('data-plotly-data'));
+          Plotly.newPlot(div, spec.data, spec.layout, spec.config || {responsive:true});
+          div._rendered = true;
+        } catch (err) { console.error('Period heatmap render failed', err); }
+      });
+    });
+  </script>
+
+</section>

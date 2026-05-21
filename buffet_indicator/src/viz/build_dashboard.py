@@ -804,6 +804,20 @@ def build_dashboard(
     # v8b: Methodology tab
     methodology_html = env.get_template("tab_methodology.html").render()
 
+    # v11.1: Strategy Engine tab (vendored v50 institutional backtest)
+    try:
+        from src.viz.build_strategy_engine import build_strategy_engine_context
+        se_ctx = build_strategy_engine_context()
+        if se_ctx is not None:
+            strategy_engine_html = env.get_template("tab_strategy_engine.html").render(se=se_ctx)
+        else:
+            strategy_engine_html = ""
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.1 strategy engine] failed to build: {exc}")
+        import traceback
+        traceback.print_exc()
+        strategy_engine_html = ""
+
     # ---------------------------------------------------------------------
     # v11.0b — Macro Risk tabs (8 new) + Macro Risk Snapshot on Overview
     # v11.0c — also build per-tab chart specs and per-tab metrics
@@ -1031,6 +1045,7 @@ def build_dashboard(
         tab_mean_reversion_html=mean_reversion_html,
         tab_diagnostics_html=diagnostics_html,
         tab_backtest_html=backtest_html,
+        tab_strategy_engine_html=strategy_engine_html,
         tab_data_html=data_html,
         tab_methodology_html=methodology_html,
         # v11.0b macro-risk tabs.

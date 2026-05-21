@@ -23,14 +23,17 @@ def test_v8b1_dashboard_html_size_below_target() -> None:
 
     v8b.1 set this at 8 MB; v11.0 master spec relaxed it to 10 MB after
     adding the macro module (7 indicators + MRC composite + all dual-frame
-    chart specs). The current bundle should remain under that ceiling.
+    chart specs). v11.1 spec §0.1 + §8.3 explicitly relaxed the ceiling to
+    13 MB to accommodate the new 32-section Strategy Engine tab (vendored
+    v50 institutional backtest with 35 collapsible sheets, 4 KPI cards,
+    governance text viewers, and embedded Plotly figures).
     """
     p = _ROOT / "outputs" / "dashboard.html"
     if not p.exists():
         return
     size_mb = p.stat().st_size / 1e6
-    assert size_mb < 10.0, (
-        f"dashboard.html size {size_mb:.2f} MB exceeds 10 MB ceiling"
+    assert size_mb < 13.0, (
+        f"dashboard.html size {size_mb:.2f} MB exceeds 13 MB v11.1 ceiling"
     )
 
 

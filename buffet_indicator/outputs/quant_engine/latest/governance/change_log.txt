@@ -1,0 +1,41 @@
+
+=== CHANGE LOG (v43 → v48) ===
+
+## v48 (20260520_1951)
+ACCEPTED from ChatGPT 5.4:
+- v47 as base branch (cleanest for mainline)
+- GFC as priority #1 issue
+- Alpha hurdle = beat FACTOR-ONLY
+- SEASONAL drop, RESMOM_52WH challenger-only, MAX_ANOMALY archive
+
+REJECTED from ChatGPT 5.4:
+- BW/W validation (user explicit: monthly-only)
+- Rank by FULL Sharpe only (added multi-factor composite)
+- ETF research-only (kept with caveats due to unique GFC alpha)
+
+NEW in v48:
+- Bug fix: Bootstrap Sharpe convention (rf_annual 0.04 → 0.0)
+- 6 institutional sheets (Ranking, SP500 H2H, $ Growth, Scorecard, Institutional/Retail Pitch)
+- Crisis cost stress (GFC + Bear22 + Dotcom at 45/100bps)
+- Period duration assertion (user explicit)
+- Realistic slippage model (square-root impact)
+- Share-level capital accounting with reconciliation
+- Governance artifacts (this document)
+
+## v47
+- 4-layer robustness (Bootstrap, Path MC, Parametric, WF OOS)
+- 11 cycles + 2 FULL periods
+- Data availability matrix
+
+## v46
+- Added MAX_ANOMALY alpha (FAILED Gate 2, corr EW 0.915)
+
+## v45
+- Added RESMOM_52WH alpha (FAILED Gate 2, corr EW 0.898)
+
+## v44
+- Added SEASONAL alpha (FAILED all gates)
+
+## v43
+- Strategic revert to v40 + diagnostic sheets
+- Baseline: DD-TARGET Sharpe 1.069, MaxDD -16.74%

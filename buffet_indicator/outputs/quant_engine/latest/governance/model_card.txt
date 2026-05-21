@@ -1,0 +1,98 @@
+
+# MODEL CARD — Quant Engine v50
+
+## Model Details
+- **Model Name**: Systematic US Equity Factor Pipeline
+- **Version**: v50
+- **Type**: Long-only factor-based equity strategy with risk overlay
+- **Rebalance**: Monthly (last trading day of month)
+- **Developer**: Internal quant research
+- **Date**: 20260520_1951
+- **Framework**: Python 3.14.3
+
+## Intended Use
+- **Primary Use**: Systematic US equity allocation for long-term investors
+- **Target Audience**: Institutional allocators ($1M+) and retail investors ($10K+)
+- **Rebalance Frequency**: Monthly
+- **Holding Period**: Designed for 1+ year horizons
+- **Not Intended For**: 
+  - Intraday trading
+  - Short-only or market-neutral strategies  
+  - Leverage > 1.5x
+  - Private equity or illiquid markets
+
+## Strategies Included
+1. **DD-TARGET** — Quadruple-brake risk overlay (Sharpe 1.069, MaxDD -16.74%)
+2. **LowBeta** — Cost-resilient defensive anchor (Sharpe 0.957, beta 0.386)
+3. **LowRisk** — Defensive 3-factor blend (Sharpe 0.956)
+4. **FACTOR-ONLY** — Transparent no-ML benchmark (Sharpe 0.963)
+5. **ENS-Ultra** — ML-augmented growth sleeve (CAGR 13.03%)
+6. **ETF-ROTATION** — State machine with HY credit signal (GFC +0.475)
+7. **EW** — Equal-weight S&P 500 benchmark
+8. **SPY** — Passive buy-and-hold reference
+
+## Data Inputs
+- **Universe**: S&P 500 Current & Past watchlist (~1,890 symbols including delisted)
+- **Data Source**: Norgate US Equities Diamond (survivorship-bias-free)
+- **Price Adjustment**: Total return (splits + dividends)
+- **Reference Data**: VIX (1990+), VIX3M (2007+), HYG (2007+), LQD (2002+), US10Y
+- **PIT Compliance**: All features lagged by 1 bar vs execution
+- **Delisted Handling**: Last-quoted date tracking, returns applied
+
+## Features Used
+- Momentum: 252d / 126d skip-1mo, 52-week high nearness, trend consistency
+- Risk: realized vol 63d, idiosyncratic vol 63d, negative beta
+- Residual momentum (post market-beta adjustment)
+- Liquidity: Amihud illiquidity measure
+- Trend: above 200-SMA signal
+
+## Training & Validation
+- **ML Model**: LightGBM Gradient Boosting
+- **Walk-Forward**: 36mo train / 6mo validate / 10d purge / 6mo test, 3mo step
+- **OOS Folds**: ~51 independent 6-month windows
+- **Random Seed**: 42 (fixed for reproducibility)
+
+## Performance (26-year backtest, 2000-2026, 15bps cost)
+- **Top Sleeve (DD-TARGET)**: Sharpe 1.069, CAGR 12.17%, MaxDD -16.74%
+- **Benchmark (SPY)**: Sharpe 0.501, CAGR 8.07%, MaxDD -55.19%
+- **Edge over SPY**: +113% Sharpe, 3.3x lower drawdown
+
+## Known Limitations
+1. **Long-only constraint**: Cannot profit from declining markets
+2. **Monthly frequency**: Not suitable for rapid regime changes
+3. **US equity only**: No geographic or asset class diversification
+4. **GFC weakness**: DD-TARGET Sharpe -1.096 in 2007-2009 systemic crisis
+5. **Pre-2007 data**: Missing VIX3M, HYG → DD-TARGET uses 3 of 4 brakes
+6. **ML dependency (ENS-Ultra)**: Requires clean training data, retraining
+
+## Risk Controls
+- Max leverage: 1.5
+- DD target: 8.0%
+- VIX caution threshold: 30.0
+- VIX panic threshold: 40.0
+- Liquidity filter: ADV > $5,000,000, price > $10.00
+- Minimum history: 252 days
+
+## Ethical Considerations
+- **Fair access**: Strategy documented and replicable by any researcher with Norgate data
+- **Transparency**: All 30 Excel sheets show decision logic
+- **No optimization against benchmarks**: Signals built from economic theory first
+- **Disclosed failure modes**: GFC weakness explicit in GFC Forensic sheet
+
+## Sign-offs Required Before Live Deployment
+- [ ] Quant Research (model logic correctness)
+- [ ] Risk Management (exposure limits)
+- [ ] Technology (execution infrastructure)
+- [ ] Compliance (regulatory adherence)
+- [ ] PM (final allocation decision)
+
+## Change Log
+- **v43**: Strategic revert to v40 + diagnostic sheets (Sharpe 1.069 baseline)
+- **v44-v46**: Alpha exploration (SEASONAL, RESMOM_52WH, MAX_ANOMALY) — all failed Gate 2
+- **v47**: 4-layer robustness suite + 11-period testing + 24 Excel sheets
+- **v48**: Critical bug fixes + institutional pitch + gap-closer implementations (30 sheets, PASS target)
+
+## Contact
+- **Owner**: [Pipeline owner name]
+- **Repository**: [Git URL]
+- **Review Date**: Annual (next: 2027-05-20)

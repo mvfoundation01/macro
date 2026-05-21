@@ -1,6 +1,25 @@
 {% import "_macros.html" as m %}
 <section data-tab="backtest" class="tab-content px-4 py-4">
 
+  <!-- v11.1: Deprecation banner — this v10.0 tactical backtest is superseded
+       by the Strategy Engine tab (vendored v50 institutional pipeline). -->
+  <div class="deprecated-banner rounded-lg border-l-4 border-amber-500 bg-amber-50 p-4 mb-6"
+       role="alert">
+    <p class="text-sm leading-relaxed">
+      ⚠ <strong>Deprecated as of v11.1.</strong> The MVCI tactical backtest
+      (v10.0 Rule A binary threshold) has been replaced by the
+      <a href="#tab=strategy_engine" class="text-blue-700 underline font-semibold"
+         onclick="document.querySelector('[data-tab-target=&quot;strategy_engine&quot;], [data-tab=strategy_engine]')?.click()">
+        Strategy Engine
+      </a>
+      in v11.1, which surfaces the user's institutional v50 quant pipeline
+      with 4 active strategies (DD-TARGET, ENS-Ultra, LowBeta, Combination),
+      4-layer 10K-simulation robustness suite, and 35 analytical surfaces
+      across 4 sub-tabs. This page is preserved for historical reference
+      only and will not receive new computation.
+    </p>
+  </div>
+
   <!-- Hero: equity curve strategy vs benchmark -->
   <div class="rounded-lg border bg-white p-4 mb-6 shadow-sm chart-card">
     <h2 class="text-xl font-bold mb-1">Tactical strategy vs buy-and-hold (100% S&amp;P 500 TR)</h2>

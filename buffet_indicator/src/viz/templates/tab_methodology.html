@@ -243,6 +243,106 @@
 
   </div>
 
+  <!-- ================================================================= -->
+  <!-- v11.1: Strategy Engine v50 (V1 — Institutional Backtest)            -->
+  <!-- ================================================================= -->
+  <section class="methodology-section rounded-lg border bg-white p-4 mb-6">
+    <h2 class="text-xl font-bold mb-2">Strategy Engine v50 (V1 — Institutional Backtest)</h2>
+    <p class="text-sm leading-relaxed mb-3 max-w-4xl">
+      v50 is a 7,032-line institutional-grade systematic equity factor pipeline
+      maintained outside MV Valuation at <code>D:\macro\quant_pipeline\</code>.
+      v11.1 integrates it as the primary backtest module, replacing the
+      deprecated v10.0 MVCI tactical rule backtest. The engine is invoked from
+      within the dashboard via a subprocess wrapper
+      (<code>src/quant_engine/runner.py</code>) and its CSV/XLSX/governance
+      outputs are surfaced in the "Strategy Engine" tab.
+    </p>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">V1 strategy lineup (4 active)</h3>
+    <ul class="text-sm leading-relaxed list-disc list-inside space-y-1 mb-3 max-w-4xl">
+      <li><strong>DD-TARGET</strong> — Quadruple-brake risk overlay on internal
+          adaptive blend (50% ENS-Ultra + 50% defensive). Brakes: volatility
+          scaler target 8%, SPY 200-SMA cap 60%, VIX/VIX3M term cap 50%,
+          own-DD reactive cap 30%, fast VIX3M crash cap 20%. All PIT via
+          <code>.shift(1)</code>. Headline: Sharpe 1.069, MaxDD −16.74%,
+          CAGR 12.17% (26.3 yr).</li>
+      <li><strong>ENS-Ultra</strong> — ML-augmented blend (LightGBM
+          walk-forward 36mo train / 6mo val / 10d purge / 6mo test, ~51 OOS
+          folds, 10-feature panel including momentum, residual momentum,
+          idiosyncratic vol, beta, Amihud illiquidity). Sharpe 0.903,
+          CAGR 13.03%, OOS consistency 74.5%.</li>
+      <li><strong>LowBeta</strong> — Negative-beta single-factor defensive
+          sleeve. Sharpe 0.957, cost retention 77.5% at 100bps round-trip.</li>
+      <li><strong>Combination</strong> (NEW in v11.1) — 40% DD-TARGET +
+          30% ENS-Ultra + 30% LowBeta combined at <em>monthly returns</em>
+          level (with 3 bps assumed inter-strategy rebal cost), then
+          compounded back to daily equity curve. Combining at returns rather
+          than equity-curve linear average preserves correct compounding.</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">Data + PIT compliance</h3>
+    <p class="text-sm leading-relaxed mb-3 max-w-4xl">
+      Norgate Diamond survivorship-bias-free S&amp;P 500 universe (~1,890
+      symbols including delisted). All features lagged 1 bar via
+      <code>.shift(1)</code>. Walk-forward purge 10 days + 6mo embargo.
+      Total-return prices (splits + dividends adjusted).
+    </p>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">4-layer robustness suite (10,000 simulations each)</h3>
+    <ol class="text-sm leading-relaxed list-decimal list-inside space-y-1 mb-3 max-w-4xl">
+      <li><strong>Block Bootstrap CI</strong> (Politis–Romano 1994, 21-day
+          blocks) — 5 metrics × 95/99% CI</li>
+      <li><strong>Path MC MaxDD</strong> — shuffled monthly returns,
+          worst-case across 10K paths</li>
+      <li><strong>Parametric Tail</strong> — Gaussian / Student-t / Empirical
+          VaR + CVaR at 95/99/99.9%</li>
+      <li><strong>Walk-Forward OOS Distribution</strong> — per-fold Sharpe
+          across ~52 six-month OOS windows</li>
+    </ol>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">Institutional infrastructure</h3>
+    <ul class="text-sm leading-relaxed list-disc list-inside space-y-1 mb-3 max-w-4xl">
+      <li>Deflated Sharpe Ratio (Lopez de Prado 2014) with Mertens
+          skew-kurt adjustment + cross-sectional Z⁻¹ multi-trial correction</li>
+      <li>Realistic Slippage Model — Almgren–Chriss 2005 square-root market
+          impact</li>
+      <li>Share-level Capital Accounting with PnL reconciliation</li>
+      <li>12-gate QA audit (PIT, leakage, persistence, etc.)</li>
+      <li>Governance artifacts: model card, config snapshot, environment
+          lock, change log (viewable in Strategy Engine → Gap-Closers →
+          Governance)</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">Cost stress (5 levels)</h3>
+    <p class="text-sm leading-relaxed mb-3 max-w-4xl">
+      Every strategy tested at 15 / 30 / 45 / 75 / 100 bps round-trip cost.
+      Retention ratio (Sharpe@100bps / Sharpe@15bps) reported per strategy
+      to surface cost sensitivity.
+    </p>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">What is NOT in V1 (will arrive in v11.2+)</h3>
+    <ul class="text-sm leading-relaxed list-disc list-inside space-y-1 mb-3 max-w-4xl">
+      <li><strong>MV-Conditional V2</strong> — V1 strategies filtered by
+          MVCI/MRC regime signal. Coming in v11.2 with pre-registered
+          conditioning rule.</li>
+      <li>Cross-engine analysis (MV macro × v50 factor backtest joint
+          conditional distribution) — v11.3+</li>
+      <li>Real-time ALFRED vintage data — v11.4+</li>
+      <li>Orthogonalized MRC variant — v11.5+ (deferred from v11.0.2)</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mt-4 mb-2">Selected references</h3>
+    <ul class="text-sm leading-relaxed list-disc list-inside space-y-1 max-w-4xl">
+      <li>Almgren, R. &amp; Chriss, N. (2005). "Optimal Execution with
+          Nonlinear Impact Functions."</li>
+      <li>Bailey, D. &amp; López de Prado, M. (2014). "The Deflated Sharpe
+          Ratio: Correcting for Selection Bias, Backtest Overfitting, and
+          Non-Normality."</li>
+      <li>Politis, D. &amp; Romano, J. (1994). "The Stationary Bootstrap."</li>
+      <li>Kissell, R. &amp; Glantz, M. (2013). "Optimal Trading Strategies."</li>
+    </ul>
+  </section>
+
   <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="text-sm text-blue-600 hover:underline">
     ↑ Back to top
   </button>

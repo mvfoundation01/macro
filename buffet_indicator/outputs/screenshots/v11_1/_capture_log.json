@@ -1,0 +1,64 @@
+{
+  "captures": [
+    {
+      "name": "01_overview_with_strategy_engine_link",
+      "tab": "overview",
+      "size_bytes": 442009,
+      "errors": []
+    },
+    {
+      "name": "02_strategy_engine_header_with_kpis",
+      "tab": "strategy_engine",
+      "size_bytes": 280873,
+      "errors": []
+    },
+    {
+      "name": "03_strategy_engine_core_analytics_subtab",
+      "tab": "strategy_engine",
+      "size_bytes": 280873,
+      "errors": []
+    },
+    {
+      "name": "04_strategy_engine_robustness_subtab",
+      "tab": "strategy_engine",
+      "size_bytes": 216657,
+      "errors": []
+    },
+    {
+      "name": "05_strategy_engine_institutional_subtab",
+      "tab": "strategy_engine",
+      "size_bytes": 229688,
+      "errors": []
+    },
+    {
+      "name": "06_strategy_engine_gap_closers_subtab",
+      "tab": "strategy_engine",
+      "size_bytes": 211127,
+      "errors": []
+    },
+    {
+      "name": "07_strategy_engine_governance_modal",
+      "tab": "strategy_engine",
+      "size_bytes": 288133,
+      "errors": []
+    },
+    {
+      "name": "08_methodology_with_v50_section",
+      "tab": "methodology",
+      "size_bytes": 519344,
+      "errors": []
+    },
+    {
+      "name": "09_deprecated_backtest_banner",
+      "tab": "backtest",
+      "size_bytes": 453819,
+      "errors": []
+    },
+    {
+      "name": "10_layout_fix_verification_hy_ig",
+      "tab": "spread_hy_ig",
+      "size_bytes": 335104,
+      "errors": []
+    }
+  ]
+}

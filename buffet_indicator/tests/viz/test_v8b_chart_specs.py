@@ -190,13 +190,19 @@ def test_V8B_C4_why_it_matters_present_for_every_indicator() -> None:
 
 
 def test_V8B_C5_historical_annotations_added_when_in_range() -> None:
-    """Hero charts spanning 1881+ should annotate 1929, 2000, 2021 peaks."""
+    """Hero charts spanning 1881+ annotate the historical valuation peaks.
+
+    v11.1 L1 fix: the "Post-COVID peak (-25% in 2022)" annotation was removed
+    because the "-25% in 2022" referred to the S&P 500 drawdown, not the
+    indicator's own behavior — and so was contextually wrong on z-score
+    history charts. Only the 1929 + 2000 valuation peaks remain.
+    """
     spec = make_hero_chart(_z_series_long(), "Test", add_historical_annotations=True)
     annotations = spec["layout"].get("annotations") or []
     texts = " ".join(str(a.get("text", "")) for a in annotations)
     assert "1929" in texts
     assert "Dot-com" in texts or "2000" in texts
-    assert "Post-COVID" in texts or "2021" in texts
+    # v11.1 L1: Post-COVID / 2021 peak intentionally removed; no assertion.
 
 
 def test_V8B_C6_no_historical_annotations_for_short_series() -> None:

@@ -1,0 +1,5 @@
+data/master/*.parquet filter=lfs diff=lfs merge=lfs -text
+
+# v11.1: Strategy Engine outputs (large XLSX with 32 sheets, CSV with per-period metrics)
+buffet_indicator/outputs/quant_engine/latest/*.csv filter=lfs diff=lfs merge=lfs -text
+buffet_indicator/outputs/quant_engine/latest/*.xlsx filter=lfs diff=lfs merge=lfs -text

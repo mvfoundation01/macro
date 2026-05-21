@@ -10,6 +10,7 @@ v8b changes (vs v8a):
 """
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -166,10 +167,14 @@ def _add_historical_annotations(z_series: pd.Series, annotations: list[dict[str,
     # All annotations live in the (date, z) data space; anchor side is chosen
     # by relative position to keep labels inside the plotting area on narrow
     # viewports.
+    # v11.1 L1 fix: removed the "Post-COVID peak (-25% in 2022)" annotation
+    # from indicator z-score history charts — the "-25% in 2022" refers to
+    # the S&P 500 drawdown, not the indicator's own behavior, so the
+    # annotation was contextually wrong on z-score charts. The 1929 and 2000
+    # entries are general historical valuation peaks and remain.
     peaks = [
         ("1929-09-30", "1929 peak<br>(crash followed)"),
         ("2000-03-31", "Dot-com peak<br>(-50% over 2y)"),
-        ("2021-12-31", "Post-COVID peak<br>(-25% in 2022)"),
     ]
     for date_str, label in peaks:
         date = pd.Timestamp(date_str)
@@ -421,7 +426,38 @@ def make_panel_b(
     alpha = float(regression.get("alpha", 0.0))
     beta = float(regression.get("beta", 0.0))
     r_squared = float(regression.get("r_squared", 0.0))
-    t_nw = float(regression.get("t_nw", 0.0))
+    # v11.1 L4 fix: t_NW (and t_HH if present) may be NaN for 10Y horizons due
+    # to insufficient effective sample size — display "n/a" instead of "+nan".
+    _t_nw_raw = regression.get("t_nw")
+    if _t_nw_raw is None:
+        t_nw_str = "t_NW = n/a"
+    else:
+        try:
+            _t_nw = float(_t_nw_raw)
+        except (TypeError, ValueError):
+            t_nw_str = "t_NW = n/a"
+        else:
+            if math.isnan(_t_nw) or math.isinf(_t_nw):
+                t_nw_str = "t_NW = n/a"
+            else:
+                t_nw_str = f"t_NW = {_t_nw:+.2f}"
+    # Optional t_HH (Hansen-Hodrick), only displayed when present and finite.
+    _t_hh_raw = regression.get("t_hh")
+    t_hh_str = ""
+    if _t_hh_raw is not None:
+        try:
+            _t_hh = float(_t_hh_raw)
+            if math.isfinite(_t_hh):
+                t_hh_str = f"<br>t_HH = {_t_hh:+.2f}"
+        except (TypeError, ValueError):
+            pass
+    # Keep the existing t_nw variable for back-compat with line_y formula etc.
+    try:
+        t_nw = float(regression.get("t_nw", 0.0)) if regression.get("t_nw") is not None else 0.0
+        if not math.isfinite(t_nw):
+            t_nw = 0.0
+    except (TypeError, ValueError):
+        t_nw = 0.0
 
     x_min, x_max = -3.0, 3.0
     if x:
@@ -522,14 +558,20 @@ def make_panel_b(
             },
             "annotations": [
                 {
+                    # v11.1 L3 fix: relocated from top-left (y=0.98) to
+                    # bottom-left (y=0.10) so it no longer overlaps with the
+                    # year colorbar legend that sits in the top-left of the
+                    # plot area.
                     "xref": "paper",
                     "yref": "paper",
                     "x": 0.02,
-                    "y": 0.98,
+                    "y": 0.10,
+                    "xanchor": "left",
+                    "yanchor": "bottom",
                     "showarrow": False,
                     "text": (
                         f"R² = {r_squared:.2f}<br>β = {beta:+.3f}<br>"
-                        f"t_NW = {t_nw:+.2f}"
+                        f"{t_nw_str}{t_hh_str}"
                     ),
                     "align": "left",
                     "bgcolor": "rgba(255,255,255,0.9)",
@@ -1909,10 +1951,19 @@ def make_conditional_distribution(
             "x0": bayesian_mean * 100, "x1": bayesian_mean * 100, "y0": 0, "y1": 1,
             "line": {"color": "#1F77B4", "width": 2, "dash": "dash"},
         })
+        # v11.1 L2 fix: position the Bayesian-mean annotation in the
+        # top-right corner of the plot area (xref/yref="paper") so it no
+        # longer overlaps the chart title that sits above. Previously the
+        # arrow's anchor at (bayesian_mean, 0.95) caused the text to sit on
+        # top of the AIC-selected fit annotation in the title region.
         annotations.append({
-            "x": bayesian_mean * 100, "y": 0.95, "xref": "x", "yref": "paper",
-            "showarrow": True, "arrowhead": 2,
+            "x": 0.98, "y": 0.95, "xref": "paper", "yref": "paper",
+            "xanchor": "right", "yanchor": "top",
+            "showarrow": False,
             "text": f"Bayesian mean = {bayesian_mean*100:+.1f}%",
+            "bgcolor": "rgba(255,255,255,0.92)",
+            "bordercolor": "#1F77B4",
+            "borderwidth": 1,
             "font": {"size": 12, "color": "#1F77B4", "family": FONT_FAMILY},
         })
     if var_5 is not None and np.isfinite(var_5):
