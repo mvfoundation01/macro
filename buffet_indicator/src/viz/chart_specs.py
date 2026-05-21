@@ -356,7 +356,7 @@ def make_panel_a(
                 "customdata": customdata,
                 "hovertemplate": (
                     "<b>%{x|%B %Y}</b><br>"
-                    "Z-score: %{y:+.2f} σ<br>"
+                    "Z-score: %{y:+,.2f} σ<br>"
                     "Regime: %{customdata[0]}<br>"
                     "Percentile: %{customdata[1]:.0f}th<extra></extra>"
                 ),
@@ -490,7 +490,7 @@ def make_panel_b(
                 "customdata": custom,
                 "hovertemplate": (
                     "<b>%{customdata}</b><br>"
-                    "z = %{x:+.2f} σ<br>"
+                    "z = %{x:+,.2f} σ<br>"
                     "10Y CAGR = %{y:.1f}%<extra></extra>"
                 ),
                 "name": "Historical",
@@ -735,7 +735,7 @@ def make_sparkline(z_series: pd.Series, *, color: str = "#1F77B4") -> dict[str, 
                 "type": "scatter",
                 "mode": "lines",
                 "line": {"color": color, "width": 1.5},
-                "hovertemplate": "%{x}: %{y:+.2f}σ<extra></extra>",
+                "hovertemplate": "%{x}: %{y:+,.2f}σ<extra></extra>",
                 "showlegend": False,
             }
         ],
@@ -860,7 +860,7 @@ def make_hero_chart(
                 "customdata": customdata,
                 "hovertemplate": (
                     "<b>%{x|%B %Y}</b><br>"
-                    "Z-score: %{y:+.2f} σ<br>"
+                    "Z-score: %{y:+,.2f} σ<br>"
                     "Regime: %{customdata[0]}<br>"
                     "Percentile: %{customdata[1]:.0f}th<extra></extra>"
                 ),
@@ -1053,7 +1053,7 @@ def make_correlation_heatmap(corr_matrix: pd.DataFrame, *, chart_name: str = "co
                 "reversescale": True,
                 "zmin": -1,
                 "zmax": 1,
-                "hovertemplate": "%{x} ↔ %{y}<br>ρ = %{z:+.3f}<extra></extra>",
+                "hovertemplate": "%{x} ↔ %{y}<br>ρ = %{z:+,.3f}<extra></extra>",
                 "colorbar": {
                     "title": {"text": "ρ", "font": {"size": 13, "family": FONT_FAMILY}},
                     "tickfont": {"size": 12, "family": FONT_FAMILY},
@@ -1199,7 +1199,7 @@ def make_acf_pacf_charts(
                 "xaxis": xaxis,
                 "yaxis": yaxis,
                 "name": name,
-                "hovertemplate": "Lag %{x}<br>" + name + " = %{y:+.3f}<extra></extra>",
+                "hovertemplate": "Lag %{x}<br>" + name + " = %{y:+,.3f}<extra></extra>",
                 "showlegend": False,
             }
         )
@@ -1834,7 +1834,7 @@ def make_constituent_contributions(
             {
                 "x": vals, "y": display_labels, "type": "bar", "orientation": "h",
                 "marker": {"color": colors},
-                "hovertemplate": "%{y}: %{x:+.2f}σ<extra></extra>",
+                "hovertemplate": "%{y}: %{x:+,.2f}σ<extra></extra>",
             }
         ],
         "layout": {
@@ -2089,7 +2089,7 @@ def make_dual_z_overlay(
                 "type": "scatter", "mode": "lines",
                 "line": {"color": "#1F77B4", "width": 2},
                 "name": name1,
-                "hovertemplate": f"{name1}: %{{y:+.2f}}σ<extra></extra>",
+                "hovertemplate": f"{name1}: %{{y:+,.2f}}σ<extra></extra>",
             },
             {
                 "x": [pd.Timestamp(d).strftime("%Y-%m-%d") for d in z2c.index],
@@ -2097,7 +2097,7 @@ def make_dual_z_overlay(
                 "type": "scatter", "mode": "lines",
                 "line": {"color": "#7E57C2", "width": 2},
                 "name": name2,
-                "hovertemplate": f"{name2}: %{{y:+.2f}}σ<extra></extra>",
+                "hovertemplate": f"{name2}: %{{y:+,.2f}}σ<extra></extra>",
             },
         ],
         "layout": {

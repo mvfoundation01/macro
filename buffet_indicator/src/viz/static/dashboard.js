@@ -165,6 +165,14 @@
 
     if (tabName === "overview") {
       renderSparklines();
+      // v11.1.1 I1 fix: wire up the MVCI+MRC mini chart on Overview tab.
+      // The chart spec is in DATA.overview_mvci_mrc_mini (populated by
+      // build_macro_charts.build_macro_chart_payload) but was previously
+      // never injected into the #overview-cross-composite-mini div.
+      if (DATA.overview_mvci_mrc_mini && DATA.overview_mvci_mrc_mini.data &&
+          DATA.overview_mvci_mrc_mini.data.length > 0) {
+        renderPlot("overview-cross-composite-mini", DATA.overview_mvci_mrc_mini);
+      }
     } else if (tabName === "mvci") {
       renderVariantPanels("mvci", "mvci");
       const pcaDiv = document.getElementById("mvci-pca-bar");

@@ -1,0 +1,60 @@
+{
+  "captures": [
+    {
+      "name": "01_overview_mvci_mrc_chart_fixed",
+      "tab": "overview",
+      "size_bytes": 544856,
+      "n_errors": 0,
+      "n_warns": 1,
+      "errors": [],
+      "warns": [
+        "console.warn: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation"
+      ]
+    },
+    {
+      "name": "02_strategy_engine_v1_lineup_full",
+      "tab": "strategy_engine",
+      "size_bytes": 304974,
+      "n_errors": 0,
+      "n_warns": 1,
+      "errors": [],
+      "warns": [
+        "console.warn: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation"
+      ]
+    },
+    {
+      "name": "03_hy_ig_conditional_dist_bayesian",
+      "tab": "spread_hy_ig",
+      "size_bytes": 334995,
+      "n_errors": 0,
+      "n_warns": 1,
+      "errors": [],
+      "warns": [
+        "console.warn: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation"
+      ]
+    },
+    {
+      "name": "04_overview_full_page",
+      "tab": "overview",
+      "size_bytes": 544856,
+      "n_errors": 0,
+      "n_warns": 1,
+      "errors": [],
+      "warns": [
+        "console.warn: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation"
+      ]
+    },
+    {
+      "name": "05_strategy_engine_full_page",
+      "tab": "strategy_engine",
+      "size_bytes": 304974,
+      "n_errors": 0,
+      "n_warns": 1,
+      "errors": [],
+      "warns": [
+        "console.warn: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation"
+      ]
+    }
+  ],
+  "all_console_errors": []
+}

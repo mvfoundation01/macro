@@ -84,8 +84,31 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
     # Header KPIs
     headline = metrics.get("headline", {})
 
-    # SPY h2h: take top 8 (4 strategies + 2 indices + top 2 stocks)
-    spy_h2h_top = metrics.get("spy_h2h", [])[:8]
+    # v11.1.1 I2 fix: V1 lineup table now shows ALL 17 entities (4 strategies +
+    # 2 indices + 11 stocks), not just the top 8 by Sharpe. Build from
+    # ranking_full (already sorted Sharpe desc) and join in the delta-vs-SPY
+    # columns from spy_h2h. SPY itself is included with delta=0.
+    h2h_by_label = {e["label"]: e for e in metrics.get("spy_h2h", [])}
+    ranking_full = metrics.get("ranking_full", [])
+    # Determine tier from the row's existing tier field; build the full table.
+    spy_lineup_table: list[dict] = []
+    for row in ranking_full:
+        label = row.get("label")
+        if label is None:
+            continue
+        h2h = h2h_by_label.get(label, {})
+        # SPY is excluded from spy_h2h (it's the baseline) — delta is 0 by definition
+        delta_sh = h2h.get("delta_sharpe_vs_spy", 0.0 if label == "SPY" else None)
+        delta_dd = h2h.get("delta_maxdd_vs_spy", 0.0 if label == "SPY" else None)
+        spy_lineup_table.append({
+            "label": label,
+            "tier": row.get("tier", "Stock"),
+            "sharpe": row.get("sharpe"),
+            "cagr": row.get("cagr"),
+            "maxdd": row.get("maxdd"),
+            "delta_sharpe_vs_spy": delta_sh,
+            "delta_maxdd_vs_spy": delta_dd,
+        })
 
     # Period heatmap as inline Plotly div
     period_heatmap_html = render_period_heatmap_extra(metrics.get("period_heatmap", {}))
@@ -122,7 +145,9 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
         "headline_maxdd_fmt": _fmt_pct(headline.get("maxdd"), digits=2),
         "headline_calmar_fmt": _fmt_signed(headline.get("calmar")),
         "headline_years_fmt": _fmt_years(headline.get("years")),
-        "spy_h2h_top": spy_h2h_top,
+        # v11.1 alias kept for back-compat; new code reads spy_lineup_table.
+        "spy_h2h_top": spy_lineup_table,
+        "spy_lineup_table": spy_lineup_table,
         "period_heatmap_html": period_heatmap_html,
         "groups": groups,
         "group_counts": group_counts,

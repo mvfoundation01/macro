@@ -63,43 +63,51 @@
     </div>
   </div>
 
-  <!-- ===== V1 lineup summary ===== -->
+  <!-- ===== V1 lineup summary (all 17 entities, sorted by Sharpe desc) ===== -->
   <div class="rounded-lg border bg-white p-4 mb-6">
-    <h3 class="text-lg font-semibold mb-2">V1 lineup</h3>
+    <h3 class="text-lg font-semibold mb-2">V1 lineup — full ranking</h3>
+    <div class="max-h-96 overflow-y-auto">
     <table class="text-sm w-full">
-      <thead>
+      <thead class="sticky top-0 bg-white shadow-sm">
         <tr class="text-left text-gray-500 text-xs uppercase border-b">
-          <th class="pr-3 py-1">Strategy</th>
+          <th class="pr-3 py-1">Entity</th>
           <th class="pr-3 py-1">Tier</th>
-          <th class="pr-3 py-1">Sharpe (FULL @ 15bps)</th>
+          <th class="pr-3 py-1">Sharpe</th>
+          <th class="pr-3 py-1">CAGR</th>
+          <th class="pr-3 py-1">MaxDD</th>
           <th class="pr-3 py-1">ΔSharpe vs SPY</th>
           <th class="pr-3 py-1">ΔMaxDD vs SPY</th>
         </tr>
       </thead>
       <tbody>
-        {% for row in se.spy_h2h_top %}
-        <tr class="border-b border-gray-100">
-          <td class="pr-3 py-1 font-medium">{{ row.label }}</td>
+        {% for row in se.spy_lineup_table %}
+        <tr class="border-b border-gray-100 {% if row.label == 'SPY' %}bg-gray-50{% endif %}">
+          <td class="pr-3 py-1 font-medium">{{ row.label }}{% if row.label == 'SPY' %} <span class="text-xs text-gray-500">(baseline)</span>{% endif %}</td>
           <td class="pr-3 py-1">
             <span class="text-xs px-2 py-0.5 rounded
               {% if row.tier == 'Strategy' %}bg-blue-100 text-blue-800{% elif row.tier == 'Index' %}bg-gray-100 text-gray-700{% else %}bg-amber-50 text-amber-800{% endif %}">
               {{ row.tier }}
             </span>
           </td>
-          <td class="pr-3 py-1">{{ "%.3f"|format(row.sharpe) }}</td>
-          <td class="pr-3 py-1 {% if row.delta_sharpe_vs_spy > 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
-            {{ "%+.3f"|format(row.delta_sharpe_vs_spy) }}
+          <td class="pr-3 py-1">{% if row.sharpe is not none %}{{ "%+.3f"|format(row.sharpe) }}{% else %}n/a{% endif %}</td>
+          <td class="pr-3 py-1">{% if row.cagr is not none %}{{ "%+.2f%%"|format(row.cagr * 100) }}{% else %}n/a{% endif %}</td>
+          <td class="pr-3 py-1">{% if row.maxdd is not none %}{{ "%+.2f%%"|format(row.maxdd * 100) }}{% else %}n/a{% endif %}</td>
+          <td class="pr-3 py-1 {% if row.delta_sharpe_vs_spy is not none and row.delta_sharpe_vs_spy > 0 %}text-emerald-700{% elif row.delta_sharpe_vs_spy is not none and row.delta_sharpe_vs_spy < 0 %}text-red-700{% endif %}">
+            {% if row.delta_sharpe_vs_spy is not none %}{{ "%+.3f"|format(row.delta_sharpe_vs_spy) }}{% else %}n/a{% endif %}
           </td>
-          <td class="pr-3 py-1 {% if row.delta_maxdd_vs_spy is not none and row.delta_maxdd_vs_spy > 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
+          <td class="pr-3 py-1 {% if row.delta_maxdd_vs_spy is not none and row.delta_maxdd_vs_spy > 0 %}text-emerald-700{% elif row.delta_maxdd_vs_spy is not none and row.delta_maxdd_vs_spy < 0 %}text-red-700{% endif %}">
             {% if row.delta_maxdd_vs_spy is not none %}{{ "%+.2f%%"|format(row.delta_maxdd_vs_spy * 100) }}{% else %}n/a{% endif %}
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
     <p class="text-xs text-gray-500 mt-2">
-      LowRisk / FACTOR-ONLY / ETF-ROTATION dropped from V1 per user direction.
-      Re-enable with <code>V11_1_DROP_STRATEGIES=0</code> in env + re-run v50.
+      Showing all {{ se.spy_lineup_table | length }} V1 entities (4 strategies + 2 indices + 11 stocks)
+      for FULL period @ 15 bps round-trip, sorted by Sharpe descending. SPY is the baseline.
+      LowRisk / FACTOR-ONLY / ETF-ROTATION dropped per user direction (re-enable with
+      <code>V11_1_DROP_STRATEGIES=0</code> in env + re-run v50).
     </p>
   </div>
 
