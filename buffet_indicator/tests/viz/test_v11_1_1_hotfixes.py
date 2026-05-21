@@ -24,39 +24,45 @@ def _read_dashboard() -> str:
 # ============================================================
 
 
-# v11.2.2 REVERT: the v11.1.1 "fix" `+.Nf` → `+,.Nf` was wrong — Plotly 2.35.2's
-# d3-format parser REJECTS `+,.Nf` ("bad format" warnings on every hover). The
-# original `+.Nf` was actually valid. v11.2.2 reverts to `+.Nf`. The tests below
-# now assert the v11.2.2 truth (the OPPOSITE of v11.1.1's assertions).
+# v11.2.2-p1 SUPERSEDES v11.2.2-p0's `+.Nf` revert. Empirical evidence from
+# Playwright DevTools captures (Investigation Report + Phase 2 diagnosis,
+# 2026-05-21) showed Plotly 2.35.2 ALSO rejects `+.Nf` (one ``WARN: encountered
+# bad format`` per unique placeholder per session). Both `+,.Nf` (v11.1.1
+# attempt) AND `+.Nf` (v11.2.2-p0 attempt) emit warnings — only `.Nf` (plain
+# decimal, no sign-modifier) is silent. v11.2.2-p1 strips ``+`` from every
+# Plotly hovertemplate placeholder source-side.
 
 
-def test_c1_v11_2_2_revert_no_bad_comma_format_in_source():
-    """v11.2.2 REVERT: `+,.Nf` patterns (the v11.1.1 'fix') are absent."""
+def test_c1_no_bad_comma_format_in_source():
+    """`+,.Nf` patterns (v11.1.1 attempt) remain absent in chart_specs.py."""
     src = CHART_SPECS.read_text(encoding="utf-8")
     bad = re.findall(r'%\{[a-z]:\+,\.\d+f\}', src)
     bad_escaped = re.findall(r'%\{\{[a-z]:\+,\.\d+f\}\}', src)
     total = bad + bad_escaped
     assert not total, (
-        f"v11.1.1's '+,.Nf' patterns still present after v11.2.2 revert: {total}"
+        f"v11.1.1's '+,.Nf' patterns still present in chart_specs.py: {total}"
     )
 
 
-def test_c1_v11_2_2_revert_uses_valid_signed_format_in_source():
-    """v11.2.2 REVERT: `+.Nf` (valid d3-format) is present after revert.
+def test_c1_no_signed_format_in_source():
+    """v11.2.2-p1: `+.Nf` Plotly hovertemplate placeholders are absent.
 
-    Plotly 2.35.2 accepts `+.Nf`, `,.Nf`, `+.N%` — but NOT `+,.Nf`.
+    Plotly 2.35.2 emits ``encountered bad format`` warnings for ANY `+` sign-
+    modifier in hovertemplate placeholders. Use `.Nf` (plain) or pre-format via
+    the ``text`` field.
     """
     src = CHART_SPECS.read_text(encoding="utf-8")
-    valid = re.findall(r'%\{[a-z]:\+\.\d+f\}', src)
-    valid_escaped = re.findall(r'%\{\{[a-z]:\+\.\d+f\}\}', src)
-    total = valid + valid_escaped
-    assert len(total) >= 7, (
-        f"Expected ≥7 valid '+.Nf' patterns after v11.2.2 revert, got {len(total)}"
+    signed = re.findall(r'%\{[a-z]:\+\.\d+f\}', src)
+    signed_escaped = re.findall(r'%\{\{[a-z]:\+\.\d+f\}\}', src)
+    total = signed + signed_escaped
+    assert not total, (
+        f"v11.2.2-p0's '+.Nf' patterns still present in chart_specs.py: {total}. "
+        f"v11.2.2-p1 strips them; use ':.Nf' instead."
     )
 
 
-def test_c1_v11_2_2_revert_no_bad_comma_format_in_rendered_html():
-    """v11.2.2 REVERT: rendered HTML has 0 `+,.Nf` patterns."""
+def test_c1_no_bad_comma_format_in_rendered_html():
+    """Rendered HTML has 0 `+,.Nf` patterns (v11.1.1 attempt remains reverted)."""
     html = _read_dashboard()
     bad = re.findall(r'%\{[a-z]:\+,\.\d+f\}', html)
     assert not bad, f"v11.1.1's '+,.Nf' patterns leaked into rendered HTML: {len(bad)}"
