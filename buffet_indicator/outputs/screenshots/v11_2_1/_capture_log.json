@@ -1,0 +1,141 @@
+{
+  "captures": [
+    {
+      "name": "01_overview_regression",
+      "tab": "overview",
+      "size_bytes": 544884,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "02_strategy_engine_v1_lineup_regression",
+      "tab": "strategy_engine",
+      "size_bytes": 433289,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "03_strategy_engine_v2_banner_regression",
+      "tab": "strategy_engine",
+      "size_bytes": 433289,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "04_ea_surface_1_summary",
+      "tab": "strategy_engine",
+      "size_bytes": 489274,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "05_ea_surface_2_drawdowns",
+      "tab": "strategy_engine",
+      "size_bytes": 680489,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "06_ea_surface_3_rolling",
+      "tab": "strategy_engine",
+      "size_bytes": 473421,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "07_ea_surface_4_risk_metrics",
+      "tab": "strategy_engine",
+      "size_bytes": 469098,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "08_ea_surface_5_returns",
+      "tab": "strategy_engine",
+      "size_bytes": 467169,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "09_ea_surface_6_lump_sum",
+      "tab": "strategy_engine",
+      "size_bytes": 476469,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "10_ea_surface_7_risk_vs_return",
+      "tab": "strategy_engine",
+      "size_bytes": 464602,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "11_ea_surface_8_withdrawal",
+      "tab": "strategy_engine",
+      "size_bytes": 480218,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "12_ea_surface_9_seasonality",
+      "tab": "strategy_engine",
+      "size_bytes": 482286,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "13_methodology_regression",
+      "tab": "methodology",
+      "size_bytes": 518916,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "14_diagnostics_regression",
+      "tab": "diagnostics",
+      "size_bytes": 432138,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "15_pushstate_routing_working",
+      "tab": "strategy_engine (restored)",
+      "restored_tab_observed": "strategy_engine",
+      "size_bytes": 433289,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    }
+  ],
+  "all_console_errors": []
+}
