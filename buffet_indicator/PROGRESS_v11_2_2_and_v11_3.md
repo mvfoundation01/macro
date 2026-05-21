@@ -108,23 +108,49 @@ Branches NOT pushed to origin (user hasn't authorized push).
 ### Invariants to re-verify each session:
 
 ```bash
-cd D:/macro
-sha256sum quant_pipeline/quant_engine_v50_FINAL.py   # Must equal 5c8bedd... (v11.2.2 baseline)
-git log --oneline buffet_indicator/specs/MV_CONDITIONAL_RULE_PREREGISTER.md   # First commit a90b02d
-cd buffet_indicator && python -m pytest tests/viz/test_v11_2_2_hotfixes.py -q   # Must pass 15/15
-du -h outputs/dashboard.html   # Within 18 MB (v11.2.2 ceiling) or 20 MB (v11.3 ceiling)
+# v50 ORIGINAL invariant (path corrected v11.2.2-p1 — was wrongly pointing at the COPY)
+sha256sum "D:/Quant Pipeline/Momentum pipeline/quant_engine_v50_FINAL.py"
+# Must equal: 6087918db909d3bb3ae66f43305c3331e4171aebc55ddc0366aaff6128026f47
+
+# Pre-reg integrity
+cd D:/macro/buffet_indicator
+git log --oneline specs/MV_CONDITIONAL_RULE_PREREGISTER.md | tail -1 | grep a90b02d
+git log --oneline specs/MV_LIQUIDITY_COMPOSITE_PREREGISTER.md | tail -1 | grep a8635ef
+
+# Test gates (40 hotfix tests post-v11.2.2-p1)
+python -m pytest tests/viz/test_v11_1_1_hotfixes.py tests/viz/test_v11_2_2_hotfixes.py tests/viz/test_v11_2_2_phase3_seasonality_nan.py -q
+
+# Bundle size (≤ 18 MB v11.2.2, ≤ 20 MB v11.3)
+du -h outputs/dashboard.html
 ```
 
 If any invariant fails → STOP, raise `BLOCKED_v11_2_2_<reason>.md` per spec §0.3.
 
 ---
 
+## v50 baseline (CORRECTED 2026-05-21 by Phase 4 of remediation sprint)
+
+Investigation Report `reviews/INVESTIGATION_REPORT_v11_2_2_session_1.md` (Hypothesis H1 PASS) showed Session 1's recorded SHA was on the wrong file:
+
+- **Canonical v50 ORIGINAL path**: `D:\Quant Pipeline\Momentum pipeline\quant_engine_v50_FINAL.py`
+- **Canonical v50 ORIGINAL SHA256**: `6087918db909d3bb3ae66f43305c3331e4171aebc55ddc0366aaff6128026f47` ← matches the spec literal, unchanged from v11.2.0-stat era (mtime 2026-04-29). The spec literal was NEVER stale.
+- **v50 COPY (modifiable, carries v11.2 EXPORT_RETURNS hook)**: `D:\macro\quant_pipeline\quant_engine_v50_FINAL.py`
+- **v50 COPY SHA256**: `5c8bedd259f28428188d0d98334520aab6bdade5b8f04de1c6071673c69e636b` (this is what Session 1 hashed and mis-labelled as "baseline")
+
+All future invariant checks target the ORIGINAL at the canonical path. The COPY is a working file for v50 experimentation; its SHA changes freely. **No custody break occurred** — the ORIGINAL is intact since v11.2.0-stat.
+
+Session 1 §A.0 line 16 ("recorded as v11.2.2 baseline") was a path-mistake, not a custody break. Apologies; the spec was right all along.
+
+---
+
 ## Known issues / blockers
 
-- **None currently blocking**. P0 ship is clean.
-- v50 SHA differs from spec literal — recorded as actual v11.2.2 baseline; spec value likely stale.
+- **None currently blocking** after v11.2.2-p1 remediation.
+- ~~v50 SHA differs from spec literal~~ → RESOLVED: corrected above. The spec literal is the ORIGINAL SHA; Session 1 had mistakenly hashed the COPY.
 - EW omitted from strategy equity curves (v50 doesn't yet emit per-month EW); deferred.
-- Playwright DevTools sweep not yet run for v11.2.2-p0 (only source-level verification via tests). Run before v11.2.2-final tag.
+- ~~Playwright DevTools sweep not yet run for v11.2.2-p0~~ → DONE in Investigation Session 1; found B1 residual which v11.2.2-p1 (commit d629459, this sprint) fixes.
+- **NEW (deferred to v11.2.3)**: 131 SVG NaN render errors per Playwright capture — Plotly internal `<text>` and `<image>` attribute errors. Independent of B1; root cause not investigated this sprint. See `BACKLOG_v11_2_3.md`.
+- **NEW (deferred to v11.2.3)**: `.github/workflows/deploy.yml` from master spec §1.6.8 is absent from the repo. No CI auto-deploy currently. See `BACKLOG_v11_2_3.md`.
 
 ---
 
