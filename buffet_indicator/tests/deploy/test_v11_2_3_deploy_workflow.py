@@ -1,11 +1,24 @@
-"""Stage 0 - verify deploy.yml correctness."""
+"""Stage 0 - verify deploy.yml correctness.
+
+deploy.yml lives at the GIT REPO ROOT (D:/macro/.github/workflows/deploy.yml),
+NOT inside buffet_indicator/. We walk up from this test file to find the .git
+directory and resolve paths relative to it.
+"""
 import pathlib
 
 import yaml
 
 
+def _repo_root() -> pathlib.Path:
+    p = pathlib.Path(__file__).resolve()
+    for parent in [p, *p.parents]:
+        if (parent / ".git").exists():
+            return parent
+    raise RuntimeError("could not locate git repo root")
+
+
 def _load_workflow():
-    p = pathlib.Path(".github/workflows/deploy.yml")
+    p = _repo_root() / ".github" / "workflows" / "deploy.yml"
     with open(p) as f:
         return yaml.safe_load(f)
 
@@ -16,8 +29,8 @@ def _get_on(data):
 
 
 def test_deploy_yml_exists():
-    p = pathlib.Path(".github/workflows/deploy.yml")
-    assert p.exists(), "deploy.yml not at expected path"
+    p = _repo_root() / ".github" / "workflows" / "deploy.yml"
+    assert p.exists(), f"deploy.yml not at expected path: {p}"
 
 
 def test_deploy_yml_valid_yaml():
@@ -45,11 +58,11 @@ def test_deploy_yml_triggers_on_main_push():
 
 
 def test_dockerfile_exists():
-    assert pathlib.Path("Dockerfile").exists()
+    assert (_repo_root() / "buffet_indicator" / "Dockerfile").exists()
 
 
 def test_dockerignore_excludes_sensitive():
-    p = pathlib.Path(".dockerignore")
+    p = _repo_root() / "buffet_indicator" / ".dockerignore"
     assert p.exists()
     content = p.read_text()
     for sensitive in [".env", "config.yaml", "data/raw"]:
