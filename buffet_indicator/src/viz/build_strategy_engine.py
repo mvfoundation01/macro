@@ -150,6 +150,12 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
     except Exception as exc:  # noqa: BLE001
         print(f"[v11.2.1 surface 1 summary] failed to build: {exc}")
         extended_analytics["summary"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_drawdowns_surface
+        extended_analytics["drawdowns"] = build_drawdowns_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 2 drawdowns] failed to build: {exc}")
+        extended_analytics["drawdowns"] = {"available": False, "reason": str(exc), "per_strategy": []}
 
     return {
         "headline_sharpe_fmt": _fmt_signed(headline.get("sharpe")),

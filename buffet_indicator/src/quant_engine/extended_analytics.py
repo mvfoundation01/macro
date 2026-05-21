@@ -203,7 +203,250 @@ def build_summary_surface(
     }
 
 
+# ── Surface 2 — Drawdowns + episode enumeration + macro regime overlay ──
+
+
+def find_drawdown_episodes(
+    returns: pd.Series, min_depth: float = 0.05
+) -> pd.DataFrame:
+    """Enumerate ALL drawdown episodes ≥ ``min_depth`` on a monthly return series.
+
+    Episode = peak → bottom → recovery (back to peak). For episodes that
+    have not yet recovered at series end, ``recovery_date`` is NaT and
+    ``recovered=False`` (still underwater).
+
+    Returns DataFrame indexed by episode number with columns:
+        peak_date, bottom_date, recovery_date,
+        depth_pct, depth_dollar (from $10K base),
+        time_to_bottom_months, time_to_recover_months, time_underwater_months,
+        recovered (bool)
+    """
+    if returns.empty:
+        return pd.DataFrame(
+            columns=[
+                "peak_date", "bottom_date", "recovery_date",
+                "depth_pct", "depth_dollar",
+                "time_to_bottom_months", "time_to_recover_months",
+                "time_underwater_months", "recovered",
+            ]
+        )
+    eq = (1.0 + returns).cumprod() * 10_000.0
+    running_max = eq.cummax()
+    drawdown = (eq - running_max) / running_max
+
+    episodes: list[dict[str, Any]] = []
+    in_dd = False
+    peak_date: pd.Timestamp | None = None
+    bottom_date: pd.Timestamp | None = None
+    bottom_value: float = 0.0
+    peak_equity_at_episode: float = 0.0
+    EPS = 1e-6
+    for date, dd_val in drawdown.items():
+        eq_val = float(eq.loc[date])
+        if not in_dd:
+            if dd_val < -EPS:
+                in_dd = True
+                # The peak was the previous month-end's running_max value.
+                # Approximate by walking backward to the last running_max.
+                peak_date = running_max.loc[:date].idxmax()
+                peak_equity_at_episode = float(running_max.loc[date])
+                bottom_value = float(dd_val)
+                bottom_date = date
+        else:
+            if dd_val < bottom_value:
+                bottom_value = float(dd_val)
+                bottom_date = date
+            if dd_val >= -EPS:
+                # Recovered.
+                if abs(bottom_value) >= min_depth:
+                    months_to_bottom = ((bottom_date - peak_date).days / 30.4375)
+                    months_to_recover = ((date - bottom_date).days / 30.4375)
+                    episodes.append({
+                        "peak_date": peak_date,
+                        "bottom_date": bottom_date,
+                        "recovery_date": date,
+                        "depth_pct": float(bottom_value),
+                        "depth_dollar": float(peak_equity_at_episode * bottom_value),
+                        "time_to_bottom_months": float(months_to_bottom),
+                        "time_to_recover_months": float(months_to_recover),
+                        "time_underwater_months": float(months_to_bottom + months_to_recover),
+                        "recovered": True,
+                    })
+                in_dd = False
+                peak_date = bottom_date = None
+                bottom_value = 0.0
+
+    # Open (not-yet-recovered) episode at series end.
+    if in_dd and abs(bottom_value) >= min_depth:
+        months_to_bottom = ((bottom_date - peak_date).days / 30.4375)
+        months_underwater = ((returns.index[-1] - peak_date).days / 30.4375)
+        episodes.append({
+            "peak_date": peak_date,
+            "bottom_date": bottom_date,
+            "recovery_date": pd.NaT,
+            "depth_pct": float(bottom_value),
+            "depth_dollar": float(peak_equity_at_episode * bottom_value),
+            "time_to_bottom_months": float(months_to_bottom),
+            "time_to_recover_months": float("nan"),
+            "time_underwater_months": float(months_underwater),
+            "recovered": False,
+        })
+
+    return pd.DataFrame(episodes)
+
+
+def tag_episodes_with_macro_regime(
+    episodes: pd.DataFrame,
+    mvci_z: pd.Series | None = None,
+    mrc_z: pd.Series | None = None,
+) -> pd.DataFrame:
+    """Upgrade 5: attach MVCI z, MRC z, and regime label at each episode's peak date.
+
+    Uses as-of-lookup (pandas ``Series.asof``) — if z is unavailable at peak
+    date, returns NaN.
+    """
+    out = episodes.copy()
+    if mvci_z is None and mrc_z is None:
+        # Lazy import to avoid cycles when called outside the orchestrator.
+        from src.quant_engine.mv_conditional import load_mvci_mrc_zscores_monthly
+        try:
+            z = load_mvci_mrc_zscores_monthly()
+            mvci_z = z["z_mvci"]
+            mrc_z = z["z_mrc"]
+        except Exception:
+            out["mvci_z_at_peak"] = float("nan")
+            out["mrc_z_at_peak"] = float("nan")
+            out["regime_at_peak"] = "unknown"
+            return out
+
+    if "peak_date" not in out.columns or out.empty:
+        out["mvci_z_at_peak"] = []
+        out["mrc_z_at_peak"] = []
+        out["regime_at_peak"] = []
+        return out
+
+    def _asof(s: pd.Series | None, d: pd.Timestamp) -> float:
+        if s is None or s.empty or pd.isna(d):
+            return float("nan")
+        try:
+            v = s.asof(d)
+            return float(v) if pd.notna(v) else float("nan")
+        except Exception:
+            return float("nan")
+
+    out["mvci_z_at_peak"] = out["peak_date"].apply(lambda d: _asof(mvci_z, d))
+    out["mrc_z_at_peak"] = out["peak_date"].apply(lambda d: _asof(mrc_z, d))
+
+    def _regime(row: pd.Series) -> str:
+        mv, mr = row["mvci_z_at_peak"], row["mrc_z_at_peak"]
+        if pd.isna(mv) or pd.isna(mr):
+            return "unknown"
+        if mv > 0.5 and mr > 0.5:
+            return "high_val_high_stress"
+        if mv > 0.5 and mr <= 0.5:
+            return "high_val_low_stress"
+        if mv <= 0.5 and mr > 0.5:
+            return "low_val_high_stress"
+        return "low_val_low_stress"
+
+    out["regime_at_peak"] = out.apply(_regime, axis=1)
+    return out
+
+
+def build_drawdowns_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+    min_depth: float = 0.05,
+) -> dict[str, Any]:
+    """Surface 2: Drawdown episodes per strategy + macro regime overlay (Upgrade 5)."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "per_strategy": []}
+
+    # Load z-scores once.
+    mvci_z = mrc_z = None
+    try:
+        from src.quant_engine.mv_conditional import load_mvci_mrc_zscores_monthly
+        z = load_mvci_mrc_zscores_monthly()
+        mvci_z = z["z_mvci"]
+        mrc_z = z["z_mrc"]
+    except Exception:
+        pass
+
+    per_strategy: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        episodes = find_drawdown_episodes(sr.monthly.dropna(), min_depth=min_depth)
+        if not episodes.empty:
+            episodes = tag_episodes_with_macro_regime(episodes, mvci_z, mrc_z)
+            episodes = episodes.sort_values("depth_pct").reset_index(drop=True)
+
+        # Format for HTML rendering.
+        episode_rows: list[dict[str, Any]] = []
+        for _, ep in episodes.iterrows():
+            episode_rows.append({
+                "peak_date_fmt": ep["peak_date"].strftime("%Y-%m") if pd.notna(ep["peak_date"]) else "n/a",
+                "bottom_date_fmt": ep["bottom_date"].strftime("%Y-%m") if pd.notna(ep["bottom_date"]) else "n/a",
+                "recovery_date_fmt": (
+                    ep["recovery_date"].strftime("%Y-%m") if pd.notna(ep["recovery_date"]) else "underwater"
+                ),
+                "depth_pct_fmt": _fmt_pct(float(ep["depth_pct"]), digits=2),
+                "depth_dollar_fmt": f"-${abs(float(ep['depth_dollar'])):,.0f}" if pd.notna(ep["depth_dollar"]) else "n/a",
+                "time_to_bottom_fmt": f"{ep['time_to_bottom_months']:.1f}",
+                "time_to_recover_fmt": (
+                    f"{ep['time_to_recover_months']:.1f}" if pd.notna(ep["time_to_recover_months"]) else "n/a"
+                ),
+                "time_underwater_fmt": f"{ep['time_underwater_months']:.1f}",
+                "recovered": bool(ep["recovered"]),
+                "mvci_z_at_peak_fmt": (
+                    f"{ep['mvci_z_at_peak']:+.2f}" if pd.notna(ep.get("mvci_z_at_peak", float("nan"))) else "n/a"
+                ),
+                "mrc_z_at_peak_fmt": (
+                    f"{ep['mrc_z_at_peak']:+.2f}" if pd.notna(ep.get("mrc_z_at_peak", float("nan"))) else "n/a"
+                ),
+                "regime_at_peak": ep.get("regime_at_peak", "unknown"),
+            })
+
+        # Summary stats over recovered episodes.
+        recovered = episodes[episodes["recovered"]] if not episodes.empty else episodes
+        if not recovered.empty:
+            summary = {
+                "n_episodes": int(len(episodes)),
+                "n_recovered": int(len(recovered)),
+                "worst_dd_pct": _fmt_pct(float(recovered["depth_pct"].min()), digits=2),
+                "median_dd_pct": _fmt_pct(float(recovered["depth_pct"].median()), digits=2),
+                "median_time_to_recover_months_fmt": f"{float(recovered['time_to_recover_months'].median()):.1f}",
+                "worst_time_to_recover_months_fmt": f"{float(recovered['time_to_recover_months'].max()):.1f}",
+            }
+        else:
+            summary = {
+                "n_episodes": int(len(episodes)),
+                "n_recovered": 0,
+                "worst_dd_pct": "n/a", "median_dd_pct": "n/a",
+                "median_time_to_recover_months_fmt": "n/a",
+                "worst_time_to_recover_months_fmt": "n/a",
+            }
+
+        per_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "episodes": episode_rows,
+            "summary": summary,
+        })
+
+    return {
+        "available": True,
+        "min_depth_pct": _fmt_pct(min_depth, digits=0),
+        "per_strategy": per_strategy,
+        "meta": {
+            "macro_overlay_available": mvci_z is not None,
+        },
+    }
+
+
 __all__ = [
     "V2_LABELS",
     "build_summary_surface",
+    "find_drawdown_episodes",
+    "tag_episodes_with_macro_regime",
+    "build_drawdowns_surface",
 ]

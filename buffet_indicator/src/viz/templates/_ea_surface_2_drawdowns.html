@@ -1,0 +1,89 @@
+<!-- v11.2.1.2 — Extended Analytics Surface 2: Drawdowns + macro regime overlay -->
+{% if se.extended_analytics and se.extended_analytics.drawdowns and se.extended_analytics.drawdowns.available %}
+{% set s2 = se.extended_analytics.drawdowns %}
+<details id="ea-surface-2-drawdowns" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 2: Drawdowns
+    <span class="text-xs font-normal text-gray-500 ml-2">
+      (episodes &ge; {{ s2.min_depth_pct }} depth &middot;
+      macro regime overlay {% if s2.meta.macro_overlay_available %}<strong class="text-emerald-700">active</strong>{% else %}<span class="text-gray-500">unavailable</span>{% endif %})
+    </span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 episode tables shown for transparency only.
+    </p>
+    {% for s in s2.per_strategy %}
+    <div class="mb-5">
+      <h4 class="font-semibold text-gray-800 mb-1">
+        {{ s.label }}
+        {% if s.is_v2 %}<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-orange-200 text-orange-900">DIAGNOSTIC</span>{% endif %}
+        <span class="ml-2 text-xs font-normal text-gray-500">
+          {{ s.summary.n_episodes }} episodes ({{ s.summary.n_recovered }} recovered) &middot;
+          worst {{ s.summary.worst_dd_pct }} &middot; median {{ s.summary.median_dd_pct }} &middot;
+          median recovery {{ s.summary.median_time_to_recover_months_fmt }} mo (worst {{ s.summary.worst_time_to_recover_months_fmt }} mo)
+        </span>
+      </h4>
+      {% if s.episodes %}
+      <div class="overflow-x-auto">
+        <table class="text-xs w-full">
+          <thead class="bg-gray-100 text-left uppercase text-gray-600">
+            <tr>
+              <th class="px-2 py-1">Peak</th>
+              <th class="px-2 py-1">Bottom</th>
+              <th class="px-2 py-1">Recovery</th>
+              <th class="px-2 py-1 text-right">Depth %</th>
+              <th class="px-2 py-1 text-right">Depth $</th>
+              <th class="px-2 py-1 text-right">To bottom (mo)</th>
+              <th class="px-2 py-1 text-right">To recover (mo)</th>
+              <th class="px-2 py-1 text-right">Underwater (mo)</th>
+              <th class="px-2 py-1 text-right">MVCI z@peak</th>
+              <th class="px-2 py-1 text-right">MRC z@peak</th>
+              <th class="px-2 py-1">Regime @peak</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% for ep in s.episodes %}
+            <tr class="{% if not ep.recovered %}bg-red-50{% endif %}">
+              <td class="px-2 py-1 tabular-nums">{{ ep.peak_date_fmt }}</td>
+              <td class="px-2 py-1 tabular-nums">{{ ep.bottom_date_fmt }}</td>
+              <td class="px-2 py-1 tabular-nums {% if not ep.recovered %}text-red-700 font-medium{% endif %}">{{ ep.recovery_date_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums font-medium text-red-700">{{ ep.depth_pct_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums text-red-700">{{ ep.depth_dollar_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums">{{ ep.time_to_bottom_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums">{{ ep.time_to_recover_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums">{{ ep.time_underwater_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums">{{ ep.mvci_z_at_peak_fmt }}</td>
+              <td class="px-2 py-1 text-right tabular-nums">{{ ep.mrc_z_at_peak_fmt }}</td>
+              <td class="px-2 py-1">
+                <span class="text-xs px-1.5 py-0.5 rounded
+                  {% if ep.regime_at_peak == 'high_val_high_stress' %}bg-red-100 text-red-800
+                  {% elif ep.regime_at_peak == 'high_val_low_stress' %}bg-orange-100 text-orange-800
+                  {% elif ep.regime_at_peak == 'low_val_high_stress' %}bg-yellow-100 text-yellow-800
+                  {% elif ep.regime_at_peak == 'low_val_low_stress' %}bg-emerald-100 text-emerald-800
+                  {% else %}bg-gray-100 text-gray-600{% endif %}">
+                  {{ ep.regime_at_peak }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-xs text-gray-500 italic">No drawdown episodes &ge; {{ s2.min_depth_pct }} found.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <p class="text-xs text-gray-500 mt-2">
+      Episodes enumerated from monthly equity curves. Macro regime tagged per pre-reg
+      MVCI/MRC z-score quadrants. "Regime @peak" colors:
+      <span class="px-1 rounded bg-red-100">high_val_high_stress</span> /
+      <span class="px-1 rounded bg-orange-100">high_val_low_stress</span> /
+      <span class="px-1 rounded bg-yellow-100">low_val_high_stress</span> /
+      <span class="px-1 rounded bg-emerald-100">low_val_low_stress</span>.
+      Upgrade 5 (macro regime overlay) per spec &sect;B.3.
+    </p>
+  </div>
+</details>
+{% endif %}
