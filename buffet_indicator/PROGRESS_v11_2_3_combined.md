@@ -80,3 +80,23 @@ def2edb v11.2.3-deploy: GitHub Actions auto-deploy + Dockerfile per master spec 
 ```
 
 `spec/liquidity-composite-v1.0` branch unchanged (pre-reg `a8635ef` still sealed).
+
+---
+
+## Session 2 — 2026-05-22 (Claude Opus 4.7 1M context)
+
+### Opening checklist (§1)
+
+| Check | Result |
+|---|---|
+| 1. `git status` — on `main` clean (gitignored only) | ✅ |
+| 2. `git log` HEAD = `91ed81c` with 3 v11.2.3 commits | ✅ |
+| 3. v11.2.3-deploy and v11.2.3-svgnan tags present | ✅ |
+| 4. v50 SHA256 = `6087918db909d3bb3ae66f43305c3331e4171aebc55ddc0366aaff6128026f47` | ✅ |
+| 5. pre-reg `a90b02d` (MV-Conditional) + `a8635ef` (LC v1.0) untouched | ✅ |
+| 6. 32 baseline tests (20 hotfix + 6 svgnan + 6 deploy) | ✅ 32/32 pass in 11.96s |
+| 7. `gh auth status` authenticated as mvfoundation01 | ✅ |
+| 8. Workflow run `26251915766` failed at `Lint (ruff)` exit 127 — confirmed root cause | ✅ |
+
+### Entering Stage 0.5 — CI hotfix
+
