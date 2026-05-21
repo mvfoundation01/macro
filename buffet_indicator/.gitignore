@@ -23,3 +23,8 @@ Thumbs.db
 # Inside repo, outputs/quant_engine/ IS tracked via Git LFS (see .gitattributes)
 logs/v11_1_*.log
 logs/v11_1_*.txt
+
+# v11.2: track the multi-session progress doc + pre-registration SHA marker,
+# but keep the bulky v50 run log out of the commit.
+!logs/v11_2_progress.md
+!logs/v11_2_prereg_sha.txt

@@ -128,16 +128,27 @@
         });
         return params;
       }
-      function writeHash(params) {
+      // v11.2: pushState (not replaceState) so back/forward traverses tab history.
+      // The {tab,group} state object lets popstate restore the prior tab even
+      // when two routes share a hash (e.g., re-clicking the same tab).
+      function writeHash(params, opts) {
         var s = Object.keys(params)
           .filter(function (k) { return params[k] !== undefined && params[k] !== ""; })
           .map(function (k) { return k + "=" + encodeURIComponent(params[k]); })
           .join("&");
-        if (s) {
-          history.replaceState(null, "", "#" + s);
+        if (!s) return;
+        var state = { tab: params.tab, group: params.group };
+        var fromPopState = opts && opts.fromPopState;
+        var fromInit = opts && opts.fromInit;
+        if (fromPopState) return;          // popstate already updated history
+        if (fromInit) {
+          // Initial load — set state on the existing history entry, no push.
+          history.replaceState(state, "", "#" + s);
+        } else {
+          history.pushState(state, "", "#" + s);
         }
       }
-      function activateFromHash() {
+      function activateFromHash(opts) {
         var params = parseHash();
         if (!params.tab) return;
         // Delegate to the existing dashboard.js showTab function by dispatching
@@ -147,7 +158,10 @@
           '.tab-button[data-tab="' + params.tab + '"]'
         );
         if (btn) {
+          // Mark click so the global click handler knows not to pushState again.
+          btn.__fromRouter = true;
           btn.click();
+          btn.__fromRouter = false;
         }
         // Highlight active group.
         document.querySelectorAll(".nav-group").forEach(function (g) {
@@ -161,6 +175,9 @@
       document.addEventListener("click", function (e) {
         var btn = e.target.closest(".tab-button");
         if (!btn) return;
+        // Skip clicks initiated by activateFromHash (popstate or hashchange
+        // already updated history; pushing again would duplicate entries).
+        if (btn.__fromRouter) return;
         var tab = btn.getAttribute("data-tab");
         var group = btn.getAttribute("data-tab-group") || "";
         var params = parseHash();
@@ -168,16 +185,45 @@
         if (group) { params.group = group; }
         writeHash(params);
       });
-      window.addEventListener("hashchange", activateFromHash);
+      // popstate fires when the user clicks back/forward.
+      window.addEventListener("popstate", function (event) {
+        if (event.state && event.state.tab) {
+          // Use state object directly so we restore even when hash is same.
+          var btn = document.querySelector(
+            '.tab-button[data-tab="' + event.state.tab + '"]'
+          );
+          if (btn) {
+            btn.__fromRouter = true;
+            btn.click();
+            btn.__fromRouter = false;
+          }
+          document.querySelectorAll(".nav-group").forEach(function (g) {
+            g.classList.toggle(
+              "active-group",
+              g.getAttribute("data-group") === event.state.group
+            );
+          });
+        } else {
+          // No state (e.g., navigated back to original page entry) — fall back to hash.
+          activateFromHash({ fromPopState: true });
+        }
+      });
+      // hashchange kept as a defensive fallback for direct hash manipulation.
+      window.addEventListener("hashchange", function () { activateFromHash(); });
       // Apply hash on initial load. dashboard.js's initTabs() fires inside
       // its own DOMContentLoaded handler and calls showTab(localStorage); we
       // need to override that with the hash, so use a longer delay to ensure
       // we run AFTER dashboard.js has settled.
       window.addEventListener("DOMContentLoaded", function () {
-        setTimeout(activateFromHash, 250);
+        setTimeout(function () {
+          // Set initial state via replaceState so the first popstate has somewhere to land.
+          var params = parseHash();
+          if (params.tab) writeHash(params, { fromInit: true });
+          activateFromHash();
+        }, 250);
       });
       window.addEventListener("load", function () {
-        setTimeout(activateFromHash, 100);
+        setTimeout(function () { activateFromHash(); }, 100);
       });
       // Group toggle (collapse) handler — independent of tab routing.
       document.addEventListener("click", function (e) {
