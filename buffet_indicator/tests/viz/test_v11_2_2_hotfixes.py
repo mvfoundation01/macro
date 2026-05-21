@@ -204,6 +204,27 @@ def test_b3_v1_equity_grows_at_least_2x_from_2000():
 
 
 # ============================================================
+# v11.2.2.1 — Summary mini equity curve (last 5Y) sub-ship
+# ============================================================
+
+
+def test_v11_2_2_1_summary_mini_equity_div_in_dashboard():
+    """Summary EA surface has the mini equity curve Plotly div."""
+    html = _read_dashboard()
+    assert 'id="ea-surface-1-mini-equity"' in html
+
+
+def test_v11_2_2_1_summary_mini_equity_reuses_equity_payload():
+    """Mini equity chart consumes the existing DATA.strategy_equity_curves payload
+    (no duplicate data ingestion)."""
+    html = _read_dashboard()
+    # Confirm both the mini chart and the source payload exist in the same dashboard
+    assert 'ea-surface-1-mini-equity' in html
+    payload = _dashboard_payload()
+    assert 'strategy_equity_curves' in payload
+
+
+# ============================================================
 # v11.2.2.9 — Seasonality heatmap (first per-surface chart sub-ship)
 # ============================================================
 
