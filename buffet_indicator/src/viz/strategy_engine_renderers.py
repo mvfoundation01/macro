@@ -53,7 +53,7 @@ def _fmt_cell(v: Any) -> str:
         return escape(str(v))
     if abs(n) < 1 and abs(n) > 1e-6:
         return f"{n:+.4f}"
-    return f"{n:+.3f}" if abs(n) < 1000 else f"{n:+,.0f}"
+    return f"{n:+.3f}" if abs(n) < 1000 else f"{n:+.0f}"
 
 
 def _na_banner(sheet_name: str) -> str:

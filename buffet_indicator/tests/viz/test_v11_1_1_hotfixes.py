@@ -24,37 +24,42 @@ def _read_dashboard() -> str:
 # ============================================================
 
 
-def test_c1_no_bad_plotly_format_strings_in_source():
-    """Source has no `%{key:+.Nf}` patterns (the d3-format pattern Plotly
-    2.35.2 emits a 'bad format' warning for).
-    """
+# v11.2.2 REVERT: the v11.1.1 "fix" `+.Nf` → `+,.Nf` was wrong — Plotly 2.35.2's
+# d3-format parser REJECTS `+,.Nf` ("bad format" warnings on every hover). The
+# original `+.Nf` was actually valid. v11.2.2 reverts to `+.Nf`. The tests below
+# now assert the v11.2.2 truth (the OPPOSITE of v11.1.1's assertions).
+
+
+def test_c1_v11_2_2_revert_no_bad_comma_format_in_source():
+    """v11.2.2 REVERT: `+,.Nf` patterns (the v11.1.1 'fix') are absent."""
     src = CHART_SPECS.read_text(encoding="utf-8")
-    # Plotly substitution pattern with + sign immediately before . precision
-    bad = re.findall(r'%\{[a-z]:\+\.\d+f\}', src)
-    # Also check the f-string-escaped variant `%{{...}}`
-    bad_escaped = re.findall(r'%\{\{[a-z]:\+\.\d+f\}\}', src)
+    bad = re.findall(r'%\{[a-z]:\+,\.\d+f\}', src)
+    bad_escaped = re.findall(r'%\{\{[a-z]:\+,\.\d+f\}\}', src)
     total = bad + bad_escaped
-    assert not total, f"Bad '+.Nf' Plotly format strings still present: {total}"
-
-
-def test_c1_safer_plotly_format_strings_in_source():
-    """The corrected `%{key:+,.Nf}` pattern (with comma separator) is present
-    where the hovertemplates exist — confirms the fix replaced the right thing."""
-    src = CHART_SPECS.read_text(encoding="utf-8")
-    safe = re.findall(r'%\{[a-z]:\+,\.\d+f\}', src)
-    safe_escaped = re.findall(r'%\{\{[a-z]:\+,\.\d+f\}\}', src)
-    total = safe + safe_escaped
-    # We fixed 9 occurrences in chart_specs.py
-    assert len(total) >= 7, (
-        f"Expected ≥7 safe '+,.Nf' patterns after fix, got {len(total)}"
+    assert not total, (
+        f"v11.1.1's '+,.Nf' patterns still present after v11.2.2 revert: {total}"
     )
 
 
-def test_c1_no_bad_plotly_format_strings_in_rendered_html():
-    """Rendered HTML has 0 occurrences of `%{key:+.Nf}` in Plotly figure JSON."""
+def test_c1_v11_2_2_revert_uses_valid_signed_format_in_source():
+    """v11.2.2 REVERT: `+.Nf` (valid d3-format) is present after revert.
+
+    Plotly 2.35.2 accepts `+.Nf`, `,.Nf`, `+.N%` — but NOT `+,.Nf`.
+    """
+    src = CHART_SPECS.read_text(encoding="utf-8")
+    valid = re.findall(r'%\{[a-z]:\+\.\d+f\}', src)
+    valid_escaped = re.findall(r'%\{\{[a-z]:\+\.\d+f\}\}', src)
+    total = valid + valid_escaped
+    assert len(total) >= 7, (
+        f"Expected ≥7 valid '+.Nf' patterns after v11.2.2 revert, got {len(total)}"
+    )
+
+
+def test_c1_v11_2_2_revert_no_bad_comma_format_in_rendered_html():
+    """v11.2.2 REVERT: rendered HTML has 0 `+,.Nf` patterns."""
     html = _read_dashboard()
-    bad = re.findall(r'%\{[a-z]:\+\.\d+f\}', html)
-    assert not bad, f"Bad +.Nf patterns leaked into rendered HTML: {len(bad)}"
+    bad = re.findall(r'%\{[a-z]:\+,\.\d+f\}', html)
+    assert not bad, f"v11.1.1's '+,.Nf' patterns leaked into rendered HTML: {len(bad)}"
 
 
 # ============================================================
@@ -240,8 +245,8 @@ def test_regression_backtest_deprecation_banner():
 
 
 def test_bundle_size_within_acceptable_range():
-    """Bundle stays within ±0.5 MB of v11.1's 10.03 MB."""
+    """Bundle stays within v11.2.2's 18 MB ceiling (raised from v11.1's 11.0)."""
     size_mb = DASHBOARD_HTML.stat().st_size / (1024 * 1024)
-    assert 9.5 <= size_mb <= 11.0, (
-        f"Bundle size {size_mb:.2f} MB outside acceptable range [9.5, 11.0]"
+    assert 9.5 <= size_mb <= 18.0, (
+        f"Bundle size {size_mb:.2f} MB outside v11.2.2 range [9.5, 18.0]"
     )

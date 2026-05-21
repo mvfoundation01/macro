@@ -108,7 +108,7 @@
     const el = document.getElementById(divId);
     if (!el) return;
     const data = spec.data || [];
-    const layout = Object.assign({}, spec.layout || {});
+    let layout = Object.assign({}, spec.layout || {});
     const config = Object.assign(
       { responsive: true, displaylogo: false, displayModeBar: true },
       spec.config || {}
@@ -116,6 +116,11 @@
     // Per-render override: only enable scrollZoom on desktop pointing devices.
     if (!IS_TOUCH_DEVICE) {
       config.scrollZoom = true;
+    }
+    // v11.2.2 B4 fix: apply universal Y-axis drag-zoom defaults so users can
+    // pan/zoom Y axis on every chart. Caller layout still wins on explicit keys.
+    if (window.MV_PlotlyConfig && window.MV_PlotlyConfig.applyUniversalDefaults) {
+      layout = window.MV_PlotlyConfig.applyUniversalDefaults(layout);
     }
     if (document.documentElement.classList.contains("dark")) {
       layout.paper_bgcolor = "rgba(0,0,0,0)";

@@ -4,6 +4,24 @@
     <span class="text-sm text-gray-500">Updated {{ asof_label }}</span>
   </div>
 
+  <!-- v11.2.2 B2 fix: notice when opened via file:// (Chrome blocks hash navigation
+       and downloads under file:// origin). Hidden via JS when served over HTTP. -->
+  <div id="file-protocol-notice" style="display:none"
+       class="mx-4 mt-2 mb-1 p-3 bg-yellow-50 border border-yellow-300 text-sm rounded">
+    <strong>Notice:</strong> dashboard opened directly via <code>file://</code>.
+    Chrome may block some downloads and emit "Unsafe attempt to load URL" console
+    warnings. For full interactivity run
+    <code>python scripts/serve_dashboard.py</code> from the project root.
+  </div>
+  <script>
+    (function () {
+      if (window.location.protocol === "file:") {
+        var n = document.getElementById("file-protocol-notice");
+        if (n) n.style.display = "block";
+      }
+    })();
+  </script>
+
   <div class="mx-4 my-3 p-4 rounded-lg text-white shadow"
        data-regime-banner
        style="background-color: {{ regime_color }};">

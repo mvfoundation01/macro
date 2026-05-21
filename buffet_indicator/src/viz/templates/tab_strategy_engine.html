@@ -1,6 +1,81 @@
 {% import "_macros.html" as m %}
 <section data-tab="strategy_engine" class="tab-content px-4 py-4">
 
+  <!-- ===== v11.2.2 B3 — Strategy equity curves ($10K growth, all 4 V1+V2 + SPY) ===== -->
+  <section id="strategy-equity-curves" class="my-2 rounded-lg border bg-white p-4 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between mb-2 gap-2">
+      <h3 class="text-lg font-semibold">Strategy performance — $10,000 growth (monthly rebal)</h3>
+      <div class="text-xs text-gray-500">Drag axes to pan, mouse-wheel to zoom, drag Y-edge for Y zoom.</div>
+    </div>
+    <div id="strategy-equity-curves-plot" style="width:100%;height:480px;"></div>
+    <p class="text-xs text-gray-500 mt-2">
+      <strong>V1 Combination</strong> (blue, thick) is the operational strategy.
+      <strong>V2 rules</strong> (orange, dotted) failed the pre-registered falsifiability test —
+      shown for transparency only. <strong>SPY</strong> (gray) is the buy-and-hold benchmark.
+      EW omitted in this release (v50 doesn't yet emit per-month EW returns).
+    </p>
+  </section>
+
+  <script>
+    (function () {
+      function tryRender() {
+        if (typeof Plotly === "undefined") {
+          window.addEventListener("load", tryRender);
+          return;
+        }
+        var DATA = (window.MV_DASHBOARD || {});
+        var ec = DATA.strategy_equity_curves;
+        if (!ec || !ec.dates) return;
+        var cfg = window.MV_PlotlyConfig || {};
+        var palette = (cfg && cfg.strategyColors) || {
+          "V1_Combination": "#1F77B4",
+          "V2_R-PRIMARY":   "#FF7F0E",
+          "V2_R-ALT1":      "#FFB78C",
+          "V2_R-ALT2":      "#FFCBA8",
+          "SPY":            "#666666"
+        };
+        var seriesOrder = ["V1_Combination", "V2_R-PRIMARY", "V2_R-ALT1", "V2_R-ALT2", "SPY"];
+        var traces = [];
+        for (var i = 0; i < seriesOrder.length; i++) {
+          var name = seriesOrder[i];
+          if (!ec[name]) continue;
+          var isV2 = name.indexOf("V2_") === 0;
+          traces.push({
+            x: ec.dates,
+            y: ec[name],
+            name: name.replace("_", " "),
+            type: "scatter",
+            mode: "lines",
+            line: {
+              color: palette[name] || "#888",
+              width: name === "V1_Combination" ? 2.5 : 1.5,
+              dash: isV2 ? "dot" : "solid"
+            },
+            hovertemplate: "%{x|%Y-%m-%d}<br>$%{y:,.0f}<extra>" + name.replace("_", " ") + "</extra>"
+          });
+        }
+        var layoutOverrides = {
+          yaxis: { title: "Account value (USD)", tickformat: "$,.0f" },
+          xaxis: { title: "" }
+        };
+        if (cfg.renderChart) {
+          cfg.renderChart("strategy-equity-curves-plot", traces, layoutOverrides, {}, { equityCurve: true });
+        } else {
+          Plotly.newPlot("strategy-equity-curves-plot", traces, layoutOverrides, { responsive: true });
+        }
+      }
+      // dashboard.js's DOMContentLoaded handler populates window.MV_DASHBOARD,
+      // so defer until after it fires.
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(tryRender, 100);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          setTimeout(tryRender, 100);
+        });
+      }
+    })();
+  </script>
+
   <!-- ===== Header strip: KPIs + refresh + download ===== -->
   <div class="strategy-engine-header rounded-lg border bg-white p-5 mb-6 shadow-sm">
     <h2 class="text-2xl font-bold mb-1">Strategy Engine v50 — Institutional Backtest</h2>

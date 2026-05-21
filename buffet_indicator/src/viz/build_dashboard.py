@@ -917,7 +917,14 @@ def build_dashboard(
             macro_tab_html[key] = ""
 
     inline_css = _read_static(_STATIC_DIR / "dashboard.css")
-    inline_js = _read_static(_STATIC_DIR / "dashboard.js")
+    # v11.2.2 — plotly_config.js MUST be inlined BEFORE dashboard.js so that
+    # window.MV_PlotlyConfig is available when renderPlot() runs. Source-of-truth
+    # for B4 universal Y-axis drag-zoom + strategy color palette.
+    inline_js = (
+        _read_static(_STATIC_DIR / "plotly_config.js")
+        + "\n\n"
+        + _read_static(_STATIC_DIR / "dashboard.js")
+    )
 
     # v8b.1 D bundle-size optimization: strip sample arrays / series from the
     # embedded variants dict before JSON serialization. The dashboard runtime
@@ -1006,6 +1013,15 @@ def build_dashboard(
             uncertainty=calib_dict["uncertainty"],
         )
         sanitized["diagnostics_calibration_chart"] = _clean_for_json(calib_spec)
+
+    # v11.2.2 B3 — inline strategy equity curves payload for Strategy Engine top chart.
+    try:
+        from src.viz.build_strategy_equity_curves import build_strategy_equity_curves
+        eq_payload = build_strategy_equity_curves()
+        if eq_payload is not None:
+            sanitized["strategy_equity_curves"] = _clean_for_json(eq_payload)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[strategy_equity_curves] failed to build: {exc}")
 
     # v8b: inline CSV exports in payload for client-side downloads.
     sanitized["csv_exports"] = data_ctx.get("csv_exports", {})
