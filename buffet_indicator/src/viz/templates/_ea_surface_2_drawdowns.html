@@ -13,6 +13,86 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 episode tables shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.0 — Underwater curve chart per strategy. Data attribute
+         carries the per-strategy time series so JS can render without needing
+         the data inlined into window.MV_DASHBOARD. -->
+    {% if s2.underwater_curves %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">Underwater curves &mdash; drawdown depth over time</h4>
+      <div id="ea-surface-2-underwater"
+           style="width:100%;height:280px;"
+           data-curves='{{ s2.underwater_curves|tojson|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-2-underwater");
+          if (!el) return;
+          var curves;
+          try { curves = JSON.parse(el.dataset.curves || "[]"); }
+          catch (e) { curves = []; }
+          if (!curves.length) return;
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          var traces = [];
+          for (var i = 0; i < curves.length; i++) {
+            var c = curves[i];
+            var ys = (c.dd_values || []).map(function (v) {
+              return (v == null) ? null : (v * 100.0);
+            });
+            traces.push({
+              x: c.dates,
+              y: ys,
+              name: (c.label || "").replace("_", " "),
+              type: "scatter",
+              mode: "lines",
+              fill: "tozeroy",
+              line: {
+                color: palette[c.label] || "#888",
+                width: c.is_v2 ? 1.2 : 1.6,
+                dash: c.is_v2 ? "dot" : "solid"
+              },
+              opacity: c.is_v2 ? 0.55 : 0.9,
+              hovertemplate: "%{x}<br>DD %{y:.1f}%<extra>" + (c.label || "") + "</extra>"
+            });
+          }
+          var layoutOverrides = {
+            yaxis: {
+              title: "Drawdown (%)",
+              tickformat: ".0f",
+              rangemode: "tozero",
+              autorange: "reversed"
+            },
+            xaxis: { title: "" },
+            margin: { l: 55, r: 15, t: 20, b: 40 },
+            hovermode: "x unified"
+          };
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-2-underwater", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-2-underwater", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     {% for s in s2.per_strategy %}
     <div class="mb-5">
       <h4 class="font-semibold text-gray-800 mb-1">

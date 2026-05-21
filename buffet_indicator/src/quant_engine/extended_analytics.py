@@ -372,8 +372,23 @@ def build_drawdowns_surface(
         pass
 
     per_strategy: list[dict[str, Any]] = []
+    underwater_curves: list[dict[str, Any]] = []  # v11.2.3 Surface 2 chart
     for label, sr in strategies.items():
-        episodes = find_drawdown_episodes(sr.monthly.dropna(), min_depth=min_depth)
+        r = sr.monthly.dropna()
+        # v11.2.3 — underwater curve time series for the Plotly chart
+        # (one trace per strategy; nullable for any pre-history months).
+        if not r.empty:
+            eq_series = (1.0 + r).cumprod() * 10_000.0
+            running_max_series = eq_series.cummax()
+            dd_series = (eq_series - running_max_series) / running_max_series
+            underwater_curves.append({
+                "label": label,
+                "is_v2": _is_v2(label),
+                "dates": [d.strftime("%Y-%m-%d") for d in dd_series.index],
+                "dd_values": [None if pd.isna(v) else float(v) for v in dd_series],
+            })
+
+        episodes = find_drawdown_episodes(r, min_depth=min_depth)
         if not episodes.empty:
             episodes = tag_episodes_with_macro_regime(episodes, mvci_z, mrc_z)
             episodes = episodes.sort_values("depth_pct").reset_index(drop=True)
@@ -435,6 +450,7 @@ def build_drawdowns_surface(
         "available": True,
         "min_depth_pct": _fmt_pct(min_depth, digits=0),
         "per_strategy": per_strategy,
+        "underwater_curves": underwater_curves,  # v11.2.3 Surface 2 chart
         "meta": {
             "macro_overlay_available": mvci_z is not None,
         },
