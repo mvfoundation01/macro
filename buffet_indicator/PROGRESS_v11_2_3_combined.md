@@ -165,5 +165,16 @@ Stage 0.5 closed. CI is "green enough for Stage 2" per §2.2 stop condition.
 
 ### Entering Stage 2
 
+### Stage 2.0 — Surface 2 (Drawdowns)
+- Commit: `eac5a1b`
+- Tag: `v11.2.3-s2-drawdowns-2026-05-22`
+- CI run: [26259770677](https://github.com/mvfoundation01/macro/actions/runs/26259770677) (test ✅ + build-docker ✅; hf-spaces non-blocking)
+- Bundle delta: 10.18 MB → 10.22 MB (+40 KB)
+- Tests added: 5 (now 37 baseline)
+- Chart: scatter+fill underwater curves per strategy (% drawdown vs time, y-axis reversed)
+- Builder extension: `build_drawdowns_surface` now emits `underwater_curves: [{label, is_v2, dates, dd_values}]`
+- SVG NaN capture: 0 errors on all 9 tabs
+
+
 
 
