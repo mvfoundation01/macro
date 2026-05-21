@@ -19,7 +19,10 @@ VARIANT_KEYS = tuple(VARIANT_REGISTRY.keys())
 
 @pytest.fixture(scope="module")
 def all_spreads() -> dict[str, pd.DataFrame]:
-    return compute_all_credit_spreads()
+    out = compute_all_credit_spreads()
+    if not out:
+        pytest.skip("compute_all_credit_spreads returned empty (raw BAML CSVs missing in CI)")
+    return out
 
 
 # ---------------------------------------------------------------------------
