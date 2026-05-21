@@ -162,6 +162,42 @@ def build_strategy_engine_context() -> Optional[Dict[str, Any]]:
     except Exception as exc:  # noqa: BLE001
         print(f"[v11.2.1 surface 3 rolling] failed to build: {exc}")
         extended_analytics["rolling_metrics"] = {"available": False, "reason": str(exc), "per_strategy": []}
+    try:
+        from src.quant_engine.extended_analytics import build_risk_metrics_surface
+        extended_analytics["risk_metrics"] = build_risk_metrics_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 4 risk_metrics] failed to build: {exc}")
+        extended_analytics["risk_metrics"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_returns_surface
+        extended_analytics["returns_dist"] = build_returns_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 5 returns] failed to build: {exc}")
+        extended_analytics["returns_dist"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_lump_sum_surface
+        extended_analytics["lump_sum"] = build_lump_sum_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 6 lump_sum] failed to build: {exc}")
+        extended_analytics["lump_sum"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_risk_vs_return_surface
+        extended_analytics["risk_vs_return"] = build_risk_vs_return_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 7 risk_vs_return] failed to build: {exc}")
+        extended_analytics["risk_vs_return"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_withdrawal_surface
+        extended_analytics["withdrawal"] = build_withdrawal_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 8 withdrawal] failed to build: {exc}")
+        extended_analytics["withdrawal"] = {"available": False, "reason": str(exc), "rows": []}
+    try:
+        from src.quant_engine.extended_analytics import build_seasonality_surface
+        extended_analytics["seasonality"] = build_seasonality_surface()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[v11.2.1 surface 9 seasonality] failed to build: {exc}")
+        extended_analytics["seasonality"] = {"available": False, "reason": str(exc), "rows": []}
 
     return {
         "headline_sharpe_fmt": _fmt_signed(headline.get("sharpe")),

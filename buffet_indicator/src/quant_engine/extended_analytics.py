@@ -551,6 +551,374 @@ def build_rolling_metrics_surface(
     }
 
 
+# ── Surface 4 — Risk Metrics deep dive ──────────────────────────────────
+
+
+def build_risk_metrics_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+    benchmark_label: str = "V1_Combination",
+) -> dict[str, Any]:
+    """Surface 4: 15+ risk metrics per strategy (skew, kurtosis, VaR/CVaR, capture, etc.)."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "rows": []}
+
+    benchmark_r = strategies[benchmark_label].monthly.dropna() if benchmark_label in strategies else None
+
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        arr = r.to_numpy(dtype=np.float64)
+
+        # Higher moments.
+        mean = float(arr.mean())
+        std = float(arr.std(ddof=1)) if len(arr) > 1 else float("nan")
+        skew = float(pd.Series(arr).skew()) if len(arr) > 2 else float("nan")
+        kurt = float(pd.Series(arr).kurt()) if len(arr) > 3 else float("nan")  # excess kurtosis
+
+        # Downside.
+        downside = arr[arr < 0]
+        dsd = float(downside.std(ddof=1)) if len(downside) > 1 else float("nan")
+
+        # VaR / CVaR (monthly, historical).
+        var_1 = float(np.percentile(arr, 1)) if len(arr) > 100 else float("nan")
+        var_5 = float(np.percentile(arr, 5)) if len(arr) > 20 else float("nan")
+        var_10 = float(np.percentile(arr, 10)) if len(arr) > 10 else float("nan")
+        cvar_5 = float(arr[arr <= var_5].mean()) if np.isfinite(var_5) and (arr <= var_5).any() else float("nan")
+        cvar_10 = float(arr[arr <= var_10].mean()) if np.isfinite(var_10) and (arr <= var_10).any() else float("nan")
+
+        # Capture ratios vs benchmark.
+        up_cap = down_cap = float("nan")
+        beta = float("nan")
+        if benchmark_r is not None and label != benchmark_label:
+            common = r.index.intersection(benchmark_r.index)
+            if len(common) >= 24:
+                r_aligned = r.loc[common]
+                b_aligned = benchmark_r.loc[common]
+                up_mask = b_aligned > 0
+                dn_mask = b_aligned < 0
+                if up_mask.sum() >= 3:
+                    up_cap = float(r_aligned[up_mask].mean() / b_aligned[up_mask].mean())
+                if dn_mask.sum() >= 3:
+                    down_cap = float(r_aligned[dn_mask].mean() / b_aligned[dn_mask].mean())
+                # Beta = cov(r, b) / var(b)
+                if b_aligned.var(ddof=1) > 0:
+                    beta = float(r_aligned.cov(b_aligned) / b_aligned.var(ddof=1))
+
+        rows.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "mean_monthly_fmt": _fmt_pct(mean, digits=3),
+            "std_monthly_fmt": _fmt_pct(std, digits=3),
+            "downside_dev_fmt": _fmt_pct(dsd, digits=3),
+            "skew_fmt": _fmt_signed(skew, digits=3),
+            "excess_kurt_fmt": _fmt_signed(kurt, digits=3),
+            "var_1_fmt": _fmt_pct(var_1, digits=2),
+            "var_5_fmt": _fmt_pct(var_5, digits=2),
+            "var_10_fmt": _fmt_pct(var_10, digits=2),
+            "cvar_5_fmt": _fmt_pct(cvar_5, digits=2),
+            "cvar_10_fmt": _fmt_pct(cvar_10, digits=2),
+            "beta_fmt": _fmt_signed(beta, digits=3),
+            "up_capture_fmt": _fmt_signed(up_cap, digits=3),
+            "down_capture_fmt": _fmt_signed(down_cap, digits=3),
+        })
+
+    return {
+        "available": True,
+        "benchmark_label": benchmark_label,
+        "rows": rows,
+    }
+
+
+# ── Surface 5 — Returns (annual + monthly distributions) ────────────────
+
+
+def build_returns_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+) -> dict[str, Any]:
+    """Surface 5: annual returns + monthly distribution summary per strategy."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "rows": []}
+
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        # Annual returns (year-end compounding).
+        annual = r.resample("YE").apply(lambda s: float((1.0 + s).prod() - 1.0))
+        annual_arr = annual.to_numpy(dtype=np.float64)
+        arr_m = r.to_numpy(dtype=np.float64)
+
+        rows.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "n_years": int(len(annual)),
+            "best_year_fmt": _fmt_pct(float(annual_arr.max()), digits=2) if len(annual_arr) else "n/a",
+            "worst_year_fmt": _fmt_pct(float(annual_arr.min()), digits=2) if len(annual_arr) else "n/a",
+            "median_year_fmt": _fmt_pct(float(np.median(annual_arr)), digits=2) if len(annual_arr) else "n/a",
+            "pct_positive_years_fmt": f"{(annual_arr > 0).mean() * 100:.1f}%" if len(annual_arr) else "n/a",
+            "monthly_p05_fmt": _fmt_pct(float(np.percentile(arr_m, 5)), digits=2) if len(arr_m) > 20 else "n/a",
+            "monthly_p95_fmt": _fmt_pct(float(np.percentile(arr_m, 95)), digits=2) if len(arr_m) > 20 else "n/a",
+            "monthly_min_fmt": _fmt_pct(float(arr_m.min()), digits=2) if len(arr_m) else "n/a",
+            "monthly_max_fmt": _fmt_pct(float(arr_m.max()), digits=2) if len(arr_m) else "n/a",
+            "pct_positive_months_fmt": f"{(arr_m > 0).mean() * 100:.1f}%" if len(arr_m) else "n/a",
+        })
+
+    return {"available": True, "rows": rows}
+
+
+# ── Surface 6 — Lump Sum (win rate vs benchmark) ────────────────────────
+
+
+def build_lump_sum_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+    benchmark_label: str = "V1_Combination",
+    horizons_months: tuple[int, ...] = (3, 12, 36),
+) -> dict[str, Any]:
+    """Surface 6: Lump-sum win rate / mean lump-sum advantage (MLSA) vs benchmark.
+
+    For each rolling N-month window, compute (1+r).prod() for strategy and
+    benchmark. Strategy "wins" when its cumulative return > benchmark's.
+    """
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies or benchmark_label not in strategies:
+        return {
+            "available": False,
+            "reason": f"benchmark {benchmark_label} not available",
+            "rows": [],
+        }
+    benchmark_r = strategies[benchmark_label].monthly.dropna()
+
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        if label == benchmark_label:
+            continue
+        r = sr.monthly.dropna()
+        common = r.index.intersection(benchmark_r.index)
+        if len(common) < max(horizons_months) + 5:
+            rows.append({
+                "label": label, "is_v2": _is_v2(label),
+                "available": False,
+                "reason": f"only {len(common)} common months",
+                "horizons": [],
+            })
+            continue
+        r_a = r.loc[common].to_numpy(dtype=np.float64)
+        b_a = benchmark_r.loc[common].to_numpy(dtype=np.float64)
+
+        horizon_rows = []
+        for h in horizons_months:
+            wins = 0
+            total = 0
+            advantages = []
+            for start in range(len(r_a) - h + 1):
+                r_cum = float(np.prod(1.0 + r_a[start:start + h])) - 1.0
+                b_cum = float(np.prod(1.0 + b_a[start:start + h])) - 1.0
+                if r_cum > b_cum:
+                    wins += 1
+                advantages.append(r_cum - b_cum)
+                total += 1
+            wr = (wins / total * 100.0) if total else float("nan")
+            mlsa = float(np.mean(advantages)) if advantages else float("nan")
+            horizon_rows.append({
+                "horizon_months": h,
+                "win_rate_fmt": f"{wr:.1f}%" if np.isfinite(wr) else "n/a",
+                "mlsa_fmt": _fmt_pct(mlsa, digits=2),
+                "n_windows": total,
+            })
+
+        rows.append({
+            "label": label, "is_v2": _is_v2(label),
+            "available": True,
+            "horizons": horizon_rows,
+        })
+
+    return {
+        "available": True,
+        "benchmark_label": benchmark_label,
+        "rows": rows,
+    }
+
+
+# ── Surface 7 — Risk vs Return scatter (as table) ───────────────────────
+
+
+def build_risk_vs_return_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+) -> dict[str, Any]:
+    """Surface 7: scatter pairs (Vol, CAGR) etc. — table form pending Plotly chart."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "rows": []}
+
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        cagr = compute_cagr(r)
+        vol = _ann_vol(r)
+        sharpe = compute_sharpe(r)
+        sortino = compute_sortino(r)
+        maxdd = compute_maxdd(r)
+        ulcer = _ulcer_index(r)
+        upi = float(cagr / (ulcer / 100.0)) if (np.isfinite(cagr) and np.isfinite(ulcer) and ulcer > 0) else float("nan")
+        rows.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "vol_fmt": _fmt_pct(vol, digits=2),
+            "cagr_fmt": _fmt_pct(cagr, digits=2),
+            "sharpe_fmt": _fmt_signed(sharpe, digits=3),
+            "sortino_fmt": _fmt_signed(sortino, digits=3),
+            "maxdd_fmt": _fmt_pct(maxdd, digits=2),
+            "ulcer_fmt": f"{ulcer:.2f}" if np.isfinite(ulcer) else "n/a",
+            "upi_fmt": _fmt_signed(upi, digits=3),
+        })
+
+    return {"available": True, "rows": rows}
+
+
+# ── Surface 8 — Withdrawal Stats (SWR survival analysis) ────────────────
+
+
+def _swr_survival_pct(monthly_returns: np.ndarray, withdrawal_rate: float,
+                      horizon_years: int) -> float | None:
+    """% of rolling horizon-year windows where $10K survives a withdrawal_rate annual draw.
+
+    Returns None if not enough data for any window of the given horizon.
+    """
+    h_months = horizon_years * 12
+    if len(monthly_returns) < h_months + 1:
+        return None
+    monthly_withdrawal = withdrawal_rate / 12.0
+    survivors = 0
+    total = 0
+    for start in range(len(monthly_returns) - h_months + 1):
+        balance = 1.0
+        survived = True
+        for i in range(h_months):
+            balance = balance * (1.0 + float(monthly_returns[start + i])) - monthly_withdrawal
+            if balance <= 0:
+                survived = False
+                break
+        if survived:
+            survivors += 1
+        total += 1
+    if total == 0:
+        return None
+    return survivors / total * 100.0
+
+
+def build_withdrawal_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+    horizons_years: tuple[int, ...] = (10, 20, 30),
+    rates: tuple[float, ...] = (0.03, 0.04, 0.05),
+) -> dict[str, Any]:
+    """Surface 8: % of rolling N-year windows that survived various withdrawal rates."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "rows": []}
+
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        arr = r.to_numpy(dtype=np.float64)
+        cells: list[dict[str, Any]] = []
+        for h in horizons_years:
+            for rate in rates:
+                surv = _swr_survival_pct(arr, rate, h)
+                cells.append({
+                    "horizon_years": h,
+                    "rate_fmt": f"{rate * 100:.0f}%",
+                    "survival_fmt": f"{surv:.1f}%" if surv is not None else "n/a",
+                })
+        rows.append({
+            "label": label, "is_v2": _is_v2(label),
+            "n_months": int(len(r)),
+            "cells": cells,
+        })
+
+    return {
+        "available": True,
+        "horizons_years": list(horizons_years),
+        "rates_fmt": [f"{rate * 100:.0f}%" for rate in rates],
+        "rows": rows,
+    }
+
+
+# ── Surface 9 — Seasonality + Allocation Pies ──────────────────────────
+
+
+def build_seasonality_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+) -> dict[str, Any]:
+    """Surface 9: month-by-month average return + allocation pies (declarative).
+
+    Per spec §6.11 thin slice — emit average return per calendar month
+    across all years for each strategy.
+    """
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "rows": []}
+
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    rows: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        by_month: list[dict[str, str]] = []
+        for i, m_label in enumerate(months, start=1):
+            mask = r.index.month == i
+            if mask.any():
+                vals = r[mask].to_numpy(dtype=np.float64)
+                by_month.append({
+                    "month": m_label,
+                    "mean_fmt": _fmt_pct(float(vals.mean()), digits=2),
+                    "n": int(len(vals)),
+                    "pct_positive_fmt": f"{(vals > 0).mean() * 100:.0f}%",
+                })
+            else:
+                by_month.append({"month": m_label, "mean_fmt": "n/a", "n": 0, "pct_positive_fmt": "n/a"})
+        rows.append({
+            "label": label, "is_v2": _is_v2(label),
+            "by_month": by_month,
+            "n_years_observed": int(len(r) / 12),
+        })
+
+    # Allocation pies (decorative — V1 Combination + R-PRIMARY when fire).
+    pies = {
+        "v1_combination": [
+            {"label": "DD-TARGET", "weight": 0.40, "color": "#1f77b4"},
+            {"label": "ENS-Ultra", "weight": 0.30, "color": "#2ca02c"},
+            {"label": "LowBeta",   "weight": 0.30, "color": "#ff7f0e"},
+        ],
+        "v2_r_primary_when_fire": [
+            {"label": "V1 Combination", "weight": 0.50, "color": "#1f77b4"},
+            {"label": "T-bills (3-mo)", "weight": 0.50, "color": "#7f7f7f"},
+        ],
+    }
+
+    return {
+        "available": True,
+        "rows": rows,
+        "pies": pies,
+    }
+
+
 __all__ = [
     "V2_LABELS",
     "build_summary_surface",
@@ -559,4 +927,11 @@ __all__ = [
     "build_drawdowns_surface",
     "compute_rolling_metrics",
     "build_rolling_metrics_surface",
+    "build_risk_metrics_surface",
+    "build_returns_surface",
+    "build_lump_sum_surface",
+    "build_risk_vs_return_surface",
+    "build_withdrawal_surface",
+    "_swr_survival_pct",
+    "build_seasonality_surface",
 ]

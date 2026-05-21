@@ -1,0 +1,65 @@
+<!-- v11.2.1.4 — Extended Analytics Surface 4: Risk Metrics deep dive -->
+{% if se.extended_analytics and se.extended_analytics.risk_metrics and se.extended_analytics.risk_metrics.available %}
+{% set s4 = se.extended_analytics.risk_metrics %}
+<details id="ea-surface-4-risk-metrics" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 4: Risk Metrics Deep Dive
+    <span class="text-xs font-normal text-gray-500 ml-2">(higher moments + VaR/CVaR + capture vs {{ s4.benchmark_label }})</span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="text-xs w-full">
+        <thead class="bg-gray-100 text-left uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1">Strategy</th>
+            <th class="px-2 py-1 text-right">Mean/mo</th>
+            <th class="px-2 py-1 text-right">Std/mo</th>
+            <th class="px-2 py-1 text-right">Downside Dev</th>
+            <th class="px-2 py-1 text-right">Skew</th>
+            <th class="px-2 py-1 text-right">Excess Kurt</th>
+            <th class="px-2 py-1 text-right">VaR 1%</th>
+            <th class="px-2 py-1 text-right">VaR 5%</th>
+            <th class="px-2 py-1 text-right">VaR 10%</th>
+            <th class="px-2 py-1 text-right">CVaR 5%</th>
+            <th class="px-2 py-1 text-right">CVaR 10%</th>
+            <th class="px-2 py-1 text-right">Beta</th>
+            <th class="px-2 py-1 text-right">Up-capture</th>
+            <th class="px-2 py-1 text-right">Down-capture</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in s4.rows %}
+          <tr class="{% if row.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1 font-medium">
+              {{ row.label }}
+              {% if row.is_v2 %}<span class="ml-1 text-xs px-1 rounded bg-orange-200 text-orange-900">DIAG</span>{% endif %}
+            </td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.mean_monthly_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.std_monthly_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.downside_dev_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.skew_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.excess_kurt_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.var_1_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.var_5_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.var_10_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.cvar_5_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.cvar_10_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.beta_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.up_capture_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ row.down_capture_fmt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-500 mt-2">
+      Beta, Up/Down-capture computed vs <strong>{{ s4.benchmark_label }}</strong>. VaR/CVaR are historical
+      percentiles of monthly returns (negative numbers = losses). Skewness positive means right-tail bias;
+      excess kurtosis &gt; 0 means fat tails relative to normal.
+    </p>
+  </div>
+</details>
+{% endif %}

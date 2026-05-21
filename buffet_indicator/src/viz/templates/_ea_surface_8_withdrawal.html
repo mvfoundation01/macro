@@ -1,0 +1,52 @@
+<!-- v11.2.1.8 — Extended Analytics Surface 8: Withdrawal / SWR survival -->
+{% if se.extended_analytics and se.extended_analytics.withdrawal and se.extended_analytics.withdrawal.available %}
+{% set s8 = se.extended_analytics.withdrawal %}
+<details id="ea-surface-8-withdrawal" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 8: Safe-Withdrawal Survival
+    <span class="text-xs font-normal text-gray-500 ml-2">
+      (% of rolling N-year windows that survived monthly withdrawals at the listed annual rate)
+    </span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    {% for row in s8.rows %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">
+        {{ row.label }}
+        {% if row.is_v2 %}<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-orange-200 text-orange-900">DIAGNOSTIC</span>{% endif %}
+        <span class="ml-2 text-xs font-normal text-gray-500">N={{ row.n_months }} months</span>
+      </h4>
+      <table class="text-xs w-full max-w-2xl">
+        <thead class="bg-gray-100 text-left uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1">Horizon (yr)</th>
+            <th class="px-2 py-1 text-right">3% annual</th>
+            <th class="px-2 py-1 text-right">4% annual</th>
+            <th class="px-2 py-1 text-right">5% annual</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for h in s8.horizons_years %}
+          <tr>
+            <td class="px-2 py-1 tabular-nums">{{ h }}</td>
+            {% for cell in row.cells if cell.horizon_years == h %}
+            <td class="px-2 py-1 text-right tabular-nums">{{ cell.survival_fmt }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+    <p class="text-xs text-gray-500 mt-2">
+      "Survival" = balance never depleted to &le; $0 during the horizon. Computed
+      by simulating $10K initial + monthly draw = annual rate / 12, across all
+      rolling windows of the given horizon. Higher % is better. Higher annual
+      withdrawal &times; longer horizon &equiv; more sequence-of-returns risk.
+    </p>
+  </div>
+</details>
+{% endif %}

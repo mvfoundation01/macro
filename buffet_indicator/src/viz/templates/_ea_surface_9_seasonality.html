@@ -1,0 +1,74 @@
+<!-- v11.2.1.9 — Extended Analytics Surface 9: Seasonality + Allocation Pies -->
+{% if se.extended_analytics and se.extended_analytics.seasonality and se.extended_analytics.seasonality.available %}
+{% set s9 = se.extended_analytics.seasonality %}
+<details id="ea-surface-9-seasonality" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 9: Seasonality + Allocation Pies
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+
+    <h4 class="text-sm font-semibold text-gray-800 mb-2">Mean monthly return by calendar month</h4>
+    <div class="overflow-x-auto">
+      <table class="text-xs w-full">
+        <thead class="bg-gray-100 text-left uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1">Strategy</th>
+            {% for m in ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] %}
+            <th class="px-2 py-1 text-right">{{ m }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in s9.rows %}
+          <tr class="{% if row.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1 font-medium">
+              {{ row.label }}
+              {% if row.is_v2 %}<span class="ml-1 text-xs px-1 rounded bg-orange-200 text-orange-900">DIAG</span>{% endif %}
+            </td>
+            {% for m in row.by_month %}
+            <td class="px-2 py-1 text-right tabular-nums">{{ m.mean_fmt }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="text-sm font-semibold text-gray-800 mb-2 mt-4">Allocation pies (decorative)</h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="border rounded p-3 bg-gray-50">
+        <p class="text-xs font-semibold text-gray-700 mb-2">V1 Combination (operational)</p>
+        <ul class="text-xs text-gray-700 space-y-1">
+          {% for slice in s9.pies.v1_combination %}
+          <li>
+            <span class="inline-block w-3 h-3 mr-1 align-middle" style="background-color: {{ slice.color }};"></span>
+            <strong>{{ "%.0f%%"|format(slice.weight * 100) }}</strong> {{ slice.label }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="border rounded p-3 bg-orange-50">
+        <p class="text-xs font-semibold text-orange-800 mb-2">
+          V2 R-PRIMARY when fire (DIAGNOSTIC &mdash; rule rejected, would-be allocation)
+        </p>
+        <ul class="text-xs text-gray-700 space-y-1">
+          {% for slice in s9.pies.v2_r_primary_when_fire %}
+          <li>
+            <span class="inline-block w-3 h-3 mr-1 align-middle" style="background-color: {{ slice.color }};"></span>
+            <strong>{{ "%.0f%%"|format(slice.weight * 100) }}</strong> {{ slice.label }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-3">
+      Cells show the simple mean of the strategy's monthly return for each calendar
+      month, across all observed years. Strong sign tilts can indicate seasonality
+      but are not statistically pre-registered.
+    </p>
+  </div>
+</details>
+{% endif %}

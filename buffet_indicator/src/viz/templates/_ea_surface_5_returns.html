@@ -1,0 +1,53 @@
+<!-- v11.2.1.5 — Extended Analytics Surface 5: Returns distributions -->
+{% if se.extended_analytics and se.extended_analytics.returns_dist and se.extended_analytics.returns_dist.available %}
+{% set s5 = se.extended_analytics.returns_dist %}
+<details id="ea-surface-5-returns" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 5: Returns (annual + monthly distributions)
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="text-sm w-full">
+        <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1.5">Strategy</th>
+            <th class="px-2 py-1.5 text-right">N (yr)</th>
+            <th class="px-2 py-1.5 text-right">Worst Yr</th>
+            <th class="px-2 py-1.5 text-right">Median Yr</th>
+            <th class="px-2 py-1.5 text-right">Best Yr</th>
+            <th class="px-2 py-1.5 text-right">% + Yrs</th>
+            <th class="px-2 py-1.5 text-right">Mo Min</th>
+            <th class="px-2 py-1.5 text-right">Mo P5</th>
+            <th class="px-2 py-1.5 text-right">Mo P95</th>
+            <th class="px-2 py-1.5 text-right">Mo Max</th>
+            <th class="px-2 py-1.5 text-right">% + Mos</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in s5.rows %}
+          <tr class="{% if row.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1.5 font-medium">
+              {{ row.label }}
+              {% if row.is_v2 %}<span class="ml-1 text-xs px-1 rounded bg-orange-200 text-orange-900">DIAG</span>{% endif %}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.n_years }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums text-red-700">{{ row.worst_year_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.median_year_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums text-emerald-700">{{ row.best_year_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.pct_positive_years_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums text-red-700">{{ row.monthly_min_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.monthly_p05_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.monthly_p95_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums text-emerald-700">{{ row.monthly_max_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.pct_positive_months_fmt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>
+{% endif %}

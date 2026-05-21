@@ -1,0 +1,54 @@
+<!-- v11.2.1.6 — Extended Analytics Surface 6: Lump Sum vs benchmark -->
+{% if se.extended_analytics and se.extended_analytics.lump_sum and se.extended_analytics.lump_sum.available %}
+{% set s6 = se.extended_analytics.lump_sum %}
+<details id="ea-surface-6-lump-sum" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 6: Lump-Sum Win Rate vs {{ s6.benchmark_label }}
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    {% for row in s6.rows %}
+    <div class="mb-3">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">
+        {{ row.label }}
+        {% if row.is_v2 %}<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-orange-200 text-orange-900">DIAGNOSTIC</span>{% endif %}
+      </h4>
+      {% if row.available %}
+      <table class="text-xs w-full max-w-md">
+        <thead class="bg-gray-100 text-left uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1">Horizon</th>
+            <th class="px-2 py-1 text-right">Win rate</th>
+            <th class="px-2 py-1 text-right">MLSA (mean excess)</th>
+            <th class="px-2 py-1 text-right">N windows</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for h in row.horizons %}
+          <tr>
+            <td class="px-2 py-1 tabular-nums">{{ h.horizon_months }} mo</td>
+            <td class="px-2 py-1 text-right tabular-nums {% if '50.0%' in h.win_rate_fmt %}text-gray-700{% elif h.win_rate_fmt[0:1] != 'n' and (h.win_rate_fmt | replace('%','') | float) > 50 %}text-emerald-700{% else %}text-red-700{% endif %}">
+              {{ h.win_rate_fmt }}
+            </td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ h.mlsa_fmt }}</td>
+            <td class="px-2 py-1 text-right tabular-nums">{{ h.n_windows }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-xs text-gray-500 italic">{{ row.reason }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <p class="text-xs text-gray-500 mt-2">
+      Win rate = % of rolling N-month windows where strategy's cumulative
+      return beats the benchmark. MLSA (Mean Lump-Sum Advantage) = mean(strategy - benchmark)
+      cumulative-return delta. Positive MLSA + win rate &gt; 50% indicates outperformance,
+      but neither is statistically pre-registered &mdash; see V1-vs-V2 stats CSV for formal tests.
+    </p>
+  </div>
+</details>
+{% endif %}

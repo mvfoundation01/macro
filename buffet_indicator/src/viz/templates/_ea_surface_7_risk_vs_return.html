@@ -1,0 +1,53 @@
+<!-- v11.2.1.7 — Extended Analytics Surface 7: Risk vs Return -->
+{% if se.extended_analytics and se.extended_analytics.risk_vs_return and se.extended_analytics.risk_vs_return.available %}
+{% set s7 = se.extended_analytics.risk_vs_return %}
+<details id="ea-surface-7-risk-vs-return" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 7: Risk vs Return
+    <span class="text-xs font-normal text-gray-500 ml-2">(scatter pairs in tabular form)</span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="text-sm w-full">
+        <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1.5">Strategy</th>
+            <th class="px-2 py-1.5 text-right">Vol (ann)</th>
+            <th class="px-2 py-1.5 text-right">CAGR</th>
+            <th class="px-2 py-1.5 text-right">Sharpe</th>
+            <th class="px-2 py-1.5 text-right">Sortino</th>
+            <th class="px-2 py-1.5 text-right">MaxDD</th>
+            <th class="px-2 py-1.5 text-right">Ulcer Idx</th>
+            <th class="px-2 py-1.5 text-right">UPI</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in s7.rows %}
+          <tr class="{% if row.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1.5 font-medium">
+              {{ row.label }}
+              {% if row.is_v2 %}<span class="ml-1 text-xs px-1 rounded bg-orange-200 text-orange-900">DIAG</span>{% endif %}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.vol_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.cagr_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.sharpe_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.sortino_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums text-red-700">{{ row.maxdd_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.ulcer_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ row.upi_fmt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-500 mt-2">
+      UPI = Ulcer Performance Index = CAGR / (Ulcer Index / 100). Plotly scatter
+      visualization scheduled for Part C polish; tabular form here gives auditors
+      the same numbers in scannable layout.
+    </p>
+  </div>
+</details>
+{% endif %}

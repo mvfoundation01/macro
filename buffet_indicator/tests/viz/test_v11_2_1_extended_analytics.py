@@ -14,14 +14,36 @@ import pytest
 
 from src.quant_engine.extended_analytics import (
     V2_LABELS,
+    _swr_survival_pct,
     build_drawdowns_surface,
+    build_lump_sum_surface,
+    build_returns_surface,
+    build_risk_metrics_surface,
+    build_risk_vs_return_surface,
     build_rolling_metrics_surface,
+    build_seasonality_surface,
     build_summary_surface,
+    build_withdrawal_surface,
     compute_rolling_metrics,
     find_drawdown_episodes,
     tag_episodes_with_macro_regime,
 )
 from src.quant_engine.analytics_core import StrategyReturns
+
+
+def _two_strategy_fixture(seed: int = 17, n: int = 80) -> dict[str, StrategyReturns]:
+    rng = np.random.default_rng(seed=seed)
+    idx = pd.date_range("2015-01-31", periods=n, freq="ME")
+    return {
+        "V1_Combination": StrategyReturns(
+            monthly=pd.Series(rng.normal(0.01, 0.04, n), index=idx),
+            name="V1_Combination", color="#1f77b4",
+        ),
+        "V2_R-PRIMARY": StrategyReturns(
+            monthly=pd.Series(rng.normal(0.008, 0.04, n), index=idx),
+            name="V2_R-PRIMARY", color="#ff7f0e",
+        ),
+    }
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD_HTML = REPO_ROOT / "outputs" / "dashboard.html"
@@ -188,3 +210,84 @@ def test_tag_episodes_with_macro_regime_columns_added():
         "unknown",
     }
     assert set(tagged["regime_at_peak"]).issubset(valid_regimes)
+
+
+# ── Surfaces 4-9 — omnibus structural + per-surface numerical ───────────
+
+def test_all_9_surfaces_present_in_dashboard():
+    """All 9 Extended Analytics surfaces must appear in the built dashboard."""
+    html = _read_dashboard()
+    for i in range(1, 10):
+        assert f'id="ea-surface-{i}-' in html, f"Surface {i} <details> block missing from dashboard"
+
+
+def test_build_risk_metrics_surface_emits_higher_moments():
+    """Surface 4: each row carries skew + kurt + VaR/CVaR fields."""
+    out = build_risk_metrics_surface(strategies=_two_strategy_fixture())
+    assert out["available"] is True
+    for row in out["rows"]:
+        for k in ("skew_fmt", "excess_kurt_fmt", "var_5_fmt", "cvar_5_fmt", "beta_fmt", "up_capture_fmt"):
+            assert k in row, f"missing key {k}"
+
+
+def test_build_returns_surface_emits_annual_and_monthly_stats():
+    """Surface 5: best/worst year + monthly p5/p95 + % positive months."""
+    out = build_returns_surface(strategies=_two_strategy_fixture())
+    assert out["available"] is True
+    for row in out["rows"]:
+        for k in ("worst_year_fmt", "best_year_fmt", "monthly_p05_fmt", "monthly_p95_fmt", "pct_positive_months_fmt"):
+            assert k in row
+
+
+def test_build_lump_sum_surface_horizons():
+    """Surface 6: each non-benchmark strategy gets the 3 default horizons (3/12/36 mo)."""
+    out = build_lump_sum_surface(strategies=_two_strategy_fixture())
+    assert out["available"] is True
+    non_bench = [r for r in out["rows"] if r.get("available")]
+    assert len(non_bench) >= 1
+    horizons = {h["horizon_months"] for h in non_bench[0]["horizons"]}
+    assert horizons == {3, 12, 36}
+
+
+def test_build_risk_vs_return_surface_pairs():
+    """Surface 7: each row has Vol, CAGR, Sharpe, MaxDD, UPI."""
+    out = build_risk_vs_return_surface(strategies=_two_strategy_fixture())
+    assert out["available"] is True
+    for row in out["rows"]:
+        for k in ("vol_fmt", "cagr_fmt", "sharpe_fmt", "maxdd_fmt", "upi_fmt"):
+            assert k in row
+
+
+def test_swr_survival_pct_known_case():
+    """SWR survival: a series of +1% monthly returns easily survives a 4% annual draw at 10y horizon."""
+    monthly = np.full(150, 0.01, dtype=np.float64)  # 12.5 years of +1%/mo
+    surv = _swr_survival_pct(monthly, withdrawal_rate=0.04, horizon_years=10)
+    assert surv is not None and surv >= 99.0, f"expected ≥ 99% survival, got {surv}"
+
+    # If returns are 0%, withdrawal of 4%/yr depletes $1 in 25 years — should die at 10y? 
+    # Actually 4%/yr * 10yr = 40% drawn, balance ≈ 0.6 → survives.
+    monthly_zero = np.zeros(150, dtype=np.float64)
+    surv_zero = _swr_survival_pct(monthly_zero, withdrawal_rate=0.04, horizon_years=10)
+    assert surv_zero is not None and surv_zero >= 90.0, f"zero-return SWR 10yr/4% should mostly survive (40% drawn vs $1 base), got {surv_zero}"
+
+
+def test_build_withdrawal_surface_horizon_rate_grid():
+    """Surface 8: each strategy gets a horizon x rate cell grid."""
+    out = build_withdrawal_surface(strategies=_two_strategy_fixture(n=200))
+    assert out["available"] is True
+    for row in out["rows"]:
+        # 3 horizons × 3 rates = 9 cells per strategy
+        assert len(row["cells"]) == 9
+
+
+def test_build_seasonality_surface_emits_12_months_per_strategy():
+    """Surface 9: every strategy has 12 by_month entries + 2 allocation pies."""
+    out = build_seasonality_surface(strategies=_two_strategy_fixture())
+    assert out["available"] is True
+    for row in out["rows"]:
+        assert len(row["by_month"]) == 12
+    # Pies (decorative) present and well-formed.
+    assert "v1_combination" in out["pies"]
+    assert "v2_r_primary_when_fire" in out["pies"]
+    for slice in out["pies"]["v1_combination"]:
+        assert "label" in slice and "weight" in slice and "color" in slice
