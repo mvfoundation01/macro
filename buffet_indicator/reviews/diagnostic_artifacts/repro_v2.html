@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Heatmap repro v2 - full spec</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<button id="show">Activate diagnostics tab</button>
+
+<section data-tab="overview" class="tab-content active">
+  <p>Overview content</p>
+</section>
+
+<section data-tab="diagnostics" class="tab-content">
+  <div style="background:white; padding:16px;">
+    <h3>Cross-variant correlation</h3>
+    <div id="diagnostics-correlation-heatmap" style="width: 100%; height: 480px;"></div>
+  </div>
+</section>
+
+<script>
+const spec = {
+  data: [{
+    type: "heatmap",
+    x: ["bi_allequity_pct","bi_spx_proxy","bi_wilshire_pct","cape","crestmont","ey_deficit","mean_reversion","mvci","qratio"],
+    y: ["bi_allequity_pct","bi_spx_proxy","bi_wilshire_pct","cape","crestmont","ey_deficit","mean_reversion","mvci","qratio"],
+    z: [[1,0.95,0.68,0.91,0.92,0.65,0.88,0.95,0.92],[0.95,1,0.78,0.95,0.95,0.58,0.97,0.99,0.96],[0.68,0.78,1,0.81,0.72,0.57,0.75,0.82,0.69],[0.91,0.95,0.81,1,0.98,0.63,0.93,0.98,0.93],[0.92,0.95,0.72,0.98,1,0.56,0.95,0.97,0.95],[0.65,0.58,0.57,0.63,0.56,1,0.43,0.64,0.49],[0.88,0.97,0.75,0.93,0.95,0.43,1,0.95,0.94],[0.95,0.99,0.82,0.98,0.97,0.64,0.95,1,0.95],[0.92,0.96,0.69,0.93,0.95,0.49,0.94,0.95,1]],
+    text: [["+1.00","+0.95","+0.68","+0.91","+0.92","+0.65","+0.88","+0.95","+0.92"],["+0.95","+1.00","+0.78","+0.95","+0.95","+0.58","+0.97","+0.99","+0.96"],["+0.68","+0.78","+1.00","+0.81","+0.72","+0.57","+0.75","+0.82","+0.69"],["+0.91","+0.95","+0.81","+1.00","+0.98","+0.63","+0.93","+0.98","+0.93"],["+0.92","+0.95","+0.72","+0.98","+1.00","+0.56","+0.95","+0.97","+0.95"],["+0.65","+0.58","+0.57","+0.63","+0.56","+1.00","+0.43","+0.64","+0.49"],["+0.88","+0.97","+0.75","+0.93","+0.95","+0.43","+1.00","+0.95","+0.94"],["+0.95","+0.99","+0.82","+0.98","+0.97","+0.64","+0.95","+1.00","+0.95"],["+0.92","+0.96","+0.69","+0.93","+0.95","+0.49","+0.94","+0.95","+1.00"]],
+    texttemplate: "%{text}",
+    textfont: {size: 12, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'},
+    colorscale: "RdBu",
+    reversescale: true,
+    zmin: -1, zmax: 1,
+    hovertemplate: "%{x} ↔ %{y}<br>ρ = %{z:.3f}<extra></extra>",
+    colorbar: {
+      title: {text: "ρ", font: {size: 13, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'}},
+      tickfont: {size: 12, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'}
+    }
+  }],
+  layout: {
+    title: {text: "Cross-variant z-score correlation matrix", font: {size: 18, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'}, x: 0.5},
+    font: {family: '"Inter", "Helvetica Neue", system-ui, sans-serif'},
+    xaxis: {tickfont: {size: 12, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'}, side: "bottom"},
+    yaxis: {tickfont: {size: 12, family: '"Inter", "Helvetica Neue", system-ui, sans-serif'}, autorange: "reversed"},
+    height: 480,
+    width: 900,
+    autosize: false,
+    margin: {t: 50, b: 100, l: 130, r: 60},
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)"
+  }
+};
+
+document.getElementById("show").addEventListener("click", function() {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.dataset.tab === 'diagnostics'));
+  Plotly.newPlot("diagnostics-correlation-heatmap", spec.data, spec.layout, {responsive: true});
+});
+
+setTimeout(() => document.getElementById("show").click(), 200);
+</script>
+</body>
+</html>

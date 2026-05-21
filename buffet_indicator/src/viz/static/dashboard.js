@@ -1,5 +1,63 @@
 // MV Valuation Dashboard runtime (Spec v8b).
 
+// v11.2.3 SVG NaN fix — public helper used by template inline-scripts to
+// defer Plotly.newPlot() calls until the host div has valid dimensions AND
+// Plotly is loaded. Rendering into a hidden (display:none) or zero-sized
+// div makes Plotly compute NaN SVG coordinates (axis labels, heatmap images,
+// colorbar) which the browser logs as "Expected length, 'NaN'" errors.
+// Worst-case timeout ~500ms (30 animation frames) before giving up and
+// rendering anyway.
+window.mvRenderWhenReady = function (divId, renderFn, maxAttempts) {
+  maxAttempts = maxAttempts || 30;
+  let attempts = 0;
+  let pendingObserver = null;
+  function doRender() {
+    if (pendingObserver) { pendingObserver.disconnect(); pendingObserver = null; }
+    // Wait one more frame so CSS reflow fully settles. Plotly heatmaps with
+    // texttemplate compute cell-label positions during the first layout pass;
+    // if the div was display:none -> .active in the same tick, Plotly's
+    // internal clientWidth read can still race the browser's reflow.
+    requestAnimationFrame(function () {
+      try { renderFn(); }
+      catch (err) { console.warn("mvRenderWhenReady failed for", divId, err); }
+    });
+  }
+  function attempt() {
+    const el = document.getElementById(divId);
+    if (!el) return;
+    if (typeof Plotly === "undefined") {
+      if (attempts < maxAttempts) { attempts++; requestAnimationFrame(attempt); }
+      return;
+    }
+    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+      doRender();
+      return;
+    }
+    if (attempts < maxAttempts) {
+      attempts++;
+      requestAnimationFrame(attempt);
+      return;
+    }
+    // Cap reached and div is still 0x0. Most likely host tab is display:none.
+    // Switch to IntersectionObserver — fires when the div eventually becomes
+    // visible (user clicks the tab). This is the path that prevents the
+    // "render into hidden div emits NaN SVG coords" bug.
+    if ("IntersectionObserver" in window && !pendingObserver) {
+      pendingObserver = new IntersectionObserver(function (entries) {
+        for (let i = 0; i < entries.length; i++) {
+          const e = entries[i];
+          if (e.isIntersecting && e.boundingClientRect.width > 0 && e.boundingClientRect.height > 0) {
+            doRender();
+            return;
+          }
+        }
+      });
+      pendingObserver.observe(el);
+    }
+  }
+  attempt();
+};
+
 (function () {
   "use strict";
 
@@ -119,7 +177,14 @@
     }
     // v11.2.2 B4 fix: apply universal Y-axis drag-zoom defaults so users can
     // pan/zoom Y axis on every chart. Caller layout still wins on explicit keys.
-    if (window.MV_PlotlyConfig && window.MV_PlotlyConfig.applyUniversalDefaults) {
+    // v11.2.3 SVG NaN fix: skip universal defaults for heatmap traces — the
+    // defaults force `yaxis.type: "linear"` which conflicts with a heatmap's
+    // categorical y-axis and causes Plotly to emit NaN SVG coordinates for
+    // every cell label (`<text y="NaN">`) and the colorbar (`<image height="NaN">`).
+    const hasHeatmap = Array.isArray(data) && data.some(function (t) {
+      return t && (t.type === "heatmap" || t.type === "heatmapgl");
+    });
+    if (window.MV_PlotlyConfig && window.MV_PlotlyConfig.applyUniversalDefaults && !hasHeatmap) {
       layout = window.MV_PlotlyConfig.applyUniversalDefaults(layout);
     }
     if (document.documentElement.classList.contains("dark")) {
@@ -127,13 +192,28 @@
       layout.plot_bgcolor = "rgba(0,0,0,0)";
       layout.font = Object.assign({}, layout.font || {}, { color: "#e5e7eb" });
     }
-    try {
-      Plotly.newPlot(divId, data, layout, config);
-      renderedCharts.add(divId);
-      if (!chartDivIds.includes(divId)) chartDivIds.push(divId);
-    } catch (err) {
-      console.warn("Plotly.newPlot failed for", divId, err);
-    }
+    // v11.2.3 SVG NaN fix: defer the actual Plotly.newPlot() call until the
+    // host div has valid dimensions. Synchronous render into a still-laying-out
+    // (display:none -> .active) div emits NaN SVG coordinates from Plotly.
+    window.mvRenderWhenReady(divId, function () {
+      // Force-pin explicit width if caller didn't specify one. Heatmaps with
+      // texttemplate compute cell-label SVG coordinates from layout.width
+      // BEFORE the responsive resize pass — reading clientWidth can still
+      // race even after offsetWidth has stabilized. An explicit width prevents
+      // any internal Plotly "0 width" path from emitting NaN.
+      const el2 = document.getElementById(divId);
+      if (el2 && layout.width == null) {
+        const w = el2.clientWidth || el2.offsetWidth;
+        if (w > 0) layout.width = w;
+      }
+      try {
+        Plotly.newPlot(divId, data, layout, config);
+        renderedCharts.add(divId);
+        if (!chartDivIds.includes(divId)) chartDivIds.push(divId);
+      } catch (err) {
+        console.warn("Plotly.newPlot failed for", divId, err);
+      }
+    });
   }
 
   function renderHeroForTab(tabName) {

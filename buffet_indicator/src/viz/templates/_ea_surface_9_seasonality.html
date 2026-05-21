@@ -63,10 +63,21 @@
             Plotly.newPlot("ea-surface-9-seasonality-heatmap", [trace], layoutOverrides, { responsive: true });
           }
         }
+        // v11.2.3 SVG NaN fix: wait for the heatmap div to have non-zero
+        // dimensions before rendering. The seasonality heatmap lives in the
+        // hidden strategy_engine tab on page-load; rendering into the hidden
+        // div emitted NaN SVG coordinates (axis labels + <image> height).
+        function scheduleRender() {
+          if (window.mvRenderWhenReady) {
+            window.mvRenderWhenReady("ea-surface-9-seasonality-heatmap", tryRender);
+          } else {
+            setTimeout(tryRender, 100);
+          }
+        }
         if (document.readyState === "complete" || document.readyState === "interactive") {
-          setTimeout(tryRender, 100);
+          scheduleRender();
         } else {
-          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+          document.addEventListener("DOMContentLoaded", scheduleRender);
         }
       })();
     </script>
