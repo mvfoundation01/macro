@@ -1,0 +1,51 @@
+{
+  "captures": [
+    {
+      "name": "01_overview_with_mvci_mrc",
+      "tab": "overview",
+      "size_bytes": 544885,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "02_strategy_engine_with_v2_banner",
+      "tab": "strategy_engine",
+      "size_bytes": 358600,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "03_strategy_engine_v1_17_lineup",
+      "tab": "strategy_engine",
+      "size_bytes": 358600,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "04_methodology_intact",
+      "tab": "methodology",
+      "size_bytes": 518913,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    },
+    {
+      "name": "05_pushstate_routing_working",
+      "tab": "strategy_engine (restored from methodology via back-button)",
+      "restored_tab_observed": "strategy_engine",
+      "size_bytes": 358600,
+      "n_errors": 0,
+      "n_warns": 0,
+      "errors": [],
+      "warns": []
+    }
+  ],
+  "all_console_errors": []
+}

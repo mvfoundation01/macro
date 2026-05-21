@@ -1,0 +1,50 @@
+<!-- v11.2-stat V2 DIAGNOSTIC BANNER (per pre-reg §3.3 falsifiability disclosure) -->
+<section id="v2-diagnostic-banner" class="my-6 p-6 border-2 border-orange-400 rounded-lg bg-orange-50">
+  <div class="flex items-start gap-3">
+    <div class="text-3xl">&#9888;</div>
+    <div class="flex-1">
+      <h3 class="text-lg font-bold text-orange-900 mb-2">
+        V2 MV-Conditional rules &mdash; DIAGNOSTIC view only
+      </h3>
+      <p class="text-sm text-gray-800 mb-3">
+        We pre-registered three tactical de-risking rules (R-PRIMARY, R-ALT1, R-ALT2)
+        that would deploy partial T-bill weight when MVCI and/or MRC valuation z-scores
+        exceeded thresholds. The pre-registration commit (<code class="bg-white px-1">a90b02d</code>,
+        2026-05-21) locked the rules BEFORE we ran the OOS test, and locked falsifiability
+        criteria (Sharpe lift &ge; +0.05 OR MaxDD improvement &ge; 3pp).
+      </p>
+      <p class="text-sm text-gray-800 mb-3">
+        <strong>All three rules failed the pre-registered falsifiability test:</strong>
+      </p>
+      <ul class="text-sm text-gray-800 mb-3 ml-6 list-disc">
+        <li><strong>R-PRIMARY</strong> (MVCI &gt; +1.5&sigma; AND MRC &gt; +0.5&sigma;): the +1.5&sigma; MVCI threshold
+            never fired in 2000&ndash;2026 (MVCI max in window = 1.43). V2 &equiv; V1 mechanically.
+            Sharpe lift = 0.000 &rarr; REJECTED.</li>
+        <li><strong>R-ALT1</strong> (MVCI &gt; +2.0&sigma; alone): also never fired. V2 &equiv; V1.
+            Sharpe lift = 0.000 &rarr; REJECTED.</li>
+        <li><strong>R-ALT2</strong> (continuous gradient): did fire but underperformed V1
+            (Sharpe diff = &minus;0.013, Holm-&Scaron;id&aacute;k p = 0.0077 in the wrong direction). REJECTED.</li>
+      </ul>
+      <p class="text-sm text-gray-800 mb-3">
+        The most likely explanation: the modern monetary regime (post-2008 Fed accommodation)
+        has compressed extreme MVCI readings compared to the pre-2000 sample our priors were
+        based on. The thresholds were designed honestly but the OOS sample didn't contain
+        any signals strong enough to fire R-PRIMARY/R-ALT1.
+      </p>
+      <p class="text-sm text-gray-800 mb-3">
+        <strong>V1 Combination remains the operational strategy.</strong>
+        V2 charts below are kept for full transparency about what was tested. They are NOT
+        actionable signals.
+      </p>
+      <details class="text-sm text-gray-700">
+        <summary class="cursor-pointer font-semibold">Pre-registration audit trail</summary>
+        <div class="mt-2 pl-4 border-l-2 border-orange-300">
+          <p>Pre-registration file: <a href="https://github.com/mvfoundation01/macro/blob/main/buffet_indicator/specs/MV_CONDITIONAL_RULE_PREREGISTER.md" class="text-blue-600 underline">specs/MV_CONDITIONAL_RULE_PREREGISTER.md</a></p>
+          <p>Commit timestamp: <code>a90b02d</code> on 2026-05-21 (BEFORE any V2 backtest)</p>
+          <p>Falsifiability decision rule: &sect;3.3 of the pre-registration file</p>
+          <p>Statistical test results: <code>outputs/quant_engine/latest/v2_statistical_tests.csv</code></p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
