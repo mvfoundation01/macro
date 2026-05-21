@@ -1,0 +1,65 @@
+<!-- v11.2.1.3 — Extended Analytics Surface 3: Rolling Metrics (per PROMPT_v11_2 §6.5) -->
+{% if se.extended_analytics and se.extended_analytics.rolling_metrics and se.extended_analytics.rolling_metrics.available %}
+{% set s3 = se.extended_analytics.rolling_metrics %}
+<details id="ea-surface-3-rolling" class="my-4 border rounded-lg bg-white">
+  <summary class="cursor-pointer px-4 py-3 font-semibold text-gray-800 bg-gray-50 rounded-t-lg">
+    Extended Analytics &mdash; Surface 3: Rolling {{ s3.window_months }}-Month Metrics
+    <span class="text-xs font-normal text-gray-500 ml-2">
+      (per-strategy summary of rolling CAGR / Vol / Sharpe / Sortino over time)
+    </span>
+  </summary>
+  <div class="p-4">
+    <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+      <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="text-sm w-full">
+        <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
+          <tr>
+            <th class="px-2 py-1.5">Strategy</th>
+            <th class="px-2 py-1.5 text-right">N (rolling obs)</th>
+            <th class="px-2 py-1.5 text-right">Rolling CAGR (min&middot;med&middot;max)</th>
+            <th class="px-2 py-1.5 text-right">% CAGR > 0</th>
+            <th class="px-2 py-1.5 text-right">Rolling Vol (min&middot;med&middot;max)</th>
+            <th class="px-2 py-1.5 text-right">Rolling Sharpe (min&middot;med&middot;max)</th>
+            <th class="px-2 py-1.5 text-right">% Sharpe > 0</th>
+            <th class="px-2 py-1.5 text-right">Rolling Sortino (med)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for s in s3.per_strategy %}
+          <tr class="{% if s.is_v2 %}bg-orange-50/40{% endif %}">
+            <td class="px-2 py-1.5 font-medium">
+              {{ s.label }}
+              {% if s.is_v2 %}<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-orange-200 text-orange-900">DIAGNOSTIC</span>{% endif %}
+            </td>
+            {% if s.available %}
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ s.n_observations }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ s.cagr.min_fmt }} &middot; <strong>{{ s.cagr.median_fmt }}</strong> &middot; {{ s.cagr.max_fmt }}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ s.cagr.pct_positive_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ s.vol.min_fmt }} &middot; <strong>{{ s.vol.median_fmt }}</strong> &middot; {{ s.vol.max_fmt }}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">
+              {{ s.sharpe.min_fmt }} &middot; <strong>{{ s.sharpe.median_fmt }}</strong> &middot; {{ s.sharpe.max_fmt }}
+            </td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ s.sharpe.pct_positive_fmt }}</td>
+            <td class="px-2 py-1.5 text-right tabular-nums">{{ s.sortino.median_fmt }}</td>
+            {% else %}
+            <td colspan="7" class="px-2 py-1.5 text-xs text-gray-500 italic">{{ s.reason }}</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-500 mt-2">
+      Each cell shows min &middot; <strong>median</strong> &middot; max of the rolling {{ s3.window_months }}-month
+      metric across the available history. % positive = fraction of rolling windows with that metric &gt; 0.
+      Bigger spread between min and max indicates regime-dependent performance.
+    </p>
+  </div>
+</details>
+{% endif %}

@@ -443,10 +443,120 @@ def build_drawdowns_surface(
     }
 
 
+# ── Surface 3 — Rolling Metrics ─────────────────────────────────────────
+
+
+def compute_rolling_metrics(
+    returns: pd.Series, window: int = 60
+) -> pd.DataFrame:
+    """60-month rolling CAGR, Vol, Sharpe, Sortino. Returns DataFrame indexed by date."""
+    if returns.empty:
+        return pd.DataFrame()
+    r = returns.dropna()
+
+    def _roll_cagr(s: pd.Series) -> float:
+        prod = float((1.0 + s).prod())
+        if prod <= 0:
+            return float("nan")
+        years = len(s) / 12.0
+        if years <= 0:
+            return float("nan")
+        return prod ** (1.0 / years) - 1.0
+
+    def _roll_sharpe(s: pd.Series) -> float:
+        sd = s.std(ddof=1)
+        if sd == 0 or not np.isfinite(sd):
+            return float("nan")
+        return float(s.mean() / sd * math.sqrt(12.0))
+
+    def _roll_sortino(s: pd.Series) -> float:
+        downside = s[s < 0]
+        if downside.empty:
+            return float("nan")
+        dsd = downside.std(ddof=1)
+        if dsd == 0 or not np.isfinite(dsd):
+            return float("nan")
+        return float(s.mean() / dsd * math.sqrt(12.0))
+
+    out = pd.DataFrame({
+        "rolling_cagr": r.rolling(window).apply(_roll_cagr, raw=False),
+        "rolling_vol": r.rolling(window).std() * math.sqrt(12.0),
+        "rolling_sharpe": r.rolling(window).apply(_roll_sharpe, raw=False),
+        "rolling_sortino": r.rolling(window).apply(_roll_sortino, raw=False),
+    })
+    return out.dropna(how="all")
+
+
+def build_rolling_metrics_surface(
+    strategies: dict[str, StrategyReturns] | None = None,
+    window: int = 60,
+) -> dict[str, Any]:
+    """Surface 3: rolling 60-month summary stats per strategy (min/median/max of rolling Sharpe etc.)."""
+    if strategies is None:
+        strategies = load_all_strategy_returns()
+    if not strategies:
+        return {"available": False, "reason": "no strategy returns available", "per_strategy": []}
+
+    per_strategy: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if len(r) < window + 1:
+            per_strategy.append({
+                "label": label, "is_v2": _is_v2(label),
+                "available": False,
+                "reason": f"only {len(r)} months; need {window + 1} for rolling {window}-mo metrics",
+            })
+            continue
+        roll = compute_rolling_metrics(r, window=window)
+        if roll.empty:
+            per_strategy.append({
+                "label": label, "is_v2": _is_v2(label),
+                "available": False,
+                "reason": "rolling computation returned empty",
+            })
+            continue
+        per_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "available": True,
+            "n_observations": int(roll.shape[0]),
+            "cagr": {
+                "min_fmt": _fmt_pct(float(roll["rolling_cagr"].min()), digits=2),
+                "median_fmt": _fmt_pct(float(roll["rolling_cagr"].median()), digits=2),
+                "max_fmt": _fmt_pct(float(roll["rolling_cagr"].max()), digits=2),
+                "pct_positive_fmt": f"{(roll['rolling_cagr'] > 0).mean() * 100:.1f}%",
+            },
+            "vol": {
+                "min_fmt": _fmt_pct(float(roll["rolling_vol"].min()), digits=2),
+                "median_fmt": _fmt_pct(float(roll["rolling_vol"].median()), digits=2),
+                "max_fmt": _fmt_pct(float(roll["rolling_vol"].max()), digits=2),
+            },
+            "sharpe": {
+                "min_fmt": _fmt_signed(float(roll["rolling_sharpe"].min()), digits=3),
+                "median_fmt": _fmt_signed(float(roll["rolling_sharpe"].median()), digits=3),
+                "max_fmt": _fmt_signed(float(roll["rolling_sharpe"].max()), digits=3),
+                "pct_positive_fmt": f"{(roll['rolling_sharpe'] > 0).mean() * 100:.1f}%",
+            },
+            "sortino": {
+                "min_fmt": _fmt_signed(float(roll["rolling_sortino"].min()), digits=3),
+                "median_fmt": _fmt_signed(float(roll["rolling_sortino"].median()), digits=3),
+                "max_fmt": _fmt_signed(float(roll["rolling_sortino"].max()), digits=3),
+            },
+        })
+
+    return {
+        "available": True,
+        "window_months": window,
+        "per_strategy": per_strategy,
+    }
+
+
 __all__ = [
     "V2_LABELS",
     "build_summary_surface",
     "find_drawdown_episodes",
     "tag_episodes_with_macro_regime",
     "build_drawdowns_surface",
+    "compute_rolling_metrics",
+    "build_rolling_metrics_surface",
 ]

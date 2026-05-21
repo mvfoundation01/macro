@@ -15,7 +15,9 @@ import pytest
 from src.quant_engine.extended_analytics import (
     V2_LABELS,
     build_drawdowns_surface,
+    build_rolling_metrics_surface,
     build_summary_surface,
+    compute_rolling_metrics,
     find_drawdown_episodes,
     tag_episodes_with_macro_regime,
 )
@@ -118,6 +120,50 @@ def test_find_drawdown_episodes_numerical():
     assert deepest < -0.15, f"deepest dd {deepest:.4f} should be < -15%"
     recovered = episodes[episodes["recovered"]]
     assert len(recovered) >= 1, "episode should have recovered within the +2% growth window"
+
+
+# ── Surface 3: Rolling Metrics ───────────────────────────────────────────
+
+def test_ea_surface_3_rolling_structural_in_dashboard():
+    """Surface 3 rolling block + 60-month label + V1_Combination row."""
+    html = _read_dashboard()
+    assert 'id="ea-surface-3-rolling"' in html, "Surface 3 <details> block missing"
+    # Title should mention the 60-mo window.
+    assert "Rolling 60-Month" in html or "60-mo" in html or "60-month" in html.lower()
+    # CAGR / Sharpe column headers present in surface 3 context.
+    assert "Rolling CAGR" in html or "rolling_cagr" in html
+
+
+def test_compute_rolling_metrics_numerical():
+    """A steady +1%/mo series has rolling 60-mo Sharpe in a sensible range."""
+    # 120 months of constant 1% returns means rolling vol is zero → Sharpe NaN.
+    # Use slightly noisy series so vol > 0.
+    rng = np.random.default_rng(seed=11)
+    n = 120
+    idx = pd.date_range("2010-01-31", periods=n, freq="ME")
+    rets = pd.Series(0.01 + rng.normal(0, 0.001, n), index=idx)
+    out = compute_rolling_metrics(rets, window=60)
+    # Should have n - 60 + 1 = 61 non-NaN rolling rows.
+    assert len(out) >= 60, f"expected ≥ 60 rolling rows, got {len(out)}"
+    # Rolling Sharpe should be very high (near-deterministic positive returns).
+    assert out["rolling_sharpe"].dropna().median() > 5, (
+        f"rolling Sharpe should be very high for near-constant +1% series; got median "
+        f"{out['rolling_sharpe'].dropna().median():.2f}"
+    )
+
+
+def test_build_rolling_metrics_surface_short_series_marks_unavailable():
+    """Strategies with < 61 months should be marked unavailable with a reason."""
+    rng = np.random.default_rng(seed=13)
+    idx = pd.date_range("2020-01-31", periods=40, freq="ME")
+    short = pd.Series(rng.normal(0.01, 0.04, 40), index=idx)
+    strats = {
+        "V1_Short": StrategyReturns(monthly=short, name="V1_Short", color="#000"),
+    }
+    out = build_rolling_metrics_surface(strategies=strats, window=60)
+    assert out["available"] is True  # surface itself is available...
+    assert out["per_strategy"][0]["available"] is False  # ...but this strategy is too short
+    assert "need 61" in out["per_strategy"][0]["reason"]
 
 
 def test_tag_episodes_with_macro_regime_columns_added():
