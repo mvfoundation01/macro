@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -242,7 +241,6 @@ def find_drawdown_episodes(
     peak_equity_at_episode: float = 0.0
     EPS = 1e-6
     for date, dd_val in drawdown.items():
-        eq_val = float(eq.loc[date])
         if not in_dd:
             if dd_val < -EPS:
                 in_dd = True

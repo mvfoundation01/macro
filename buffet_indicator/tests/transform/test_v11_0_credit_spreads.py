@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ingest._base import SourceMissingError
 from src.transform.credit_spread_compute import (
     REQUIRED_COLUMNS,
     VARIANT_REGISTRY,
