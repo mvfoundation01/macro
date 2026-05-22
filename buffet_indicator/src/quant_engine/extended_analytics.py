@@ -593,6 +593,7 @@ def build_risk_metrics_surface(
     benchmark_r = strategies[benchmark_label].monthly.dropna() if benchmark_label in strategies else None
 
     rows: list[dict[str, Any]] = []
+    metric_chart_data: list[dict[str, Any]] = []  # v11.2.3 Surface 4 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -651,11 +652,32 @@ def build_risk_metrics_surface(
             "up_capture_fmt": _fmt_signed(up_cap, digits=3),
             "down_capture_fmt": _fmt_signed(down_cap, digits=3),
         })
+        # v11.2.3 — raw scalar metrics for the grouped bar chart.
+        # All values returned in *percent* (e.g. 0.012 → 1.2) so the
+        # chart axis can display % consistently.
+        def _pct(x: float) -> float | None:
+            return None if (x is None or not np.isfinite(x)) else float(x) * 100.0
+
+        def _raw(x: float) -> float | None:
+            return None if (x is None or not np.isfinite(x)) else float(x)
+
+        metric_chart_data.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "mean_pct": _pct(mean),
+            "std_pct": _pct(std),
+            "downside_dev_pct": _pct(dsd),
+            "var_5_pct": _pct(var_5),
+            "cvar_5_pct": _pct(cvar_5),
+            "skew": _raw(skew),
+            "beta": _raw(beta),
+        })
 
     return {
         "available": True,
         "benchmark_label": benchmark_label,
         "rows": rows,
+        "metric_chart_data": metric_chart_data,  # v11.2.3 Surface 4 chart
     }
 
 

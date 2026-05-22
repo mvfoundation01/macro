@@ -10,6 +10,74 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.2 — Grouped bar chart: monthly statistics on a
+         common %-monthly y-axis. Mean and Std positive, VaR/CVaR negative
+         (losses). Group=strategy so users compare side-by-side. -->
+    {% if s4.metric_chart_data %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">Monthly risk statistics (%)</h4>
+      <div id="ea-surface-4-risk-chart"
+           style="width:100%;height:300px;"
+           data-strategies='{{ s4.metric_chart_data|tojson|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-4-risk-chart");
+          if (!el) return;
+          var strategies;
+          try { strategies = JSON.parse(el.dataset.strategies || "[]"); }
+          catch (e) { strategies = []; }
+          if (!strategies.length) return;
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          var metric_keys = ["mean_pct", "std_pct", "downside_dev_pct", "var_5_pct", "cvar_5_pct"];
+          var metric_labels = ["Mean", "Std", "Downside σ", "VaR 5%", "CVaR 5%"];
+          var traces = [];
+          for (var i = 0; i < strategies.length; i++) {
+            var s = strategies[i];
+            var y = metric_keys.map(function (k) { return s[k]; });
+            traces.push({
+              x: metric_labels, y: y,
+              name: (s.label || "").replace("_", " "),
+              type: "bar",
+              marker: { color: palette[s.label] || "#888", opacity: s.is_v2 ? 0.55 : 0.95 },
+              hovertemplate: "%{x}<br>%{y:.2f}%<extra>" + (s.label || "") + "</extra>"
+            });
+          }
+          var layoutOverrides = {
+            barmode: "group",
+            yaxis: { title: "% monthly", zeroline: true, zerolinecolor: "#888" },
+            xaxis: { title: "" },
+            margin: { l: 55, r: 15, t: 20, b: 40 },
+            legend: { orientation: "h", y: 1.12, x: 0 }
+          };
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-4-risk-chart", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-4-risk-chart", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     <div class="overflow-x-auto">
       <table class="text-xs w-full">
         <thead class="bg-gray-100 text-left uppercase text-gray-600">
