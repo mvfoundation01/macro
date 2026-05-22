@@ -470,3 +470,32 @@ Session 7 starts with **§2.F (bootstrap CIs + conditional-probability tail prob
 
 **Next**: Session 8 — §2.H (diagnostics: ADF/KPSS/PP/ZA + VIF + Bai-Perron) + §2.I (DIAGNOSTIC ONLY dashboard panel) + §2.J (falsifiability scorecard locked + research write-up draft).
 
+## Session 8 — 2026-05-25 (Claude Opus 4.7 1M context, autonomous closeout)
+
+**Accomplished**:
+- §2.0 DECISIONS.md addendum (Strategist arbitration on Session 7) — `c89d5e7` — tag `v11.3-lc-v1-decisions-2-2026-05-25`
+- §2.H Diagnostics (ADF + KPSS + PP + ZA + VIF + Bai-Perron) — `d081085` — tag `v11.3-lc-v1-H-2026-05-25`
+- §2.I DIAGNOSTIC ONLY dashboard panel (standalone HTML, 173 KB) — `177554f` — tag `v11.3-lc-v1-I-2026-05-25`
+- §2.J Verdict locked + research write-up + sprint closeout — `d56174c` — tag `v11.3-lc-v1-J-2026-05-25` + **`v11.3.0`** sprint closeout tag
+- §6 + §4 final reports — this commit
+
+**Test deltas**: +47 new tests (16 diagnostics + 16 panel structural + 9 verdict + 6 write-up). Cumulative ≥860+. All baseline tests still pass.
+
+**CI runs**: [26304545776](https://github.com/mvfoundation01/macro/actions/runs/26304545776), [26304782659](https://github.com/mvfoundation01/macro/actions/runs/26304782659), [26304954593](https://github.com/mvfoundation01/macro/actions/runs/26304954593), [26305214049](https://github.com/mvfoundation01/macro/actions/runs/26305214049).
+
+**Invariants**: all 6 §1 gates remained green throughout. v50 SHA unchanged; pre-reg `a90b02d` + `a8635ef` intact; `a8635ef` ancestor of HEAD enforced at every artifact write.
+
+**Outputs added**:
+- `outputs/tables/lc_v1_stationarity.csv`, `lc_v1_diagnostics.csv`, `lc_v1_component_correlation_matrix.csv`, `lc_v1_component_eigenvalues.csv`, `lc_v1_bai_perron_breaks.csv`.
+- `outputs/lc_v1_diagnostic_panel.html` (standalone DIAGNOSTIC panel).
+- `outputs/lc_v1_verdict.json` (LOCKED).
+- `outputs/reports/lc_v1_research_writeup.md` (academic-style draft, ~2,500 words).
+- `LC_V1_SPRINT_CLOSEOUT_REPORT.md` (this sprint's full closeout report).
+- `SESSION_8_FINAL_REPORT.md`.
+
+**Final scorecard locked**: 0 of 7 testable criteria pass. Verdict FAIL per pre-reg §2.1. Display framing DIAGNOSTIC ONLY per pre-reg §12.2. Three publishable findings preserved in `outputs/lc_v1_verdict.json`.
+
+**LC v1.0 sprint closed**. Verdict locked at `v11.3.0`. Strategist arbitrates merge-to-main timing in a future `DECISIONS.md` entry.
+
+**Next sprint**: v11.4 LC v2.0 — fresh pre-registration based on the 4 amendment candidates documented in `outputs/lc_v1_verdict.json` (priors re-anchoring, criterion 4 wording, non-Gaussian forecast distribution, insufficient-sample gate). Validation window 2025–2027 (held out from v11.3).
+
