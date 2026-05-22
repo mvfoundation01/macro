@@ -694,6 +694,8 @@ def build_returns_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    cum_log_curves: list[dict[str, Any]] = []  # v11.2.3 Surface 5 panel (a)
+    annual_returns_by_strategy: list[dict[str, Any]] = []  # panel (b)
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -702,6 +704,23 @@ def build_returns_surface(
         annual = r.resample("YE").apply(lambda s: float((1.0 + s).prod() - 1.0))
         annual_arr = annual.to_numpy(dtype=np.float64)
         arr_m = r.to_numpy(dtype=np.float64)
+
+        # v11.2.3 — cumulative log-equity series for panel (a).
+        cum = (1.0 + r).cumprod()
+        log_eq = np.log(cum.to_numpy(dtype=np.float64))
+        cum_log_curves.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "dates": [d.strftime("%Y-%m-%d") for d in cum.index],
+            "log_eq": [None if not np.isfinite(v) else float(v) for v in log_eq],
+        })
+        # v11.2.3 — per-year returns for panel (b) grouped bar.
+        annual_returns_by_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "years": [int(d.year) for d in annual.index],
+            "values": [None if pd.isna(v) else float(v) * 100.0 for v in annual_arr],
+        })
 
         rows.append({
             "label": label,
@@ -718,7 +737,12 @@ def build_returns_surface(
             "pct_positive_months_fmt": f"{(arr_m > 0).mean() * 100:.1f}%" if len(arr_m) else "n/a",
         })
 
-    return {"available": True, "rows": rows}
+    return {
+        "available": True,
+        "rows": rows,
+        "cum_log_curves": cum_log_curves,  # v11.2.3 Surface 5 panel (a)
+        "annual_returns": annual_returns_by_strategy,  # v11.2.3 panel (b)
+    }
 
 
 # ── Surface 6 — Lump Sum (win rate vs benchmark) ────────────────────────
