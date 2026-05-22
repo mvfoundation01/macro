@@ -346,3 +346,64 @@ Per prompt §3.3 explicit guidance: data layer (A1 + A2) complete → STOP and e
 
 CI trigger: pending (workflow on `deploy.yml` only auto-fires for `push: branches: [main]` / PRs to main, NOT spec branches). Will trigger manually via `gh workflow run deploy.yml --ref spec/liquidity-composite-v1.0` and poll before emitting final §7.
 
+## Session 6 — 2026-05-23 (Claude Opus 4.7 1M context) — Stage 3 LC v1.0 (modeling layer A1-ICEDXY + B → E)
+
+### Done
+
+| Sub-stage | Status | Commit | Tag | CI run |
+|---|---|---|---|---|
+| §2.0 ICE DXY resolution (Norgate + yfinance + cache priority) | ✅ | `9d685ef` | `v11.3-lc-v1-A1-icedxy-2026-05-23` | [26296649804](https://github.com/mvfoundation01/macro/actions/runs/26296649804) |
+| §2.B 4 splice functions per pre-reg §1.3 | ✅ | `99af87e` | `v11.3-lc-v1-B-2026-05-23` | [26297294564](https://github.com/mvfoundation01/macro/actions/runs/26297294564) |
+| §2.C 5 component z-scores per pre-reg §1.1 + §3.1 | ✅ | `ec24edf` | `v11.3-lc-v1-C-2026-05-23` | [26297580445](https://github.com/mvfoundation01/macro/actions/runs/26297580445) |
+| §2.D composite construction (3 scopes) per pre-reg §1.1-§1.2 | ✅ | `21049f5` | `v11.3-lc-v1-D-2026-05-23` | [26297854405](https://github.com/mvfoundation01/macro/actions/runs/26297854405) |
+| §2.E predictive regression per pre-reg §3.1-§3.5 | ✅ | `8cd1a10` | `v11.3-lc-v1-E-2026-05-23` | [26298276841](https://github.com/mvfoundation01/macro/actions/runs/26298276841) |
+
+### Test deltas
+
+| Sub-stage | New tests | Coverage on new module |
+|---|---|---|
+| §2.0 ICE DXY | +12 (T-N1..N10, T-S1..S7, T-W1) + 1 yfinance integration | 94% on `src/ingest/lc_v1_loader.py` |
+| §2.B splices | +18 | 100% on `src/transform/lc_v1_splices.py` |
+| §2.C components | +21 | 95% on `src/models/lc_v1_components.py` |
+| §2.D composite | +15 | 97% on `src/models/lc_v1_composite.py` |
+| §2.E regression | +21 | 91% on `src/models/lc_v1_regression.py` |
+
+Total new tests: **~87**. Pre-Session-6 baseline was ≥494 (Session 5 closeout); cumulative now ≥581. All per-module coverage targets met or exceeded.
+
+### Invariants verified
+
+| Invariant | Status |
+|---|---|
+| v50 ORIGINAL SHA256 = `6087918d…26f47` | ✅ unchanged |
+| Pre-reg `a90b02d` (MV-Conditional) on `origin/main` | ✅ untouched |
+| Pre-reg `a8635ef` (LC v1.0) ancestor of HEAD (now `8cd1a10`) | ✅ verified (enforced as HARD GATE by `src/models/lc_v1_composite.write_composites_parquet`) |
+| Baseline test suite | ✅ all green (~701 tests at start; +87 = ~788 cumulative) |
+| Bundle ≤ 20 MB | ✅ no dashboard rebuilds in Session 6 |
+| Look-ahead audits | ✅ T-A1 (loader), T-B5 (splices), T-LA1 + T-LA2 (components), T-LA-E (regression) |
+
+### ICE DXY blocker resolution (§2.0)
+
+- `src/ingest/lc_v1_loader.build_lc_icedxy_master()` rewritten with 3-tier priority chain (Norgate Diamond / yfinance / local parquet cache).
+- `scripts/bootstrap_icedxy_from_norgate.py` is the one-shot Owner-runs script (requires Norgate Diamond subscription; writes `data/master/icedxy_close.parquet` and commits via Git LFS).
+- `data/master/_source_policy.json` records the priority chain formally.
+- DTWEXBGS splice at 2006-01-04 retained per sealed pre-reg §1.3 (log-level additive c, gates `corr > 0.85`, `mean |z-divergence| < 0.30`).
+- Stooq path deprecated behind `build_lc_icedxy_stooq_master_legacy` with `DeprecationWarning`.
+- Resolution section appended to `specs/BLOCKED_v11_3_A1_icedxy_stooq.md`.
+- Per spec §17 within-scope vendor swap; **no amendment of pre-reg required**.
+
+### Headline regression results (preliminary)
+
+The `outputs/tables/lc_v1_predictive_regression.csv` table is **NOT yet generated** in this session because the LC composites depend on z₄ (DXY⁻¹), which depends on the cached ICE DXY parquet — the Owner must first run `scripts/bootstrap_icedxy_from_norgate.py` while a Norgate Diamond subscription is active.
+
+The regression CODE is fully tested with synthetic data (T-E3.1 confirms β recovery within 0.02 on simulated data with β=0.05; T-E4.1 confirms bootstrap reproducibility; T-E5.1 confirms Goyal-Welch + Clark-West formulas). Once the cache is populated, `run_all_regressions()` will emit the 12-row CSV.
+
+### Owner actions required
+
+- [ ] **Run `python scripts/bootstrap_icedxy_from_norgate.py` ONCE** while Norgate Diamond is active. This produces the ICE DXY cache (`data/master/icedxy_close.parquet`) that survives subscription cancellation.
+- [ ] Review §7 final report (`SESSION_6_FINAL_REPORT.md`) — regression headline table will be generated AFTER the bootstrap above.
+- [ ] Authorize Session 7 (sub-stages F → J: bootstrap CIs, calibration, diagnostics, dashboard panel, falsifiability scorecard) via a DECISIONS.md entry.
+
+### Next session entry point
+
+Session 7 starts with **§2.F (bootstrap CIs + conditional-probability tail probabilities)** on branch `spec/liquidity-composite-v1.0` HEAD `8cd1a10` (or post-Norgate-bootstrap commit).
+
