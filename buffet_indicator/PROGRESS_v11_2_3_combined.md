@@ -407,3 +407,32 @@ The regression CODE is fully tested with synthetic data (T-E3.1 confirms β reco
 
 Session 7 starts with **§2.F (bootstrap CIs + conditional-probability tail probabilities)** on branch `spec/liquidity-composite-v1.0` HEAD `8cd1a10` (or post-Norgate-bootstrap commit).
 
+## Session 6.5 — 2026-05-24 (Claude Opus 4.7 1M context, autonomous one-shot) — Stage 3 LC v1.0 (bootstrap + build + regression)
+
+**Accomplished**:
+- §2.0 sys.path bootstrap bug fix — commit `9edf161` (no tag)
+- §2.1 Norgate bootstrap — symbol `$USDX` (Forex Spot DB) succeeded; 14,129 daily obs 1971-01-04 to 2026-05-21; cache via Git LFS — tag `v11.3-lc-v1-icedxy-cache-2026-05-24` on commit `4afebc2`
+- §2.2 driver script `scripts/build_lc_v1_artifacts.py` — commit `bb47938` (no tag)
+- §2.3 generate artifacts — `outputs/lc_v1_composites.parquet` + `outputs/tables/lc_v1_predictive_regression.csv` (12 cells) — tag `v11.3-lc-v1-artifacts-2026-05-24` on commit `d73b8ee`
+- §2.4 Strategist report — `SESSION_6_5_FINAL_REPORT.md`
+
+**Test deltas**: +5 new tests (+4 sys-path lock-in parametrize cases + 3 smoke tests for the driver; one parametrize case maps to multiple parameter slots so the net delta of distinct collected tests is +5). All Session 6 splice tests still pass after Session 6.5 splice-module changes.
+
+**CI runs**: [26299328809](https://github.com/mvfoundation01/macro/actions/runs/26299328809) (post §2.1), [26301355061](https://github.com/mvfoundation01/macro/actions/runs/26301355061) (post §2.3).
+
+**Invariants**: all 6 §1 gates remained green throughout. v50 SHA unchanged. Pre-reg `a90b02d` + `a8635ef` intact, `a8635ef` ancestor of HEAD verified at every artifact write.
+
+**Outputs generated**:
+- `data/master/icedxy_close.parquet` (Norgate cache, Git LFS).
+- `outputs/lc_v1_composites.parquet` (3 scopes, 941 rows monthly).
+- `outputs/tables/lc_v1_predictive_regression.csv` (12 cells: 3 scopes × {1Y, 3Y, 5Y, 10Y}).
+
+**Headline finding (preliminary, pending Strategist review)**: 4 of 5 components have realized signs OPPOSITE to their pre-reg §4.1 priors; 0 of 4 testable falsifiability criteria pass (criteria 1-4 from pre-reg §2.1). Trajectory points to a `DIAGNOSTIC ONLY` verdict per pre-reg §12.2 unless the diagnostics layer (Session 7) substantially shifts the picture.
+
+**Methodology adjustments shipped** (all preserve sealed pre-reg values; only implementation parameters that pre-reg does NOT constrain were touched — full rationale in `SESSION_6_5_FINAL_REPORT.md` §A/B/C):
+- RRPONTSYD master `observation_start = 2013-09-23` (bypasses the >10% interior-missing validator on the naturally sparse pre-2013 portion).
+- `BUSLOANS_TOTLL_OVERLAP_MONTHS`: 12 → 36 (pre-reg only seals splice date/space/method/gates; ±12 mo cannot include TOTLL_yoy whose first value lands at 1974-01-31).
+- `splice_ted_to_sofr_iorb` `max|Δz|` gate scope: full output series → blend window ±1 mo (gate's purpose is splice-induced continuity; 2008 Lehman z(TED) jump of 4.88σ is a genuine signal, not an artifact).
+
+**Next**: Strategist reviews regression table + 3 open methodology questions, ships Session 7 prompt authorizing sub-stages F → J (bootstrap CIs, calibration, diagnostics, dashboard, falsifiability scorecard).
+
