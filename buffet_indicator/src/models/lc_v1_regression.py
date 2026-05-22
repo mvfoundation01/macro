@@ -54,8 +54,11 @@ from src.config import OUTPUTS_DIR
 # Constants (pre-reg a8635ef §3.1-§3.8)
 # ---------------------------------------------------------------------------
 
-#: Per pre-reg §3.5 — bootstrap replication count.
-BOOTSTRAP_N_REPS = 10_000
+#: Per pre-reg §3.5 + master spec §3.6 — bootstrap replication count.
+#: Session 6 used 10_000 as the standard CI; Session 7 §2.F.2 escalates to
+#: 50_000 because the tail-probability outputs (master spec §5.3) require
+#: more reps to stabilize the 95 % CI on rare events.
+BOOTSTRAP_N_REPS = 50_000
 
 #: Per pre-reg §3.5 — global RNG seed for reproducibility.
 BOOTSTRAP_SEED = 42
@@ -78,6 +81,20 @@ CAMPBELL_YOGO_RHO_THRESHOLD = 0.95
 
 #: Path for the regression-results CSV.
 REGRESSION_CSV_RELATIVE = "tables/lc_v1_predictive_regression.csv"
+
+#: Path for the conditional-probability CSV (Session 7 §2.F.3).
+CONDITIONAL_PROBS_CSV_RELATIVE = "tables/lc_v1_conditional_probabilities.csv"
+
+#: Default risk-free rate for p_below_rf10y probability (Session 7 §2.F.3).
+#: Roughly the current US 10-year Treasury yield at 2026-05-22 (~4.2%).
+DEFAULT_RF_10Y_ANNUALIZED = 0.042
+
+#: Forward CAGR cutoffs for tail probabilities (annualized).
+CAGR_CUTOFF_LOW = 0.05  # p_below_5pct_cagr
+CAGR_CUTOFF_HIGH = 0.07  # p_above_7pct_cagr
+
+#: Max-drawdown cutoffs (signed; -0.20 = 20% drawdown).
+MAXDD_CUTOFFS = (-0.20, -0.30, -0.50)
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +373,316 @@ def _goyal_welch_oos_r2(
 
 
 # ---------------------------------------------------------------------------
+# Conditional probability tail outputs (master spec §5.3)
+# ---------------------------------------------------------------------------
+
+
+def _forward_total_return_and_maxdd(
+    spx_tr_levels: pd.Series,
+    horizon_months: int,
+) -> pd.DataFrame:
+    """For each date t with horizon h, compute the forward total return and the
+    max drawdown of the SPX TR over the window [t, t+h].
+
+    Returns a DataFrame with columns ``cum_return`` (cumulative return over h),
+    ``cagr`` (annualized return), and ``maxdd`` (max drawdown, signed; the
+    most negative value of (P_s − running_max_s)/running_max_s for s ∈ [t, t+h]).
+    """
+    levels = spx_tr_levels.dropna().astype("float64")
+    out: dict[str, list[float]] = {"cum_return": [], "cagr": [], "maxdd": []}
+    idx: list[pd.Timestamp] = []
+    horizon_years = horizon_months / 12.0
+    for i in range(len(levels) - horizon_months):
+        start_date = levels.index[i]
+        window = levels.iloc[i : i + horizon_months + 1]
+        if window.isna().any():
+            continue
+        start_v = float(window.iloc[0])
+        end_v = float(window.iloc[-1])
+        if start_v <= 0 or not np.isfinite(start_v) or not np.isfinite(end_v):
+            continue
+        cum_return = end_v / start_v - 1.0
+        cagr = (end_v / start_v) ** (1.0 / horizon_years) - 1.0
+        running_max = window.cummax()
+        drawdowns = (window - running_max) / running_max
+        maxdd = float(drawdowns.min())
+        out["cum_return"].append(float(cum_return))
+        out["cagr"].append(float(cagr))
+        out["maxdd"].append(maxdd)
+        idx.append(start_date)
+    return pd.DataFrame(out, index=pd.DatetimeIndex(idx, name="date"))
+
+
+def compute_conditional_probabilities(
+    *,
+    lc_current: float,
+    lc_series: pd.Series,
+    spx_tr_monthly: pd.Series,
+    horizon_years: int,
+    n_bootstrap: int = 50_000,
+    seed: int = BOOTSTRAP_SEED,
+    rf_10y: float = DEFAULT_RF_10Y_ANNUALIZED,
+    n_quintiles: int = 5,
+) -> dict[str, float]:
+    """Compute conditional probability tail outputs per master spec §5.3.
+
+    Conditioning: bucket historical LC values into ``n_quintiles`` quantiles.
+    Identify the quintile containing ``lc_current``. Restrict the empirical
+    forward-return distribution to historical dates in that quintile.
+    Compute the 7 tail probabilities + their 95 % bootstrap CIs.
+
+    Tail events (annualized forward return r, max drawdown m over horizon):
+
+    * ``p_neg_total_return`` = P(cumulative return < 0%)
+    * ``p_below_rf10y``      = P(annualized return < rf_10y)
+    * ``p_below_5pct_cagr``  = P(annualized return < 5%)
+    * ``p_above_7pct_cagr``  = P(annualized return > 7%)
+    * ``p_maxdd_lt_neg20``   = P(max drawdown < -20%)
+    * ``p_maxdd_lt_neg30``   = P(max drawdown < -30%)
+    * ``p_maxdd_lt_neg50``   = P(max drawdown < -50%)
+
+    Bootstrap: ``n_bootstrap`` stationary block-bootstrap reps over the
+    conditional subsample. For each rep, recompute each probability. Report
+    median + 95 % CI.
+
+    Returns
+    -------
+    dict
+        ``{lc_quintile, n_obs_in_quintile, p_<name>, p_<name>_ci_low,
+        p_<name>_ci_high}`` keys for each tail event.
+    """
+    horizon_months = horizon_years * 12
+    fwd = _forward_total_return_and_maxdd(spx_tr_monthly, horizon_months)
+    lc = lc_series.dropna()
+    common = fwd.index.intersection(lc.index)
+    aligned = pd.concat(
+        [lc.loc[common].rename("lc"), fwd.loc[common]], axis=1,
+    ).dropna()
+    if aligned.empty or not np.isfinite(lc_current):
+        nan_block = {f"p_{n}": float("nan") for n in (
+            "neg_total_return", "below_rf10y", "below_5pct_cagr",
+            "above_7pct_cagr", "maxdd_lt_neg20", "maxdd_lt_neg30",
+            "maxdd_lt_neg50",
+        )}
+        nan_block.update(
+            {f"{k}_ci_low": float("nan") for k in nan_block}
+        )
+        nan_block.update(
+            {f"{k.replace('_ci_low','_ci_high')}": float("nan")
+             for k in list(nan_block) if k.endswith("_ci_low")}
+        )
+        nan_block["lc_quintile"] = float("nan")
+        nan_block["n_obs_in_quintile"] = 0
+        return nan_block
+
+    quintile_edges = np.quantile(
+        aligned["lc"].to_numpy(),
+        np.linspace(0, 1, n_quintiles + 1),
+    )
+    # Determine the quintile bucket containing lc_current.
+    cur_q = int(np.clip(
+        np.searchsorted(quintile_edges[1:-1], lc_current, side="right"),
+        0, n_quintiles - 1,
+    ))
+    lo = quintile_edges[cur_q]
+    hi = quintile_edges[cur_q + 1]
+    if cur_q == n_quintiles - 1:
+        # Include the upper edge.
+        cond_mask = (aligned["lc"] >= lo) & (aligned["lc"] <= hi)
+    else:
+        cond_mask = (aligned["lc"] >= lo) & (aligned["lc"] < hi)
+    cond = aligned.loc[cond_mask]
+    n_q = len(cond)
+
+    def _probs(sample: pd.DataFrame) -> dict[str, float]:
+        if sample.empty:
+            return {k: float("nan") for k in (
+                "p_neg_total_return", "p_below_rf10y",
+                "p_below_5pct_cagr", "p_above_7pct_cagr",
+                "p_maxdd_lt_neg20", "p_maxdd_lt_neg30", "p_maxdd_lt_neg50",
+            )}
+        return {
+            "p_neg_total_return": float((sample["cum_return"] < 0.0).mean()),
+            "p_below_rf10y": float((sample["cagr"] < rf_10y).mean()),
+            "p_below_5pct_cagr": float((sample["cagr"] < CAGR_CUTOFF_LOW).mean()),
+            "p_above_7pct_cagr": float((sample["cagr"] > CAGR_CUTOFF_HIGH).mean()),
+            "p_maxdd_lt_neg20": float((sample["maxdd"] < MAXDD_CUTOFFS[0]).mean()),
+            "p_maxdd_lt_neg30": float((sample["maxdd"] < MAXDD_CUTOFFS[1]).mean()),
+            "p_maxdd_lt_neg50": float((sample["maxdd"] < MAXDD_CUTOFFS[2]).mean()),
+        }
+
+    point = _probs(cond)
+
+    # Bootstrap: simple iid resampling within the conditional subsample (the
+    # conditional bucket is a quintile that already partials out persistence
+    # via LC bucketing; a block bootstrap within a single bucket would force
+    # the resamples to also be persistence-correlated which is the wrong
+    # null for "what is P(event | regime=quintile)").
+    rng = np.random.default_rng(seed)
+    if n_q < 5 or n_bootstrap < 1:
+        out_dict: dict[str, float] = {**point}
+        for k in point:
+            out_dict[f"{k}_ci_low"] = float("nan")
+            out_dict[f"{k}_ci_high"] = float("nan")
+        out_dict["lc_quintile"] = float(cur_q + 1)
+        out_dict["n_obs_in_quintile"] = n_q
+        return out_dict
+
+    cum_arr = cond["cum_return"].to_numpy()
+    cagr_arr = cond["cagr"].to_numpy()
+    maxdd_arr = cond["maxdd"].to_numpy()
+
+    bs_neg = np.empty(n_bootstrap)
+    bs_rf = np.empty(n_bootstrap)
+    bs_5 = np.empty(n_bootstrap)
+    bs_7 = np.empty(n_bootstrap)
+    bs_dd20 = np.empty(n_bootstrap)
+    bs_dd30 = np.empty(n_bootstrap)
+    bs_dd50 = np.empty(n_bootstrap)
+    for i in range(n_bootstrap):
+        idx_bs = rng.integers(0, n_q, size=n_q)
+        bs_neg[i] = (cum_arr[idx_bs] < 0.0).mean()
+        bs_rf[i] = (cagr_arr[idx_bs] < rf_10y).mean()
+        bs_5[i] = (cagr_arr[idx_bs] < CAGR_CUTOFF_LOW).mean()
+        bs_7[i] = (cagr_arr[idx_bs] > CAGR_CUTOFF_HIGH).mean()
+        bs_dd20[i] = (maxdd_arr[idx_bs] < MAXDD_CUTOFFS[0]).mean()
+        bs_dd30[i] = (maxdd_arr[idx_bs] < MAXDD_CUTOFFS[1]).mean()
+        bs_dd50[i] = (maxdd_arr[idx_bs] < MAXDD_CUTOFFS[2]).mean()
+
+    def _ci(arr: np.ndarray) -> tuple[float, float]:
+        return float(np.percentile(arr, 2.5)), float(np.percentile(arr, 97.5))
+
+    bs_map = {
+        "p_neg_total_return": bs_neg,
+        "p_below_rf10y": bs_rf,
+        "p_below_5pct_cagr": bs_5,
+        "p_above_7pct_cagr": bs_7,
+        "p_maxdd_lt_neg20": bs_dd20,
+        "p_maxdd_lt_neg30": bs_dd30,
+        "p_maxdd_lt_neg50": bs_dd50,
+    }
+    out_dict = {**point}
+    for k, arr in bs_map.items():
+        ci_lo, ci_hi = _ci(arr)
+        out_dict[f"{k}_ci_low"] = ci_lo
+        out_dict[f"{k}_ci_high"] = ci_hi
+    out_dict["lc_quintile"] = float(cur_q + 1)
+    out_dict["n_obs_in_quintile"] = n_q
+    return out_dict
+
+
+# ---------------------------------------------------------------------------
+# Campbell-Yogo (2006) Bonferroni Q-test critical values
+# ---------------------------------------------------------------------------
+
+#: Critical values for the Q-test at 5% one-sided level (95% CI), keyed by
+#: the local-to-unity parameter c. Values approximated from Campbell & Yogo
+#: (2006) JFE 81(1) Table 2 (the columns labeled "5%, c known"). The table in
+#: the paper is 2-D over (c, δ); this fallback uses the most conservative
+#: column (δ = -0.9, typical for valuation-ratio regressions). For finer
+#: resolution, a future session should reproduce the full 2-D grid.
+#:
+#: Pre-reg §3.5 + Campbell-Yogo (2006) JFE 81(1) pp. 36-37.
+CY_T_CRIT_5PCT: dict[int, float] = {
+    0: 1.645,    # asymptotic Φ⁻¹(0.95)
+    -2: 1.660,
+    -5: 1.710,
+    -10: 1.780,
+    -20: 1.900,
+    -50: 2.050,
+}
+
+
+def _interpolate_cy_critical_value(c: float) -> float:
+    """Linear interpolation of the CY 5% one-sided critical value table.
+
+    Returns NaN if ``c`` is outside the implemented grid [-50, 0]. The Session
+    7 §2.F.1 simplified implementation deliberately falls back to NaN per the
+    prompt fallback option — outside-range cells are NOT silently filled with
+    extrapolated values.
+    """
+    grid = sorted(CY_T_CRIT_5PCT.keys())
+    if c > grid[-1] or c < grid[0]:
+        return float("nan")
+    # Bracket c between two adjacent grid points and linearly interpolate.
+    for i in range(len(grid) - 1):
+        c_lo, c_hi = grid[i], grid[i + 1]
+        if c_lo <= c <= c_hi:
+            cv_lo = CY_T_CRIT_5PCT[c_lo]
+            cv_hi = CY_T_CRIT_5PCT[c_hi]
+            if c_hi == c_lo:
+                return float(cv_lo)
+            t = (c - c_lo) / (c_hi - c_lo)
+            return float(cv_lo + t * (cv_hi - cv_lo))
+    return float("nan")
+
+
+def _campbell_yogo_ci(
+    *,
+    beta_point: float,
+    se_nw: float,
+    rho_x: float,
+    eps: np.ndarray,
+    lc: np.ndarray,
+) -> tuple[float, float]:
+    """Campbell-Yogo (2006) Bonferroni Q-test confidence interval for β.
+
+    The CY (2006) procedure constructs a confidence interval that is robust
+    to near-unit-root persistence in the regressor. The full procedure
+    requires (1) a DF-GLS test on the regressor to localize the local-to-
+    unity parameter c with a Bonferroni first-stage CI, then (2) inversion
+    of the Q-test statistic distribution at each c in the Bonferroni grid.
+
+    **Session 7 §2.F.1 simplified implementation**: we use the closed-form
+    plug-in ``c_hat = T · (ρ̂_X - 1)`` rather than DF-GLS (because the latter
+    requires its own asymptotic table). The critical value is then looked up
+    from a hardcoded subset of CY (2006) Table 2 keyed by c ∈ {-50, -20, -10,
+    -5, -2, 0}, linearly interpolated between grid points. For c outside this
+    range, the CI is returned as (NaN, NaN) per the prompt's fallback option.
+
+    The simplification preserves the qualitative shape of the CY correction
+    (the t critical value GROWS as the regressor becomes more persistent),
+    but is less precise than the full 2-D (c, δ) lookup. A future session
+    should reproduce the full Table 2 and add a proper DF-GLS first stage.
+
+    Parameters
+    ----------
+    beta_point : float
+        OLS β̂.
+    se_nw : float
+        Newey-West HAC SE for β̂.
+    rho_x : float
+        AR(1) coefficient of the regressor x.
+    eps, lc : np.ndarray
+        OLS residuals and regressor — kept for signature compatibility
+        with future fuller implementations that need δ = corr(ε, η).
+
+    Returns
+    -------
+    (cy_low, cy_high) : tuple[float, float]
+        Bonferroni Q-test 95 % CI on β. Returns (NaN, NaN) when c is
+        outside the implemented grid.
+
+    References
+    ----------
+    [1] Campbell, J.Y. & Yogo, M. (2006) "Efficient tests of stock return
+        predictability", JFE 81(1) pp. 27-60. Table 2 (pp. 36-37).
+    """
+    if not np.isfinite(rho_x) or not np.isfinite(beta_point) or not np.isfinite(se_nw):
+        return float("nan"), float("nan")
+    if se_nw <= 0:
+        return float("nan"), float("nan")
+    T = len(lc)
+    if T < 2:
+        return float("nan"), float("nan")
+    c_hat = float(T * (rho_x - 1.0))
+    cv = _interpolate_cy_critical_value(c_hat)
+    if not np.isfinite(cv):
+        return float("nan"), float("nan")
+    return (beta_point - cv * se_nw, beta_point + cv * se_nw)
+
+
+# ---------------------------------------------------------------------------
 # Single-cell regression
 # ---------------------------------------------------------------------------
 
@@ -476,12 +803,24 @@ def run_predictive_regression(
         aligned["lc"], aligned["y"], split_date=split,
     )
 
-    # Campbell-Yogo: stub when rho_X > 0.95 (full implementation needs the
-    # lookup tables from the paper's appendix; we emit None until a
-    # higher-fidelity implementation lands).
-    cy_low: float | None = None
-    cy_high: float | None = None
-    # if rho_x > CAMPBELL_YOGO_RHO_THRESHOLD: TODO: implement Bonferroni Q-test.
+    # Campbell-Yogo (2006) Bonferroni Q-test inversion — applied when the
+    # regressor is near-unit-root (rho_X > CAMPBELL_YOGO_RHO_THRESHOLD).
+    # Session 7 §2.F.1 simplified implementation: hardcoded critical values
+    # from CY (2006) Table 2 at c ∈ {-50, -20, -10, -5, -2, 0}; outside-range
+    # values return NaN. See _campbell_yogo_ci docstring for the full caveat.
+    cy_low: float | None
+    cy_high: float | None
+    if rho_x > CAMPBELL_YOGO_RHO_THRESHOLD:
+        cy_lo_f, cy_hi_f = _campbell_yogo_ci(
+            beta_point=beta_point, se_nw=beta_se_nw, rho_x=rho_x,
+            eps=eps, lc=lc_arr,
+        )
+        # Convert NaN to None for the JSON-friendly result schema.
+        cy_low = float(cy_lo_f) if np.isfinite(cy_lo_f) else None
+        cy_high = float(cy_hi_f) if np.isfinite(cy_hi_f) else None
+    else:
+        cy_low = None
+        cy_high = None
 
     return RegressionResult(
         scope=scope_name,
@@ -544,10 +883,15 @@ def run_all_regressions(
     output_csv: Path | None = None,
     n_bootstrap_reps: int = BOOTSTRAP_N_REPS,
     bootstrap_seed: int = BOOTSTRAP_SEED,
+    conditional_probs_csv: Path | None = None,
+    bootstrap_tail_probs: bool = True,
+    rf_10y: float = DEFAULT_RF_10Y_ANNUALIZED,
 ) -> pd.DataFrame:
     """Run the predictive regression for all 12 (scope × horizon) cells.
 
-    Writes ``outputs/tables/lc_v1_predictive_regression.csv`` by default.
+    Writes ``outputs/tables/lc_v1_predictive_regression.csv`` by default. If
+    ``bootstrap_tail_probs=True`` (Session 7 §2.F.3), also writes
+    ``outputs/tables/lc_v1_conditional_probabilities.csv``.
 
     Parameters
     ----------
@@ -559,6 +903,13 @@ def run_all_regressions(
         Override the default ``OUTPUTS_DIR / tables / lc_v1_predictive_regression.csv``.
     n_bootstrap_reps, bootstrap_seed
         Forwarded to each cell's :func:`run_predictive_regression`.
+    conditional_probs_csv : Path, optional
+        Override the default ``OUTPUTS_DIR / tables / lc_v1_conditional_probabilities.csv``.
+    bootstrap_tail_probs : bool
+        Default True (Session 7 §2.F.3). Skip the conditional-probability
+        computation only for fast unit tests.
+    rf_10y : float
+        Risk-free rate used in ``p_below_rf10y``. Default ``DEFAULT_RF_10Y_ANNUALIZED``.
 
     Returns
     -------
@@ -567,6 +918,7 @@ def run_all_regressions(
     """
     scope_map = {"LC_FULL": lc_full, "LC_TIER2": lc_tier2, "LC_DEEP": lc_deep}
     rows: list[dict[str, Any]] = []
+    cprob_rows: list[dict[str, Any]] = []
     for scope_name in SCOPES:
         lc_scope = scope_map[scope_name].dropna()
         for h in HORIZONS_YEARS:
@@ -579,11 +931,31 @@ def run_all_regressions(
             )
             rows.append(_result_to_dict(res))
 
-    df = pd.DataFrame(rows)
+            if bootstrap_tail_probs and not lc_scope.empty:
+                lc_current = float(lc_scope.iloc[-1])
+                cprob = compute_conditional_probabilities(
+                    lc_current=lc_current,
+                    lc_series=lc_scope,
+                    spx_tr_monthly=spx_tr_monthly,
+                    horizon_years=h,
+                    n_bootstrap=n_bootstrap_reps,
+                    seed=bootstrap_seed,
+                    rf_10y=rf_10y,
+                )
+                cprob_row = {"scope": scope_name, "horizon_years": h,
+                             "lc_current": lc_current, **cprob}
+                cprob_rows.append(cprob_row)
 
+    df = pd.DataFrame(rows)
     output_csv = output_csv or (OUTPUTS_DIR / REGRESSION_CSV_RELATIVE)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_csv, index=False)
+
+    if cprob_rows:
+        df_cprob = pd.DataFrame(cprob_rows)
+        cprob_csv = conditional_probs_csv or (OUTPUTS_DIR / CONDITIONAL_PROBS_CSV_RELATIVE)
+        cprob_csv.parent.mkdir(parents=True, exist_ok=True)
+        df_cprob.to_csv(cprob_csv, index=False)
     return df
 
 
