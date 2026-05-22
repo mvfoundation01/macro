@@ -851,6 +851,7 @@ def build_risk_vs_return_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    scatter_points: list[dict[str, Any]] = []  # v11.2.3 Surface 7 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -873,8 +874,21 @@ def build_risk_vs_return_surface(
             "ulcer_fmt": f"{ulcer:.2f}" if np.isfinite(ulcer) else "n/a",
             "upi_fmt": _fmt_signed(upi, digits=3),
         })
+        # v11.2.3 — annualized vol on x, CAGR on y, both in %.
+        if np.isfinite(vol) and np.isfinite(cagr):
+            scatter_points.append({
+                "label": label,
+                "is_v2": _is_v2(label),
+                "vol_pct": float(vol) * 100.0,
+                "cagr_pct": float(cagr) * 100.0,
+                "sharpe": float(sharpe) if np.isfinite(sharpe) else None,
+            })
 
-    return {"available": True, "rows": rows}
+    return {
+        "available": True,
+        "rows": rows,
+        "scatter_points": scatter_points,  # v11.2.3 Surface 7 chart
+    }
 
 
 # ── Surface 8 — Withdrawal Stats (SWR survival analysis) ────────────────
