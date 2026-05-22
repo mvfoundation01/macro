@@ -9,9 +9,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Ensure project root is on sys.path even when invoked from elsewhere
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from src.ingest.master_archive import load_master
 from src.ingest.fred_loader import load_buffett_fred
@@ -59,7 +59,7 @@ check("wilshire_latest_pts", float(w.data.iloc[-1]))
 check("wilshire_lag_days",   float(days_lag), fmt="{:.0f}")
 
 print("\n[2] FRED")
-cfg_path = PROJECT_ROOT / "config.yaml"
+cfg_path = _PROJECT_ROOT / "config.yaml"
 cfg = yaml.safe_load(cfg_path.read_text())
 fred = load_buffett_fred(api_key=cfg["fred_api_key"])
 eq_all_t = float(fred["equities_all"].data.iloc[-1]) / 1_000_000  # M → T

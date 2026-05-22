@@ -7,9 +7,16 @@ Usage::
 """
 from __future__ import annotations
 
+# --- sys.path bootstrap (must precede any src.* imports) ---
+import sys
+from pathlib import Path
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+# -----------------------------------------------------------
+
 import json
 import warnings
-from pathlib import Path
 
 import pandas as pd
 import yaml

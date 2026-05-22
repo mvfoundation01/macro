@@ -46,11 +46,20 @@ References
 """
 from __future__ import annotations
 
+# --- sys.path bootstrap (must precede any src.* imports) ---
+# Standard pattern for scripts under scripts/ invoked as `python scripts/foo.py`
+# rather than `python -m scripts.foo`. See tests/scripts/test_sys_path_bootstrap.py
+# for the rule that locks this in for all scripts that import from src.*.
+import sys
+from pathlib import Path
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+# -----------------------------------------------------------
+
 import argparse
 import hashlib
 import subprocess  # nosec B404 - used for trusted git commands only, no shell=True
-import sys
-from pathlib import Path
 
 import pandas as pd
 
