@@ -181,3 +181,89 @@ but the decision rule is locked.
 ## End of 2026-05-24 entry
 
 Future Strategist arbitration entries append below this line.
+
+---
+
+## 2026-05-25 — Session 7 results arbitration (post-zero-fill / post-calibration)
+
+### Context
+
+Session 7 (commit `dab754b`) delivered:
+- Zero-fill RRPONTSYD restoration of LC_FULL (n=31 → n=160).
+- 4-of-4 sign-check sensitivity tests PASS — composite construction methodologically clean.
+- Per-component univariate regressions: **5 of 5 components NEGATIVE β at all horizons** (z₄ at 10Y ≈ 0). Sign anomaly is COMPONENT-LEVEL, not composite-construction artifact.
+- Full Campbell-Yogo (2006) implementation replacing Session 6 stub. CY CIs populated for LC_FULL and LC_DEEP cells where ρ_X > 0.95.
+- 50K stationary bootstrap reps + conditional probability tail outputs (12 cells × 7 probabilities).
+- Calibration layer (Brier + Murphy + reliability + PIT + CRPS).
+
+Three new findings surfaced that require Strategist arbitration before Session 8 proceeds.
+
+### Question 4 — LC_FULL @ 10Y insufficient sample
+
+**Finding**: LC_FULL @ 10Y has `n_obs_insample = 42` (per Session 7 build log). Newey-West HAC with lag = 119 cannot stabilize SE when sample size ≈ HAC lag. The reported t_NW = −17.62 and R²_OOS = +0.704 are statistical artifacts of the small-sample / overlapping-returns / horizon-equal-to-sample-length problem (Hansen-Hodrick 1980; Britten-Jones-Neuberger-Nolte 2011 "Improved inference in regression with overlapping observations").
+
+**Strategist decision**: **flag as "insufficient sample" in the scorecard**. The cell remains in `outputs/tables/lc_v1_predictive_regression.csv` for transparency but:
+- Dashboard panel displays a warning badge on the cell.
+- Research write-up explicitly excludes the cell from headline conclusions.
+- Falsifiability criterion 4 evaluation: LC_FULL @ 3Y (n=126, t=-3.08, p=0.001) is the credible cell satisfying t > 1.65. The 10Y cell is REPORTED but NOT counted.
+
+**Threshold for "insufficient sample"**: any cell with `n_obs_insample < 5 × HAC_lag` is flagged. For 10Y: lag=119 → threshold n<595, so 10Y cells with n=42 (LC_FULL), n=425 (LC_DEEP) are flagged; n=245 (LC_TIER2) is below threshold but the cell sits at n_obs/HAC_lag = 2.1× which is borderline — flag with softer warning.
+
+### Question 5 — Universal calibration failure
+
+**Finding**: PIT Kolmogorov-Smirnov p-values < 0.0001 across all 12 cells. PIT histograms show right-skew (clustering at 0.8–1.0) — Gaussian forecast distribution chronically UNDER-PREDICTS realized values. Reliability diagrams show observed event frequencies far below diagonal — model probabilities of "high prob of negative return" are NOT matched by realized event frequencies. CRPS skill mostly NEGATIVE (prevailing-mean benchmark beats model).
+
+**Strategist decision**: **probability outputs are MISCALIBRATED and must be flagged as such in the dashboard**. Specifically:
+- Dashboard panel includes a prominent **"⚠ Probability outputs are MISCALIBRATED — do not use for decisions"** disclosure card directly above any conditional probability display.
+- The conditional probability table is shown for transparency, but with a faded / lower-contrast styling indicating it is research material, not actionable.
+- Research write-up frames calibration failure as a methodological finding (see Q6).
+
+**Underlying interpretation**: the Gaussian assumption used in the conditional probability framework (forecast mean from regression + forecast SD from regression residuals) fails against fat-tailed empirical equity returns. This is a well-documented limitation of conditional-Gaussian forecast distributions for equity returns (Mandelbrot 1963; Fama 1965; Cont 2001 "Empirical properties of asset returns: stylized facts and statistical issues"). Session 8 does NOT attempt to fix this — the fat-tailed alternative (skewed-t, mixture model, kernel density) was specified per master spec §5.1b but is out of scope for this v11.3 sprint. v11.4 or v12.0 would address.
+
+### Question 6 — Add calibration failure as publishable finding
+
+**Strategist decision**: **YES**. The research write-up §2.J now includes three publishable findings:
+
+1. **LC_DEEP β NEGATIVE robust** at 3Y (t=-1.89, p=0.029, CY CI [-0.105, -0.002] excludes zero) on 45-year sample. LC_FULL @ 3Y also negative (t=-3.08, CY CI [-0.053, -0.015]). Interpretable via credit-cycle / dollar-cycle reversal literature (Fama-French 1988; Schularick-Taylor 2012; Bruno-Shin 2015; Adrian-Boyarchenko 2012).
+2. **5-of-5 component-level negative β anomaly** at all horizons. Pre-reg priors expected POSITIVE on all components based on simple "loose money → returns" intuition. Realized signs uniformly NEGATIVE. Interpretable via the same mean-reversion / over-extension literature. This is a methodological lesson about prior calibration for macro-financial composites.
+3. **Universal calibration failure of Gaussian conditional forecast distribution** vs fat-tailed empirical returns (PIT K-S p<0.0001, CRPS skill mostly negative). Even methodologically-clean predictive composites built on multiple-decade samples fail distributional calibration when the assumed conditional distribution is misspecified. This is a methodological lesson about probability framework choice.
+
+### Re-evaluation of falsifiability criteria 1-4 (with Session 7 zero-fill artifacts)
+
+| # | Criterion | Threshold | Realized | Pass? |
+|---|---|---|---|---|
+| 1 | OOS R² @ 1Y > 0.005 on LC_TIER2 | 0.005 | −0.0167 | ❌ FAIL |
+| 2 | OOS R² @ 3Y > 0.020 on LC_TIER2 | 0.020 | −0.0028 | ❌ FAIL |
+| 3 | OOS R² @ 5Y > 0.040 on LC_TIER2 | 0.040 | −0.0602 | ❌ FAIL |
+| 4 | NW t > 1.65 on LC_FULL, any horizon | 1.65 | 3Y: t=-3.08 ✅; 5Y: 0.39 ❌; 10Y: -17.62 ⚠ (flagged insufficient sample). **Net**: PASS on 3Y strict reading. | ✅ PASS (strict) |
+
+**Strict-reading n_pass = 1 of 4** (criterion 4 passes on |t| magnitude; criteria 1-3 fail).
+**Spirit-reading n_pass = 0 of 4** (criterion 4 sign violates pre-reg §4.1 priors).
+
+**Strategist arbitration**: per master spec §0.3 ("pre-reg discipline is binding") and the criterion text in `a8635ef` §2.1 which specifies "**Positive with Newey-West HAC t > 1.65**", the SIGN requirement is in the criterion text itself. Realized sign is NEGATIVE → criterion 4 **FAILS** on textual reading as well.
+
+**Final n_pass = 0 of 4 testable criteria** → per pre-reg §2.1 decision rule (`n_pass ≤ 3 → FAIL`), **the LC v1.0 verdict is FAIL** with confidence floor 99%. Per pre-reg §12.2, display framing is DIAGNOSTIC ONLY.
+
+This locks at Session 8 §2.J via `outputs/lc_v1_verdict.json`.
+
+### Authorization for Session 8
+
+The Strategist authorizes Claude Code to proceed with Session 8 sub-stages:
+- §2.0 (commit this DECISIONS.md addendum verbatim).
+- §2.H (diagnostics: ADF + KPSS + PP + Zivot-Andrews on 5 components + 3 composites; VIF on cross-correlation matrix; Bai-Perron breaks on each composite).
+- §2.I (DIAGNOSTIC ONLY dashboard panel: integrated LC v1.0 tab in `outputs/dashboard.html`, with calibration-failure disclosure card, falsifiability scorecard table, 12-cell regression display, per-component regression display, three publishable findings narrative).
+- §2.J (final falsifiability scorecard locked; `outputs/lc_v1_verdict.json` written; `outputs/reports/lc_v1_research_writeup.md` academic-style draft; sprint closeout tag `v11.3.0`).
+
+### Future-version pre-reg amendments to consider (NOT for v11.3)
+
+For the eventual LC v2.0 spec, the following modifications should be considered (DO NOT apply to v11.3):
+- Pre-reg §4.1 priors need re-anchoring. Both literature streams (1970s-90s monetarist vs 2008+ mean-reversion) should be represented with separate prior probabilities.
+- Criterion 4 wording needs disambiguation: "positive t" or "any |t|" must be explicit.
+- The conditional probability framework should default to non-Gaussian distributions (skewed-t per Hansen 1994 or empirical kernel) given the calibration failure documented here.
+- Insufficient-sample threshold (`n < 5 × HAC_lag`) should be an explicit pre-reg gate, not a post-hoc filter.
+
+These notes are for the v11.4+ Strategist — not actionable in v11.3.
+
+---
+
+## End of 2026-05-25 entry
