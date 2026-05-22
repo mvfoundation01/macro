@@ -600,58 +600,20 @@ def _splice_log_dxy_with_dtwexbgs(
 
     Notes
     -----
-    Sub-stage B (``src/transform/lc_v1_splices.py``) extracts this algorithm
-    into a reusable splice function. Both call sites must remain bit-identical
-    so the modeling layer's pre-reg invariants hold.
+    Sub-stage B (``src/transform/lc_v1_splices.py``) promoted this algorithm
+    to the transforms module. This loader-side function is now a thin shim
+    delegating to ``splice_icedxy_to_dtwexbgs``; both call sites share the
+    same code path so modeling-layer pre-reg invariants hold.
     """
-    overlap_start = splice_date - pd.DateOffset(months=overlap_window_months)
-    overlap_end = splice_date + pd.DateOffset(months=overlap_window_months)
-    overlap_dxy = log_dxy.loc[overlap_start:overlap_end].dropna()
-    overlap_dtw = log_dtwexbgs.loc[overlap_start:overlap_end].dropna()
-    common = overlap_dxy.index.intersection(overlap_dtw.index)
-    if len(common) < 2:
-        raise ValueError(
-            f"ICE DXY <-> DTWEXBGS splice at {splice_date.date()}: insufficient "
-            f"overlap (n={len(common)} months) — need ≥2 to compute corr/z-divergence."
-        )
-    overlap_dxy = overlap_dxy.loc[common]
-    overlap_dtw = overlap_dtw.loc[common]
-
-    c = float(overlap_dxy.mean() - overlap_dtw.mean())
-
-    # Precondition: both overlap series must have non-zero finite std for corr
-    # and z-divergence to be meaningful.
-    dxy_std = float(overlap_dxy.std(ddof=1))
-    dtw_std = float(overlap_dtw.std(ddof=1))
-    if dxy_std == 0 or dtw_std == 0 or not np.isfinite(dxy_std) or not np.isfinite(dtw_std):
-        raise ValueError(
-            f"ICE DXY <-> DTWEXBGS splice GATE FAIL: zero/NaN std in overlap "
-            f"(dxy_std={dxy_std}, dtw_std={dtw_std})."
-        )
-
-    corr = float(overlap_dxy.corr(overlap_dtw))
-    if not np.isfinite(corr) or corr <= min_corr:
-        raise ValueError(
-            f"ICE DXY <-> DTWEXBGS splice GATE FAIL: corr={corr:.4f} <= {min_corr} "
-            f"(pre-reg a8635ef §1.3 min_corr). Refusing to splice through a regime break."
-        )
-    z_dxy = (overlap_dxy - overlap_dxy.mean()) / dxy_std
-    z_dtw = (overlap_dtw - overlap_dtw.mean()) / dtw_std
-    mean_abs_z_div = float((z_dxy - z_dtw).abs().mean())
-    if mean_abs_z_div >= max_mean_abs_z_divergence:
-        raise ValueError(
-            f"ICE DXY <-> DTWEXBGS splice GATE FAIL: mean|z-div|={mean_abs_z_div:.4f} "
-            f">= {max_mean_abs_z_divergence} (pre-reg a8635ef §1.3 max divergence). "
-            f"Refusing to splice through a regime break."
-        )
-
-    log_dtw_shifted = log_dtwexbgs + c
-    pre = log_dxy.loc[log_dxy.index < splice_date]
-    post = log_dtw_shifted.loc[log_dtw_shifted.index >= splice_date]
-    result = pd.concat([pre, post]).sort_index()
-    result = result[~result.index.duplicated(keep="first")]
-    result.name = "ice_dxy_spliced_log"
-    return result, c
+    from src.transform.lc_v1_splices import splice_icedxy_to_dtwexbgs
+    return splice_icedxy_to_dtwexbgs(
+        log_dxy,
+        log_dtwexbgs,
+        splice_date=splice_date,
+        overlap_window_months=overlap_window_months,
+        min_corr=min_corr,
+        max_mean_abs_z_divergence=max_mean_abs_z_divergence,
+    )
 
 
 def build_lc_icedxy_master(
