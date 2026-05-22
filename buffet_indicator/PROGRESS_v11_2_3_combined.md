@@ -308,4 +308,41 @@ Evaluated all prompt §2.4 gates:
 - Brings the 456-test baseline + deploy.yml + dashboard.html to the spec branch.
 - Does NOT rewrite any commit; does NOT merge spec→main.
 
+### Sub-stage A1 — FRED ingestion (11 series) + ICE DXY scaffold
+
+- Commit: `459c905` (on top of merge `8e9ceeb` and RECON `a7f17c8`)
+- Tag: `v11.3-lc-v1-A1-2026-05-22`
+- Files touched:
+  - NEW `src/ingest/lc_v1_loader.py` (421 lines)
+  - NEW `tests/ingest/test_lc_v1_loader.py` (20 tests)
+  - NEW `specs/BLOCKED_v11_3_A1_icedxy_stooq.md`
+- Tests added: 20 (18 unit + 2 integration-gated). All 18 unit pass locally; real-FRED integration `test_I1` against live FRED confirmed working (WALCL fetched and persisted).
+- Coverage on new module: **91%** (above 90% spec gate).
+- Ruff: clean. Bandit: 0 issues. Mypy: only the pre-existing `untyped-decorator` warning from `@retryable` shared with `fred_loader.py:139`.
+- Local sub-suite verification (full suite still running at commit time):
+  - `tests/ingest/` → 87 passed, 5 skipped (52 existing + 35 new = 87)
+  - `tests/models/` → 153/153 pass (load_master change doesn't regress consumers)
+  - `tests/viz tests/deploy` → 456 pass (from earlier full run on the same code base)
+- BLOCKER filed: `specs/BLOCKED_v11_3_A1_icedxy_stooq.md`. Stooq free CSV endpoint for `dx.f` and `^dxy` now returns empty/API-gated — exact 40%-probability risk anticipated in spec §17. Loader handles ICE DXY via dependency injection (`stooq_body=bytes`); blocker only affects the live fetch. Owner decision needed: Norgate (paid) / yfinance (1985+ only) / static archive / defer.
+
+### Sub-stage A2 — ALFRED vintage loader + load_master(vintage=) extension
+
+- Commit: `e90c729`
+- Tag: `v11.3-lc-v1-A2-2026-05-22`
+- Files touched:
+  - NEW `src/ingest/fred_alfred_loader.py` (~330 lines)
+  - MODIFIED `src/ingest/master_archive.py` (added `vintage=` keyword to `load_master`; routes to vintage snapshot when non-None and non-'latest')
+  - NEW `tests/ingest/test_fred_alfred_loader.py` (18 tests)
+- Tests added: 18 (17 unit + 1 integration-gated). All 17 unit pass locally.
+- **Look-ahead audit** (test_S2): explicitly verifies that a vintage-T snapshot contains ONLY observations with `realtime_start ≤ T`. This is the central invariant of look-ahead-safe backtest, per spec §1.4 and prompt §3.1.3.
+- Coverage on new module: **93%** (above 90% spec gate).
+- Ruff: clean. Bandit: 0 issues.
+- ALFRED data backfill (one-time, ~1-2h network operation) NOT executed in this commit — orchestrator + storage layer fully tested with synthetic data via `fred_client_factory` injection. Live backfill scheduled for the modeling-layer session when data is actually consumed (sub-stage E).
+- All 11 existing `master_archive.py` tests pass unchanged → backward compat confirmed.
+
+### Data-layer pause checkpoint (prompt §3.3)
+
+Per prompt §3.3 explicit guidance: data layer (A1 + A2) complete → STOP and emit §7-style partial report. Modeling layer (B → J) is the next session.
+
+CI trigger: pending (workflow on `deploy.yml` only auto-fires for `push: branches: [main]` / PRs to main, NOT spec branches). Will trigger manually via `gh workflow run deploy.yml --ref spec/liquidity-composite-v1.0` and poll before emitting final §7.
 
