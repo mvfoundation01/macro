@@ -1,0 +1,163 @@
+{
+  "verdict": "FAIL",
+  "verdict_locked_at": "2026-05-25T00:00:00Z",
+  "verdict_locked_by_commit": "177554f327b031c873536f3082b34a35a441bdea",
+  "sprint": "v11.3.0",
+  "pre_registration_commit": "a8635ef",
+  "decision_rule": "pre_reg_a8635ef_section_2_1_decision_rule",
+  "decision_rule_text": "n_pass <= 3 -> FAIL -> DIAGNOSTIC ONLY view, no actionable conviction/probability",
+
+  "scorecard": {
+    "criterion_1_oos_r2_1y_tier2": {
+      "threshold": 0.005,
+      "realized": -0.0167,
+      "pass": false
+    },
+    "criterion_2_oos_r2_3y_tier2": {
+      "threshold": 0.020,
+      "realized": -0.0028,
+      "pass": false
+    },
+    "criterion_3_oos_r2_5y_tier2": {
+      "threshold": 0.040,
+      "realized": -0.0602,
+      "pass": false
+    },
+    "criterion_4_t_positive_lc_full_any_horizon": {
+      "threshold": "positive sign AND NW |t| > 1.65",
+      "realized_1y": {"t": -0.254, "p_1sided": 0.3999, "sign": "negative"},
+      "realized_3y": {"t": -3.076, "p_1sided": 0.0013, "sign": "negative"},
+      "realized_5y": {"t": 0.388, "p_1sided": 0.3493, "sign": "positive_but_t_below_threshold"},
+      "realized_10y": {"t": -17.622, "n_obs_insample": 42, "flag": "insufficient_sample"},
+      "pass": false,
+      "reason": "no horizon meets positive-sign AND t>1.65 jointly; LC_FULL 10Y excluded as insufficient sample (n=42 << 5*HAC_lag=595)"
+    },
+    "criterion_5_adf_all_components": {
+      "threshold": "ADF rejects null (p<0.05) for all 5 components",
+      "realized": {
+        "z1_netfed": {"adf_pvalue": 0.1701, "rejects": false},
+        "z2_m2_yoy": {"adf_pvalue": 0.0000, "rejects": true},
+        "z3_banklend_yoy": {"adf_pvalue": 0.0001, "rejects": true},
+        "z4_dxy_inv": {"adf_pvalue": 0.3652, "rejects": false},
+        "z5_funding_stress": {"adf_pvalue": 0.0804, "rejects": false}
+      },
+      "pass": false,
+      "reason": "z1, z4, z5 do not reject the unit-root null at 5%"
+    },
+    "criterion_6_max_vif_lt_5": {
+      "threshold": 5.0,
+      "realized_max_vif": 7.581,
+      "realized_per_component": {
+        "z1_netfed": 6.016,
+        "z2_m2_yoy": 1.128,
+        "z3_banklend_yoy": 1.633,
+        "z4_dxy_inv": 1.290,
+        "z5_funding_stress": 7.581
+      },
+      "pass": false,
+      "reason": "z5 VIF = 7.58 and z1 VIF = 6.02 exceed the 5.0 multicollinearity threshold"
+    },
+    "criterion_7_bonferroni_sig_any_cell": {
+      "threshold": "any (component x horizon) p < 0.0025 (= 0.05/20)",
+      "realized_bonferroni_significant_cells": [
+        {
+          "component": "z1_netfed",
+          "horizon_years": 10,
+          "p_1sided": 0.0000001094,
+          "n_obs_insample": 42,
+          "flag": "insufficient_sample_excluded_per_decisions_md_q4"
+        }
+      ],
+      "adequate_sample_threshold": "n_obs_insample >= 150",
+      "pass": false,
+      "reason": "the only Bonferroni-significant cell (z1 NetFed @ 10Y) has n=42 << 5*HAC_lag=595 and is flagged insufficient sample per DECISIONS.md 2026-05-25 Q4; no adequately-sampled cell meets the Bonferroni threshold"
+    }
+  },
+
+  "n_pass_total": 0,
+  "n_total_criteria": 7,
+  "n_pass_testable_at_session_7": 0,
+  "n_pass_testable_at_session_8": 0,
+
+  "display_framing": "DIAGNOSTIC_ONLY",
+  "actionable_for_investment": false,
+  "calibration_status": "MISCALIBRATED",
+  "calibration_evidence": "PIT KS p < 0.0001 across all 12 cells; Gaussian forecast distribution universally rejected; CRPS skill mostly negative (prevailing-mean benchmark beats model)",
+
+  "research_findings_publishable": [
+    {
+      "id": "lc_deep_negative_beta_3y",
+      "summary": "LC_DEEP beta negative robust at 3Y horizon on 45-year sample; LC_FULL @ 3Y also negative (post-zero-fill)",
+      "evidence_lc_deep": {
+        "scope": "LC_DEEP",
+        "horizon": 3,
+        "beta": -0.0533,
+        "t_nw": -1.8937,
+        "p_1sided": 0.0294,
+        "cy_ci_95": [-0.1048, -0.0019],
+        "n_obs": 509
+      },
+      "evidence_lc_full": {
+        "scope": "LC_FULL",
+        "horizon": 3,
+        "beta": -0.0340,
+        "t_nw": -3.0762,
+        "p_1sided": 0.0013,
+        "cy_ci_95": [-0.0526, -0.0154],
+        "n_obs": 126
+      },
+      "interpretation": "Consistent with credit-cycle / dollar-cycle reversal literature (Fama-French 1988; Schularick-Taylor 2012; Bruno-Shin 2015; Adrian-Boyarchenko 2012). Modern macro-liquidity proxies historically PRECEDE lower forward equity returns at the end-of-cycle, opposite to pre-reg §4.1 priors based on simple loose-money/returns intuition."
+    },
+    {
+      "id": "five_of_five_components_negative",
+      "summary": "All 5 components show NEGATIVE beta at all 4 horizons (z4 at 10Y near zero); sign anomaly is component-level not composite-construction",
+      "evidence_table_path": "outputs/tables/lc_v1_per_component_regressions.csv",
+      "sign_check_sensitivity_tests": {
+        "z4_dxy_inv_negation_in_code": "PASS",
+        "z5_funding_stress_weight_sign": "PASS",
+        "busloans_totll_splice_c_sign": "PASS",
+        "spx_tr_splice_1988_direction": "PASS"
+      },
+      "interpretation": "Same mean-reversion / over-extension literature as Finding 1. Methodological lesson: pre-reg priors based on 1970s-90s monetarist intuition fail at multi-year horizons in the modern (post-2008) regime."
+    },
+    {
+      "id": "universal_gaussian_calibration_failure",
+      "summary": "Gaussian conditional forecast distribution rejected universally by PIT K-S test (p<0.0001 in all 12 cells) and outperformed by prevailing-mean benchmark (CRPS skill mostly negative)",
+      "evidence_table_path": "outputs/tables/lc_v1_calibration.csv",
+      "interpretation": "Well-documented limitation of conditional-Gaussian forecast distributions for equity returns (Mandelbrot 1963; Fama 1965; Cont 2001). Methodological lesson: even methodologically-clean predictive composites built on multiple-decade samples fail distributional calibration when the assumed conditional distribution is misspecified. v11.4+ should default to skewed-t (Hansen 1994) or empirical-kernel distributions."
+    }
+  ],
+
+  "bai_perron_structural_breaks": {
+    "LC_FULL": ["2017-09-30", "2020-03-31", "2023-07-31"],
+    "LC_TIER2": ["2002-12-31", "2009-11-30", "2012-05-31", "2020-03-31", "2023-07-31"],
+    "LC_DEEP": ["1991-02-28", "2009-09-30", "2012-04-30", "2020-03-31", "2023-07-31"],
+    "note": "2020-03 (COVID) and 2023-07 break dates appear in all 3 composites; 2009-09 (post-GFC) appears in LC_TIER2 and LC_DEEP. Economically interpretable break dates."
+  },
+
+  "v11_4_amendment_candidates": [
+    "Pre-reg §4.1 priors to incorporate both monetarist and mean-reversion literature streams with separate prior probabilities for each component sign",
+    "Criterion 4 wording to disambiguate sign vs magnitude requirement explicitly",
+    "Conditional probability framework to default to skewed-t (Hansen 1994) or empirical kernel distributions (non-Gaussian) given universal calibration failure documented here",
+    "Insufficient-sample gate (n_obs_insample < 5 * HAC_lag) to be an explicit pre-reg condition rather than a post-hoc filter"
+  ],
+
+  "sprint_provenance": {
+    "sessions": [
+      {"session": 1, "date": "2026-05-21", "scope": "Stage 0 deploy + Stage 1 SVG NaN diagnosis"},
+      {"session": 2, "date": "2026-05-22", "scope": "Stage 0.5 finalize + Stage 2"},
+      {"session": 3, "date": "2026-05-22", "scope": "Stage 0.5 + Stage 2 ship"},
+      {"session": 4, "date": "2026-05-22", "scope": "SVG NaN regression hotfix"},
+      {"session": 5, "date": "2026-05-22", "scope": "Stage 3 LC v1.0 data layer (A1 + A2)"},
+      {"session": 6, "date": "2026-05-23", "scope": "Stage 3 LC v1.0 modeling layer (A1-ICEDXY + B + C + D + E)"},
+      {"session": 6.5, "date": "2026-05-23", "scope": "Bootstrap ICE DXY + build artifacts + 12-cell regression"},
+      {"session": 7, "date": "2026-05-24", "scope": "DECISIONS + investigation + F (50K bootstrap + CY) + G (calibration)"},
+      {"session": 8, "date": "2026-05-25", "scope": "DECISIONS-2 + H (diagnostics) + I (panel) + J (sprint closeout)"}
+    ],
+    "pre_reg_invariants_intact": {
+      "a90b02d_mv_conditional": true,
+      "a8635ef_lc_v1": true,
+      "v50_original_sha": "6087918DB909D3BB3AE66F43305C3331E4171AEBC55DDC0366AAFF6128026F47"
+    }
+  }
+}
