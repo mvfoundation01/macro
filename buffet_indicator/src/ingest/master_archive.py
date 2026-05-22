@@ -400,8 +400,48 @@ def load_master(
     end: str | None = None,
     frequency: Literal["D", "W", "M", "Q", "A"] | None = None,
     fill: Literal["none", "ffill", "interpolate"] = "none",
+    vintage: str | pd.Timestamp | None = None,
 ) -> MasterSeries:
-    """Read a master series. THE single API for downstream consumers."""
+    """Read a master series. THE single API for downstream consumers.
+
+    Parameters
+    ----------
+    vintage : 'latest', pd.Timestamp, ISO date string, or None
+        - None or 'latest' → read the current master parquet (descriptive default).
+        - Timestamp / ISO string → read the ALFRED vintage snapshot under
+          ``MASTER_DIR / _vintages / <series_id>__YYYYMMDD.parquet`` whose
+          date is the largest ≤ supplied vintage. Used for look-ahead-safe
+          backtests per spec v11.3 §1.2.
+
+    All other filters (start, end, frequency, fill) apply uniformly to both
+    descriptive and vintage reads.
+    """
+    if vintage is not None and vintage != "latest":
+        # Lazy import to avoid circular import (fred_alfred_loader imports MASTER_DIR).
+        from src.ingest.fred_alfred_loader import load_master_at_vintage
+        v_ts = pd.Timestamp(vintage)
+        series = load_master_at_vintage(series_id, v_ts)
+        # Apply filters consistently.
+        if start is not None:
+            series = series.loc[series.index >= pd.Timestamp(start)]
+        if end is not None:
+            series = series.loc[series.index <= pd.Timestamp(end)]
+        if frequency is not None:
+            freq_alias = {"D": "D", "W": "W-FRI", "M": "M", "Q": "Q", "A": "Y"}[frequency]
+            series = series.resample(freq_alias).last()
+        if fill == "ffill":
+            series = series.ffill()
+        elif fill == "interpolate":
+            series = series.interpolate(method="time")
+        return MasterSeries(
+            series_id=series_id,
+            data=series,
+            sources_used=(f"alfred_vintage:{v_ts.strftime('%Y-%m-%d')}",),
+            earliest=series.index.min() if not series.empty else pd.Timestamp("NaT"),
+            latest=series.index.max() if not series.empty else pd.Timestamp("NaT"),
+            n_observations=int(len(series)),
+        )
+
     path = _master_path(series_id)
     if not path.exists():
         raise SourceMissingError(
