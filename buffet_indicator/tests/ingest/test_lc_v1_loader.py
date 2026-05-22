@@ -7,15 +7,19 @@ quality bar).
 Test layout:
 - C* tests cover the catalog (frozen-spec invariants).
 - F* tests cover the FRED builder via responses-mocked HTTP.
-- S* tests cover the Stooq ICE DXY builder (parse + fetch error paths).
+- S* tests cover the LEGACY Stooq path (``build_lc_icedxy_stooq_master_legacy``)
+  — retained for audit replay per Session 6 §2.0 blocker resolution.
 - O* tests cover the orchestrator.
 - I* tests are integration tests gated by INTEGRATION_TESTS=1.
+
+New ICE DXY priority-chain tests live in ``tests/ingest/test_lc_v1_loader_icedxy.py``.
 
 References
 ----------
 - spec_v11_3__liquidity_composite.md §1.1, §16 (sub-stage A1)
 - specs/MV_LIQUIDITY_COMPOSITE_PREREGISTER.md §1.1 (sealed catalog)
 - specs/RECON_lc_v1_2026-05-22.md §12 (A1 plan)
+- specs/BLOCKED_v11_3_A1_icedxy_stooq.md — Stooq deprecation context (Session 6 §2.0).
 """
 from __future__ import annotations
 
@@ -254,18 +258,22 @@ def test_S2_parse_stooq_csv_rejects_missing_columns() -> None:
 
 
 def test_S3_build_icedxy_with_injected_body() -> None:
+    """Session 6 §2.0: build_lc_icedxy_master is now model-construction; the
+    Stooq master-write path is retained under build_lc_icedxy_stooq_master_legacy."""
     body = _mk_stooq_csv(n=20)
-    result = lc.build_lc_icedxy_master(stooq_body=body)
+    with pytest.warns(DeprecationWarning):
+        result = lc.build_lc_icedxy_stooq_master_legacy(stooq_body=body)
     assert result.series_id == "ice_dxy"
     assert result.n_observations == 20
     assert result.sources_used == ("stooq:dx.f",)
 
 
 def test_S4_build_icedxy_rejects_empty_parse() -> None:
-    # Body parses to 0 rows because all values are NaN-ish — DataValidationError
+    """Empty parse → DataValidationError (legacy Stooq path)."""
     body = b"Date,Open,High,Low,Close,Volume\n"
-    with pytest.raises(DataValidationError):
-        lc.build_lc_icedxy_master(stooq_body=body)
+    with pytest.warns(DeprecationWarning):
+        with pytest.raises(DataValidationError):
+            lc.build_lc_icedxy_stooq_master_legacy(stooq_body=body)
 
 
 def test_S5_fetch_stooq_csv_rejects_no_data_marker(
@@ -325,6 +333,8 @@ def test_O1_build_all_lc_v1_masters_fred_subset(tmp_path: Path) -> None:
 
 @responses.activate
 def test_O2_orchestrator_includes_icedxy_when_body_injected(tmp_path: Path) -> None:
+    """Session 6 §2.0: orchestrator only builds ICE DXY via the legacy Stooq
+    path when ``use_stooq_legacy=True`` is explicitly opted in (audit replay)."""
     for lc_id, spec in lc.LC_V1_FRED_CATALOG.items():
         _register_fred_pair(
             VALID_KEY,
@@ -333,15 +343,34 @@ def test_O2_orchestrator_includes_icedxy_when_body_injected(tmp_path: Path) -> N
             spec.earliest_expected,
             _mk_obs_for_frequency(spec.frequency, n=15),
         )
-    out = lc.build_all_lc_v1_masters(
-        VALID_KEY,
-        cache_dir=tmp_path / "cache",
-        skip_icedxy=False,
-        stooq_body=_mk_stooq_csv(n=15),
-    )
+    with pytest.warns(DeprecationWarning):
+        out = lc.build_all_lc_v1_masters(
+            VALID_KEY,
+            cache_dir=tmp_path / "cache",
+            skip_icedxy=False,
+            use_stooq_legacy=True,
+            stooq_body=_mk_stooq_csv(n=15),
+        )
     assert "ice_dxy" in out
     assert out["ice_dxy"].n_observations == 15
     assert ma._master_path("ice_dxy").exists()
+
+
+@responses.activate
+def test_O3_orchestrator_skips_icedxy_by_default(tmp_path: Path) -> None:
+    """Session 6 §2.0: default ``skip_icedxy=True`` — ICE DXY is now sourced
+    via scripts/bootstrap_icedxy_from_norgate.py, not the orchestrator."""
+    for lc_id, spec in lc.LC_V1_FRED_CATALOG.items():
+        _register_fred_pair(
+            VALID_KEY,
+            spec.fred_id,
+            spec.frequency,
+            spec.earliest_expected,
+            _mk_obs_for_frequency(spec.frequency, n=15),
+        )
+    out = lc.build_all_lc_v1_masters(VALID_KEY, cache_dir=tmp_path / "cache")
+    assert "ice_dxy" not in out
+    assert set(out.keys()) == set(lc.LC_V1_FRED_CATALOG.keys())
 
 
 # ---------------------------------------------------------------------------
@@ -381,10 +410,16 @@ def test_I1_real_fred_walcl_happy_path(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
+@pytest.mark.skip(
+    reason="Session 6 §2.0: Stooq dx.f / ^dxy free endpoints empty since 2026-05-22; "
+           "ICE DXY is now sourced via Norgate (bootstrap script) + yfinance fallback. "
+           "Integration coverage of the new path lives in test_lc_v1_loader_icedxy.py::test_I3."
+)
 def test_I2_real_stooq_icedxy_happy_path() -> None:
-    """Hit real Stooq for ICE DXY. Requires INTEGRATION_TESTS=1."""
+    """DEPRECATED: Stooq integration test retained for audit only."""
     if os.environ.get("INTEGRATION_TESTS") != "1":
         pytest.skip("set INTEGRATION_TESTS=1 to run")
-    result = lc.build_lc_icedxy_master()
-    assert result.n_observations > 1000  # ~ 50 years of daily data
+    with pytest.warns(DeprecationWarning):
+        result = lc.build_lc_icedxy_stooq_master_legacy()
+    assert result.n_observations > 1000
     assert result.earliest <= pd.Timestamp("1985-01-01")

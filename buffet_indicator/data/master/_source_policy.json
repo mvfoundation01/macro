@@ -1,0 +1,44 @@
+{
+  "_schema": "v1",
+  "_authored_by": "Session 6 (Claude Code) per prompt §2.0.3",
+  "_authored_at": "2026-05-23",
+  "_purpose": "Formal record of source-priority overrides per master spec §2.4.5 Step 1.",
+
+  "icedxy_close": {
+    "source_priority": [
+      {
+        "tier": 3,
+        "source": "norgate_diamond",
+        "earliest": "1971-01-01",
+        "use": "bootstrap_only",
+        "notes": "Owner runs scripts/bootstrap_icedxy_from_norgate.py ONCE while Norgate Diamond subscription is active. After that, cache survives subscription cancellation."
+      },
+      {
+        "tier": 4,
+        "source": "yfinance_DX-Y.NYB",
+        "earliest": "1985-01-01",
+        "use": "runtime_tail_update",
+        "notes": "Used when use_yfinance_live=True; cannot satisfy LC_DEEP/LC_TIER2 pre-1985."
+      },
+      {
+        "tier": "cached",
+        "source": "data/master/icedxy_close.parquet",
+        "earliest": "depends_on_bootstrap",
+        "use": "default_runtime",
+        "notes": "Default source consulted by build_lc_icedxy_master() when no live source is enabled."
+      }
+    ],
+    "splice_with": "fred_DTWEXBGS",
+    "splice_date": "2006-01-04",
+    "splice_method": "log_level_additive",
+    "splice_gates": {
+      "min_corr": 0.85,
+      "max_mean_abs_z_divergence": 0.30
+    },
+    "references": [
+      "specs/MV_LIQUIDITY_COMPOSITE_PREREGISTER.md (a8635ef) §1.3",
+      "specs/BLOCKED_v11_3_A1_icedxy_stooq.md",
+      "Session 6 §2.0 (prompt/052226/PROMPT_v11_3_stage_3_LC_v1_session_6.md)"
+    ]
+  }
+}

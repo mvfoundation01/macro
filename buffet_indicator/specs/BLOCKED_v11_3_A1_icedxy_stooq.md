@@ -55,3 +55,49 @@ Switching from Stooq to a different ICE DXY source is **not an amendment** of th
 ## Status flag
 
 Surface in §7 final report under "Owner actions required".
+
+---
+
+## Resolution (2026-05-23, Session 6 §2.0)
+
+**Decision**: Option A (Norgate Diamond) + Option B (yfinance) hybrid.
+
+- **Norgate Diamond** serves as the deep-history primary (1971+). Owner runs
+  `scripts/bootstrap_icedxy_from_norgate.py` ONCE while subscription is active.
+  Result cached to `data/master/icedxy_close.parquet` and committed via Git LFS.
+- **yfinance `DX-Y.NYB`** (1985+) serves as Tier-4 runtime fallback for tail updates.
+- **Local MoDH parquet** (`data/master/icedxy_close.parquet`) is the default
+  runtime source — survives Norgate subscription cancellation per spec §2.4.8.
+
+**Implementation landing**:
+- `src/ingest/lc_v1_loader.build_lc_icedxy_master()` rewritten with 3-tier source
+  priority (`norgate_data` / `yfinance_data` / `cache_parquet_path`), monthly EOM
+  resample, log transform, and DTWEXBGS log-level-additive splice at 2006-01-04
+  with sealed gates (`corr > 0.85`, `mean |z-divergence| < 0.30`) per pre-reg
+  a8635ef §1.3.
+- `src/ingest/lc_v1_loader.build_lc_icedxy_stooq_master_legacy()` retains the
+  Stooq master-write path behind a `DeprecationWarning` for audit replay only.
+- `scripts/bootstrap_icedxy_from_norgate.py` is the one-shot Norgate cache builder.
+- `data/master/_source_policy.json` records the priority chain formally
+  per master spec §2.4.5 Step 1 override mechanism.
+- 12 new unit tests in `tests/ingest/test_lc_v1_loader_icedxy.py` cover the
+  priority chain, splice algorithm, gates, look-ahead audit, and the cached-parquet
+  default path.
+
+**Stooq fallback deprecated**: its empty-response state is documented as a
+historical artifact, not a current path. Code retained behind
+`build_lc_icedxy_stooq_master_legacy()` (and orchestrator flag
+`use_stooq_legacy=False`, default off) for future audit, with a deprecation
+warning.
+
+**Pre-reg posture**: this resolution is a within-scope vendor swap permitted by
+spec §17 — NOT an amendment of sealed pre-reg `a8635ef` (which lists ICE DXY
+abstractly, not a specific vendor). Both pre-reg invariants (`a90b02d` on `main`,
+`a8635ef` ancestor of `spec/liquidity-composite-v1.0` HEAD) remain intact.
+
+**Owner action remaining**: run
+`python scripts/bootstrap_icedxy_from_norgate.py` ONCE while Norgate Diamond is
+active to populate the cache. Until then, `build_lc_icedxy_master()` raises
+`RuntimeError` with an actionable error message. Components downstream of z4
+(LC composites) will naturally be NaN where ICE DXY is missing, allowing the
+rest of the modeling layer to ship and be validated independently.
