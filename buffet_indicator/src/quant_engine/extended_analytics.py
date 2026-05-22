@@ -812,10 +812,29 @@ def build_lump_sum_surface(
             "horizons": horizon_rows,
         })
 
+    # v11.2.3 — terminal wealth of $10k at series end, per strategy, for
+    # the Surface 6 bar chart. Sorted descending so the leader is leftmost.
+    terminal_wealth: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        cum = float((1.0 + r).prod())
+        terminal_wealth.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "is_benchmark": label == benchmark_label,
+            "terminal_value": cum * 10_000.0,
+            "cagr_pct": (cum ** (12.0 / len(r)) - 1.0) * 100.0 if len(r) > 0 else None,
+            "n_months": int(len(r)),
+        })
+    terminal_wealth.sort(key=lambda d: d["terminal_value"], reverse=True)
+
     return {
         "available": True,
         "benchmark_label": benchmark_label,
         "rows": rows,
+        "terminal_wealth": terminal_wealth,  # v11.2.3 Surface 6 chart
     }
 
 
