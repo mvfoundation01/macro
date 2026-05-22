@@ -220,6 +220,55 @@ Stage 0.5 closed. CI is "green enough for Stage 2" per §2.2 stop condition.
 - Bundle: 10.18 MB → 10.36 MB (+185 KB, well under 14 MB ceiling)
 - Pre-reg commits + v50 SHA invariants verified at each push
 
+---
+
+## Session 4 — 2026-05-22 (continued) — SVG NaN regression hotfix
+
+### The bug
+
+Owner reported ~99 console errors in real Chrome via `python -m http.server` after opening Strategy Engine surfaces. The Stage 1 `capture_svg_nan_per_tab.py` script reported 0 errors — false confidence. **Verification was incomplete.**
+
+### Reproduction (§1)
+
+New script: `reviews/diagnostic_artifacts/capture_svg_nan_real_browser.py`. Differences from the Stage 1 script:
+1. Loads via `http://127.0.0.1:8000/dashboard.html` (NOT `file://`).
+2. After clicking each top-level tab, also opens every Strategy Engine `<details>` element and cycles every `<select>` through all options.
+
+Running it on Stage 2.6 HEAD `7bcad09` reproduced **49 errors**, all triggered by the single action `open-details:ea-surface-9-seasonality`. (Owner's 99 figure may include additional manual interactions; the trigger is the same chart.)
+
+### Root cause (§2 hypothesis H1 confirmed)
+
+`MV_PlotlyConfig.renderChart()` in `src/viz/static/plotly_config.js` merges `plotlyLayoutDefault` into the caller's `layoutOverrides`. `plotlyLayoutDefault.yaxis` carries `type: "linear"`, which gets stamped onto categorical-y-axis charts (Surface 9 seasonality heatmap; Surface 8 SWR heatmap; any chart with `xaxis.type:"category"`).
+
+The Stage 1 heatmap-skip was added to `dashboard.js renderPlot()` — but every Surface 2-9 chart uses `MV_PlotlyConfig.renderChart()`, a different code path that never got the skip.
+
+### Fix (§3, F1 + F4 combined)
+
+`src/viz/static/plotly_config.js`:
+- Added `plotlyLayoutHeatmapSafe` — `plotlyLayoutDefault` with `type` and spike-config stripped from xaxis/yaxis.
+- `renderChart()` now branches on `_hasHeatmapTrace(data) || _looksCategorical(layoutOverrides)` and uses the heatmap-safe base when either is true.
+
+Localized, ~30-line diff. No template changes needed — the Surfaces 8/9 templates already pass through the right code path; the bug was further down.
+
+### Verification
+
+- HTTP capture (new script): 49 → **0** errors.
+- `file://` capture (existing script): still 0 (no regression).
+- 84 viz/deploy tests: all pass.
+- 4 new Playwright HTTP tests (`tests/viz/test_v11_2_3_svgnan_real_browser.py`): all pass locally.
+
+### Hardening (§4)
+
+Promoted the new capture script to a proper pytest module with 4 tests:
+1. `test_no_nan_errors_on_initial_load`
+2. `test_no_nan_errors_on_each_top_tab`
+3. `test_no_nan_errors_on_strategy_engine_subactions` — opens every EA surface details
+4. `test_no_nan_errors_on_strategy_dropdown_changes` — cycles every `<select>` through every option
+
+New session-scoped fixture `http_server_fixture` in `tests/conftest.py` boots a SimpleHTTPServer on a random port. CI installs `playwright` + `playwright install chromium` in a new step.
+
+These 4 tests would have caught the Stage 2 regression at any surface. No future surface ships without passing them.
+
 
 
 

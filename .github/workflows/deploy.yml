@@ -38,6 +38,12 @@ jobs:
           pip install ruff mypy bandit pytest pytest-cov
           pip install pandas-stubs types-PyYAML types-requests
           pip install pillow  # required by test_v11_0b_screenshots, test_v11_0c_recapture
+          pip install playwright  # v11.2.3 Session 4: real-browser SVG NaN tests
+
+      - name: Install Playwright Chromium
+        # v11.2.3 Session 4 hotfix: needed by tests/viz/test_v11_2_3_svgnan_real_browser.py.
+        # The browser binary is ~150 MB; cache hit on second runs is fast.
+        run: python -m playwright install --with-deps chromium
 
       - name: Lint (ruff)
         run: ruff check src/ tests/

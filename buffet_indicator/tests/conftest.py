@@ -15,9 +15,22 @@ data/config missing-file exceptions into a ``skipped`` outcome during
 setup OR call phase. Real bugs (other ``FileNotFoundError`` paths,
 ``AssertionError``, etc.) still fail.
 
+Also exposes ``http_server_fixture`` (session-scoped) — a SimpleHTTPServer
+on a random port serving the rendered ``outputs/`` directory. Used by
+``tests/viz/test_v11_2_3_svgnan_real_browser.py`` to drive Playwright
+against the real-browser HTTP URL.
+
 Spec ref: v11.2.3 Stage 0.5 CI hotfix-3+4 (PROMPT_v11_2_3_stage_2 §3.2 #10).
+        + v11.2.3 Session 4 SVG NaN hotfix (PROMPT_v11_2_3_svgnan_hotfix §4).
 """
 from __future__ import annotations
+
+import http.server
+import os
+import socketserver
+import threading
+import time
+from pathlib import Path
 
 import pytest
 
@@ -53,3 +66,40 @@ def pytest_runtest_makereport(item, call):
     report.longrepr = (
         f"[skip-in-ci] required raw-data/config file missing: {call.excinfo.value}"
     )
+
+
+# ---------------------------------------------------------------------------
+# v11.2.3 Session 4 — HTTP-served dashboard fixture for Playwright tests.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session")
+def http_server_fixture():
+    """Serve ``outputs/`` over HTTP on a random local port for the session.
+
+    Yields the base URL (e.g. ``http://127.0.0.1:54321``). Playwright tests
+    use this so the dashboard is loaded the same way a real browser would
+    (HTTP, no ``--allow-file-access-from-files``), catching the class of
+    bugs that ``file://`` loads silently mask.
+    """
+    outputs = Path(__file__).resolve().parents[1] / "outputs"
+    if not outputs.exists():
+        pytest.skip(f"outputs/ directory missing at {outputs}")
+
+    prev_cwd = os.getcwd()
+    os.chdir(outputs)
+
+    # Bind to port 0 so the OS picks a free one — supports parallel test runs.
+    handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("127.0.0.1", 0), handler)
+    port = httpd.server_address[1]
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    # Allow the server thread to fully come up before any test hits it.
+    time.sleep(0.3)
+    try:
+        yield f"http://127.0.0.1:{port}"
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+        os.chdir(prev_cwd)

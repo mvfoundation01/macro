@@ -141,6 +141,46 @@
     return layout;
   }
 
+  // v11.2.3 SVG NaN hotfix (Session 4): heatmap-safe base layout. Strips
+  // the `type: "linear"` axis defaults from plotlyLayoutDefault so that
+  // categorical-axis charts (heatmap, grouped bar with `xaxis.type:"category"`,
+  // etc.) don't get forced into linear-axis mode — which causes Plotly to
+  // emit NaN SVG coordinates for every cell label and colorbar image.
+  // Equivalent in spirit to the dashboard.js renderPlot() heatmap skip but
+  // for the renderChart() code path used by every EA surface chart.
+  var plotlyLayoutHeatmapSafe = (function () {
+    var hm = Object.assign({}, plotlyLayoutDefault);
+    var hmX = Object.assign({}, plotlyLayoutDefault.xaxis || {});
+    var hmY = Object.assign({}, plotlyLayoutDefault.yaxis || {});
+    // Drop the type pin so a categorical axis stays categorical, and the
+    // spike/zoom config that breaks on categorical axes.
+    delete hmX.type;
+    delete hmY.type;
+    delete hmX.showspikes; delete hmX.spikemode; delete hmX.spikethickness; delete hmX.spikecolor; delete hmX.spikedash;
+    delete hmY.showspikes; delete hmY.spikemode; delete hmY.spikethickness; delete hmY.spikecolor; delete hmY.spikedash;
+    hm.xaxis = hmX;
+    hm.yaxis = hmY;
+    return hm;
+  })();
+
+  function _looksCategorical(layoutOverrides) {
+    if (!layoutOverrides) return false;
+    var ax = layoutOverrides.xaxis, ay = layoutOverrides.yaxis;
+    if (ax && ax.type === "category") return true;
+    if (ay && ay.type === "category") return true;
+    return false;
+  }
+
+  function _hasHeatmapTrace(data) {
+    if (!Array.isArray(data)) return false;
+    for (var i = 0; i < data.length; i++) {
+      var t = data[i];
+      if (!t) continue;
+      if (t.type === "heatmap" || t.type === "heatmapgl") return true;
+    }
+    return false;
+  }
+
   // ==========================================================================
   // High-level renderer for NEW v11.2.2 charts (equity curves, EA surfaces).
   // Existing charts use dashboard.js renderPlot() — this is for code that
@@ -149,7 +189,10 @@
   // ==========================================================================
   function renderChart(divId, data, layoutOverrides, configOverrides, opts) {
     opts = opts || {};
-    var baseLayout = opts.equityCurve ? plotlyLayoutEquityCurve : plotlyLayoutDefault;
+    var needsHeatmapSafe = _hasHeatmapTrace(data) || _looksCategorical(layoutOverrides);
+    var baseLayout = opts.equityCurve
+      ? plotlyLayoutEquityCurve
+      : (needsHeatmapSafe ? plotlyLayoutHeatmapSafe : plotlyLayoutDefault);
     var layout = mergeLayoutShallow(baseLayout, layoutOverrides || {});
     var config = Object.assign({}, plotlyConfigDefault, configOverrides || {});
     Plotly.newPlot(divId, data, layout, config);
