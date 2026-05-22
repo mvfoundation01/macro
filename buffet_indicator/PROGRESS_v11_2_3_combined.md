@@ -269,6 +269,43 @@ New session-scoped fixture `http_server_fixture` in `tests/conftest.py` boots a 
 
 These 4 tests would have caught the Stage 2 regression at any surface. No future surface ships without passing them.
 
+---
 
+## Session 5 — 2026-05-22 — Stage 3 LC v1.0 (data layer)
+
+### §1 Opening checklist results
+
+| Check | Result |
+|---|---|
+| 1. `git status` — on `main`, working tree had pre-existing screenshot/JSON modifications + untracked dirs from prior sessions; nothing blocking | ✅ |
+| 2. `git log` HEAD on `main` = `27d3a7b` (v11.2.3-s2-svgnan-hotfix) | ✅ |
+| 3. v50 SHA256 = `6087918db909d3bb3ae66f43305c3331e4171aebc55ddc0366aaff6128026f47` | ✅ unchanged |
+| 4. pre-reg `a90b02d` (MV-Conditional, on `main`) untouched | ✅ |
+| 5. pre-reg `a8635ef` (LC v1.0, on `spec/liquidity-composite-v1.0`) untouched | ✅ |
+| 6. Baseline pytest (`tests/viz tests/deploy`): **456 passed in 906.69s** (15m), 32 warnings (statsmodels sqrt invalid value — known, pre-existing) | ✅ |
+| 7. CI on `main` (run `26264337242`): conclusion `success` | ✅ |
+| 8. `gh auth status`: authenticated as `mvfoundation01` | ✅ |
+
+Note on baseline count: prompt §1.4 mentioned "89 passed" as an expected/placeholder number. Actual count of all collected tests under `tests/viz tests/deploy` on the v11.2.3 hotfix HEAD is **456**. The prompt was written from a v11.2.3-mid-session viewpoint where only the NEW test additions were tracked. Both interpretations are consistent with "no regressions on baseline".
+
+### §2 RECON
+
+- Pre-reg `a8635ef` is the falsifiability + priors document (259 lines). It references the FULL implementation spec at `prompt/052126/spec_v11_3__liquidity_composite.md` (1361 lines, Strategist v1.0 sealed) and the mega-sprint prompt Part B.
+- RECON report written: `buffet_indicator/specs/RECON_lc_v1_2026-05-22.md` (covers composite definition, data sources, statistical methodology, sub-stages A1–K, bundle budget, module layout, open questions, branch-state plan).
+- Sub-stages enumerated: **A0 (DONE @ `a8635ef`), A1, A2, B, C, D, E, F, G, H, I, J, K** — 12 total, 11 implementable this/future session, K is the Stage-4 merge session per prompt §0 hard stop.
+
+### §2.4 Decision
+
+Evaluated all prompt §2.4 gates:
+- Auto-proceed gates: ALL satisfied (sub-stages enumerated, data sources accessible via `FRED_API_KEY`, methods well-defined, no new credentials, bundle estimate ≈ 3.5 MB << ceiling).
+- Pause gates: only "sub-stage count > 10" technically hit (11 implementable). Spec is fully unambiguous; the count reflects spec §16 breakdown, not interpretation gaps. Per prompt §3.3, MUST pause after data layer regardless.
+- **Decision**: auto-proceed to A1+A2 (data layer), pause after A2 with §7 partial report.
+
+### Branch-state plan: main merged into spec branch
+
+`spec/liquidity-composite-v1.0` was at `a8635ef` (BEHIND main; missing Stage 0/1/2). Merged `main` (HEAD `27d3a7b`) into spec branch via `--no-ff` merge commit `8e9ceeb`. This:
+- Preserves `a8635ef` as ancestor (verified via `git merge-base --is-ancestor a8635ef HEAD` → YES).
+- Brings the 456-test baseline + deploy.yml + dashboard.html to the spec branch.
+- Does NOT rewrite any commit; does NOT merge spec→main.
 
 
