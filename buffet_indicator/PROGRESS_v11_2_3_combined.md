@@ -436,3 +436,37 @@ Session 7 starts with **§2.F (bootstrap CIs + conditional-probability tail prob
 
 **Next**: Strategist reviews regression table + 3 open methodology questions, ships Session 7 prompt authorizing sub-stages F → J (bootstrap CIs, calibration, diagnostics, dashboard, falsifiability scorecard).
 
+## Session 7 — 2026-05-24 (Claude Opus 4.7 1M context, autonomous through G)
+
+**Accomplished**:
+- §2.0 DECISIONS.md verbatim Strategist arbitration — `a647f4e` — tag `v11.3-lc-v1-decisions-2026-05-24`
+- §2.1 Investigation (zero-fill RRPONTSYD + sign checks) — `d690066` — tag `v11.3-lc-v1-investigation-2026-05-24`
+- §2.F Bootstrap CIs (50K reps) + full Campbell-Yogo + conditional-probability tails — `76bfada` — tag `v11.3-lc-v1-F-2026-05-24`
+- §2.G Calibration layer (Brier + Murphy + CRPS + log + PIT + reliability) — `86dbb3d` — tag `v11.3-lc-v1-G-2026-05-24`
+- §6 + §4 final report + PROGRESS update — this commit
+
+**Test deltas**: +35 new tests (+21 calibration + 4 z1 zero-fill + 8 regression Session 7 + 2 sys-path lock-in). All baseline tests still pass.
+
+**CI runs**: [26302576739](https://github.com/mvfoundation01/macro/actions/runs/26302576739) (§2.0), [26302967323](https://github.com/mvfoundation01/macro/actions/runs/26302967323) (§2.1), [26303350216](https://github.com/mvfoundation01/macro/actions/runs/26303350216) (§2.F), [26303649897](https://github.com/mvfoundation01/macro/actions/runs/26303649897) (§2.G).
+
+**Invariants**: all 6 §1 gates green throughout. v50 SHA unchanged. Pre-reg `a90b02d` + `a8635ef` intact, `a8635ef` ancestor of HEAD enforced at every artifact write.
+
+**Outputs added/regenerated**:
+- `DECISIONS.md` — Strategist arbitration log.
+- `specs/INVESTIGATION_session_7.md` — investigation findings (pre-reg verification + sign checks).
+- `outputs/lc_v1_composites.parquet` — zero-fill canonical (LC_FULL n=160; was n=31 in Session 6.5).
+- `outputs/lc_v1_composites_truncate.parquet` — robustness companion.
+- `outputs/tables/lc_v1_predictive_regression.csv` — 50K bootstrap + Campbell-Yogo CI populated.
+- `outputs/tables/lc_v1_predictive_regression_truncate.csv` — robustness.
+- `outputs/tables/lc_v1_conditional_probabilities.csv` — 12 cells × 7 tail events with 95 % bootstrap CIs.
+- `outputs/tables/lc_v1_per_component_regressions.csv` — 5 components × 4 horizons univariate.
+- `outputs/tables/lc_v1_calibration.csv` — Brier+Murphy+CRPS+log+PIT per cell.
+- `outputs/figures/lc_v1_reliability_diagram_LC_TIER2_10y.png` (+ LC_DEEP_5y).
+- `outputs/figures/lc_v1_pit_histogram_LC_TIER2_10y.png` (+ LC_DEEP_5y).
+
+**Headline finding** (preliminary, locks at Session 8 §2.J): per-component univariate regressions show **5-of-5 components with NEGATIVE β at all horizons** — Session 6.5's composite 4-of-5 sign anomaly is confirmed at the univariate level. All 4 sign-check sensitivity tests PASS (no sign-flip bugs). The negative-β finding is methodologically clean and economically interpretable via credit-cycle / dollar-cycle reversal literature. Falsifiability criteria 1-4 remain FAIL post-zero-fill (n_pass=0). Verdict trajectory: DIAGNOSTIC ONLY per pre-reg §12.2.
+
+**Owner action**: paste `SESSION_7_FINAL_REPORT.md` to Strategist for Session 8 authorization.
+
+**Next**: Session 8 — §2.H (diagnostics: ADF/KPSS/PP/ZA + VIF + Bai-Perron) + §2.I (DIAGNOSTIC ONLY dashboard panel) + §2.J (falsifiability scorecard locked + research write-up draft).
+
