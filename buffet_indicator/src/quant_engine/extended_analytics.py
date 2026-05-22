@@ -934,31 +934,67 @@ def build_withdrawal_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    # v11.2.3 — heatmap matrices per strategy: rows=rates, cols=horizons.
+    heatmap_by_strategy: list[dict[str, Any]] = []
+    rates_pct = [f"{rate * 100:.0f}%" for rate in rates]
+    horizons_lbl = [str(h) for h in horizons_years]  # categorical x-axis
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
             continue
         arr = r.to_numpy(dtype=np.float64)
         cells: list[dict[str, Any]] = []
-        for h in horizons_years:
-            for rate in rates:
+        z_matrix: list[list[float | None]] = []
+        for rate in rates:
+            z_row: list[float | None] = []
+            for h in horizons_years:
                 surv = _swr_survival_pct(arr, rate, h)
+                z_row.append(surv if surv is None else float(surv))
                 cells.append({
                     "horizon_years": h,
                     "rate_fmt": f"{rate * 100:.0f}%",
                     "survival_fmt": f"{surv:.1f}%" if surv is not None else "n/a",
                 })
+            z_matrix.append(z_row)
         rows.append({
             "label": label, "is_v2": _is_v2(label),
             "n_months": int(len(r)),
             "cells": cells,
         })
+        heatmap_by_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "z": z_matrix,  # [rate_idx][horizon_idx]
+        })
+
+    # Pick the primary V1 strategy if present, else the first non-V2 strategy,
+    # else the first strategy. Used as the default heatmap shown in the UI.
+    primary_label = None
+    for cand in ("V1_Combination", "SPY"):
+        if any(h["label"] == cand for h in heatmap_by_strategy):
+            primary_label = cand
+            break
+    if primary_label is None:
+        non_v2 = [h for h in heatmap_by_strategy if not h["is_v2"]]
+        if non_v2:
+            primary_label = non_v2[0]["label"]
+        elif heatmap_by_strategy:
+            primary_label = heatmap_by_strategy[0]["label"]
 
     return {
         "available": True,
         "horizons_years": list(horizons_years),
-        "rates_fmt": [f"{rate * 100:.0f}%" for rate in rates],
+        "rates_fmt": rates_pct,
         "rows": rows,
+        "heatmap": {  # v11.2.3 Surface 8 chart
+            "x_labels": horizons_lbl,
+            "y_labels": rates_pct,
+            "x_axis_title": "Horizon (years)",
+            "y_axis_title": "Annual withdrawal rate",
+            "z_unit": "% survival",
+            "primary_label": primary_label,
+            "by_strategy": heatmap_by_strategy,
+        },
     }
 
 
