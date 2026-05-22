@@ -175,6 +175,51 @@ Stage 0.5 closed. CI is "green enough for Stage 2" per §2.2 stop condition.
 - Builder extension: `build_drawdowns_surface` now emits `underwater_curves: [{label, is_v2, dates, dd_values}]`
 - SVG NaN capture: 0 errors on all 9 tabs
 
+### Stage 2.1 — Surface 3 (Rolling metrics)
+- Commit: `aa53c29`
+- Tag: `v11.2.3-s2-rolling-2026-05-22`
+- CI run: [26260135811](https://github.com/mvfoundation01/macro/actions/runs/26260135811) (test ✅ + build-docker ✅)
+- Bundle delta: 10.22 MB → 10.30 MB (+75 KB)
+- Tests added: 5 (now 42 baseline)
+- Chart: single Plotly chart with 3 stacked subplots (Sharpe / Vol% / Sortino), shared x-axis, legendgroup per strategy
+- Builder extension: `build_rolling_metrics_surface` emits `rolling_series: [{label, is_v2, dates, sharpe, vol, sortino}]`
+- SVG NaN capture: 0 errors on all 9 tabs
+
+### Stage 2.2 — Surface 4 (Risk metrics)
+- Commit: `4626063` · Tag: `v11.2.3-s2-riskmetrics-2026-05-22` · CI: [26260469903](https://github.com/mvfoundation01/macro/actions/runs/26260469903) (✅)
+- Bundle: 10.30 MB → 10.30 MB · Tests +5 (47)
+- Chart: grouped bar of 5 monthly-% metrics (mean / std / downside σ / VaR 5% / CVaR 5%), color per strategy
+- Builder: `metric_chart_data` raw scalars added; existing `*_fmt` strings unchanged
+
+### Stage 2.3 — Surface 5 (Returns)
+- Commit: `e1eb2d7` · Tag: `v11.2.3-s2-returns-2026-05-22` · CI: [26260812625](https://github.com/mvfoundation01/macro/actions/runs/26260812625) (✅)
+- Bundle: 10.30 MB → 10.35 MB (+47 KB) · Tests +5 (52)
+- Chart: two stacked panels — cumulative log-equity (line) + annual returns (grouped bar by year)
+- Builder: `cum_log_curves` + `annual_returns` lists per strategy
+
+### Stage 2.4 — Surface 6 (Lump sum / terminal wealth)
+- Commit: `4f447d1` · Tag: `v11.2.3-s2-lumpsum-2026-05-22` · CI: [26261115257](https://github.com/mvfoundation01/macro/actions/runs/26261115257) (✅)
+- Bundle: 10.35 MB → 10.35 MB · Tests +6 (58)
+- Chart: vertical bar of $10K-equivalent terminal wealth per strategy, sorted descending, with benchmark reference line + annotation
+- Builder: `terminal_wealth` list (sorted)
+
+### Stage 2.5 — Surface 7 (Risk vs Return scatter)
+- Commit: `e54028e` · Tag: `v11.2.3-s2-riskreturn-2026-05-22` · CI: [26261436821](https://github.com/mvfoundation01/macro/actions/runs/26261436821) (✅)
+- Bundle: 10.35 MB → 10.36 MB · Tests +4 (62)
+- Chart: scatter — annualized vol (x) vs CAGR (y), labeled markers per strategy, SPY highlighted as larger diamond
+- Builder: `scatter_points` list
+
+### Stage 2.6 — Surface 8 (SWR survival heatmap)
+- Commit: `fd9e0ec` · Tag: `v11.2.3-s2-swr-2026-05-22` · CI: [26261751300](https://github.com/mvfoundation01/macro/actions/runs/26261751300) (✅)
+- Bundle: 10.36 MB → 10.36 MB · Tests +6 (68)
+- Chart: heatmap (rates × horizons) of % survival, RdYlGn colorscale 0–100, strategy `<select>` dropdown. Both axes pinned to `type:"category"` — heatmap-skip from v11.2.3-svgnan still suppresses SVG NaN.
+- Builder: `heatmap.{x_labels, y_labels, by_strategy, primary_label}`
+
+### Stage 2 complete
+- 7/7 surfaces shipped, 7 CI runs all green (test + build-docker), 0 SVG NaN errors across 9 tabs throughout, total tests +36 (32 → 68 viz+deploy)
+- Bundle: 10.18 MB → 10.36 MB (+185 KB, well under 14 MB ceiling)
+- Pre-reg commits + v50 SHA invariants verified at each push
+
 
 
 
