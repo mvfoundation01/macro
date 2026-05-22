@@ -29,7 +29,7 @@ References
 """
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy as np
 import pandas as pd
@@ -145,6 +145,12 @@ def _resample_monthly_eom(series: pd.Series) -> pd.Series:
 # ---------------------------------------------------------------------------
 
 
+#: Cutoff after which RRPONTSYD has dense, economically meaningful balances.
+#: Strategist DECISIONS.md (2026-05-24) §Q1 — facility was administratively
+#: present pre-2013 but ran near-zero (Fed wasn't deploying RRPs aggressively).
+RRPONTSYD_DENSE_FROM = pd.Timestamp("2013-09-23")
+
+
 def compute_z1_netfed(
     *,
     walcl: pd.Series | None = None,
@@ -152,12 +158,24 @@ def compute_z1_netfed(
     rrpontsyd: pd.Series | None = None,
     vintage: str | pd.Timestamp | None = None,
     min_n: int = PIT_ZSCORE_MIN_N,
+    rrpontsyd_pre2013_treatment: Literal["zero_fill", "truncate"] = "zero_fill",
 ) -> pd.Series:
     """Compute z₁ NetFed = PIT-z(WALCL − WDTGAL − RRPONTSYD), monthly EOM.
 
+    Per Strategist DECISIONS.md (2026-05-24) §Q1, the canonical treatment of
+    RRPONTSYD's sparse pre-2013-09-23 history is ``"zero_fill"``. The ON RRP
+    facility existed pre-2013 but had near-zero balances most days
+    (Session 7 §2.1.2 empirical check: 94.5% of pre-2013 monthly obs are NaN
+    or |x| < $5B; pre-2013 mean is ~1.2% of post-2013 mean). Zero-fill is the
+    closest approximation to economic truth, not synthetic data injection.
+
+    The ``"truncate"`` mode reproduces Session 6.5 behavior (RRPONTSYD NaN
+    pre-2013-09-23 → z₁ NaN until 120-mo PIT warm-up completes after 2013-09).
+    Provided for robustness reporting only; NOT the canonical mode.
+
     Active from 2003-01 in principle (WALCL starts 2002-12; the 12-month
     warm-up brings z₁ to non-NaN around 2003-12 once min_n=120 PIT history
-    has accumulated). Pragmatically anchored at 2003-01 in spec §1.1.
+    has accumulated). Pre-reg §1.2 sealed active-from at 2003-01.
 
     Parameters
     ----------
@@ -169,6 +187,9 @@ def compute_z1_netfed(
         leave ``vintage`` unset.
     min_n : int
         Override the PIT-z warm-up requirement for testing.
+    rrpontsyd_pre2013_treatment : {"zero_fill", "truncate"}
+        Canonical: ``"zero_fill"`` (DECISIONS.md 2026-05-24 §Q1). Robustness:
+        ``"truncate"`` reproduces Session 6.5 (RRPONTSYD NaN propagates).
 
     Returns
     -------
@@ -186,15 +207,35 @@ def compute_z1_netfed(
     wdtgal_m = _resample_monthly_eom(wdtgal)
     rrpontsyd_m = _resample_monthly_eom(rrpontsyd)
 
-    # Align on common monthly index. Forward-fill RRPONTSYD pre-2013-09-23
-    # (zero-fill per spec) — but here we keep it simple: take the intersection
-    # of dates where all three are defined.
+    if rrpontsyd_pre2013_treatment == "zero_fill":
+        # Extend RRPONTSYD's index to match the WALCL/WDTGAL window so the
+        # pre-2013 zeros are visible. Then fill NaN values with 0.0 ONLY for
+        # dates < RRPONTSYD_DENSE_FROM (post-2013 NaNs would be data outages,
+        # not facility inactivity).
+        union_idx = walcl_m.index.union(wdtgal_m.index).union(rrpontsyd_m.index)
+        rrpontsyd_m = rrpontsyd_m.reindex(union_idx)
+        pre_2013_mask = union_idx < RRPONTSYD_DENSE_FROM
+        rrpontsyd_m.loc[pre_2013_mask] = rrpontsyd_m.loc[pre_2013_mask].fillna(0.0)
+    elif rrpontsyd_pre2013_treatment == "truncate":
+        # Session 6.5 behavior — leave NaNs unfilled.
+        pass
+    else:
+        raise ValueError(
+            f"Unknown rrpontsyd_pre2013_treatment: {rrpontsyd_pre2013_treatment!r}. "
+            f"Expected 'zero_fill' or 'truncate'."
+        )
+
     idx = walcl_m.index.intersection(wdtgal_m.index).intersection(rrpontsyd_m.index)
     if idx.empty:
         return pd.Series([], dtype="float64", index=pd.DatetimeIndex([]), name="z1_netfed")
 
     netfed = walcl_m.loc[idx] - wdtgal_m.loc[idx] - rrpontsyd_m.loc[idx]
     netfed.name = "netfed"
+    # Drop NaN rows BEFORE PIT z so the expanding window starts at WALCL's
+    # first defined date rather than counting NaN slots. This matters most in
+    # zero_fill mode where rrpontsyd_m may still be NaN at edge dates that
+    # WALCL covers — without dropna the expanding window stays "warm".
+    netfed = netfed.dropna()
     z = _pit_zscore_expanding(netfed, min_n=min_n)
     z.name = "z1_netfed"
     return z
