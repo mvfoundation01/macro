@@ -14,6 +14,81 @@
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test
       (see <a href="#v2-diagnostic-banner" class="underline">DIAGNOSTIC banner</a> below). V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.2.1 — Mini equity curve (last 5 years) per strategy. Re-uses
+         DATA.strategy_equity_curves which already carries V1+V2+SPY series. -->
+    <div class="mb-3">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">$10,000 growth — last 5 years</h4>
+      <div id="ea-surface-1-mini-equity" style="width:100%;height:260px;"></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-1-mini-equity");
+          if (!el) return;
+          var DATA = (window.MV_DASHBOARD || {});
+          var ec = DATA.strategy_equity_curves;
+          if (!ec || !ec.dates) return;
+          // Slice to last 60 monthly observations.
+          var n = ec.dates.length;
+          var startIdx = Math.max(0, n - 60);
+          var xs = ec.dates.slice(startIdx);
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          // Rebase last-5Y so each series starts at $10,000 at the slice start.
+          var seriesOrder = ["V1_Combination", "V2_R-PRIMARY", "V2_R-ALT1", "V2_R-ALT2", "SPY"];
+          var traces = [];
+          for (var i = 0; i < seriesOrder.length; i++) {
+            var name = seriesOrder[i];
+            if (!ec[name]) continue;
+            var raw = ec[name].slice(startIdx);
+            var base = null;
+            for (var j = 0; j < raw.length; j++) {
+              if (raw[j] != null) { base = raw[j]; break; }
+            }
+            if (base == null || base === 0) continue;
+            var ys = raw.map(function (v) { return v == null ? null : (v / base * 10000); });
+            traces.push({
+              x: xs, y: ys,
+              name: name.replace("_", " "),
+              type: "scatter", mode: "lines",
+              line: {
+                color: palette[name] || "#888",
+                width: name === "V1_Combination" ? 2 : 1.2,
+                dash: name.indexOf("V2_") === 0 ? "dot" : "solid"
+              },
+              hovertemplate: "%{x|%Y-%m-%d}<br>$%{y:,.0f}<extra>" + name.replace("_", " ") + "</extra>"
+            });
+          }
+          var layoutOverrides = {
+            yaxis: { title: "Value ($)", tickformat: "$,.0f" },
+            xaxis: { title: "" },
+            margin: { l: 55, r: 15, t: 20, b: 40 }
+          };
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-1-mini-equity", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-1-mini-equity", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+
     <div class="overflow-x-auto">
       <table class="text-sm w-full">
         <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">

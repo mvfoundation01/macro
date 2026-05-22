@@ -1,0 +1,14 @@
+{
+  "total": 82,
+  "by_phase": {
+    "tab_click_render": 82
+  },
+  "samples": [
+    "Error: <image> attribute height: Expected length, \"NaN\".",
+    "Error: <text> attribute y: Expected length, \"NaN\".",
+    "Error: <text> attribute y: Expected length, \"NaN\".",
+    "Error: <text> attribute y: Expected length, \"NaN\".",
+    "Error: <text> attribute y: Expected length, \"NaN\"."
+  ],
+  "hovered": 12
+}

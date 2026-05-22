@@ -10,7 +10,79 @@
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
 
-    <h4 class="text-sm font-semibold text-gray-800 mb-2">Mean monthly return by calendar month</h4>
+    <!-- v11.2.2.9 — Seasonality heatmap (12 months × strategies, mean monthly return) -->
+    <div id="ea-surface-9-seasonality-heatmap"
+         style="width:100%;height:340px;"
+         data-seasonality-rows='{{ s9.rows|tojson|e }}'></div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-9-seasonality-heatmap");
+          if (!el) return;
+          var rows;
+          try { rows = JSON.parse(el.getAttribute("data-seasonality-rows")); }
+          catch (e) { return; }
+          if (!rows || !rows.length) return;
+          var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+          var labels = rows.map(function (r) { return r.label + (r.is_v2 ? " (DIAG)" : ""); });
+          // z-matrix: rows × 12 months; missing → null. Convert decimal to percent.
+          var z = rows.map(function (r) {
+            return (r.by_month || []).map(function (m) {
+              return (m && typeof m.mean === "number") ? m.mean * 100 : null;
+            });
+          });
+          var text = rows.map(function (r) {
+            return (r.by_month || []).map(function (m) { return m.mean_fmt || ""; });
+          });
+          var trace = {
+            type: "heatmap",
+            x: months,
+            y: labels,
+            z: z,
+            text: text,
+            texttemplate: "%{text}",
+            textfont: { size: 10 },
+            hovertemplate: "%{y} · %{x}: %{text}<extra></extra>",
+            colorscale: "RdYlGn",
+            zmid: 0,
+            colorbar: { title: "Mean (%)" , thickness: 10 }
+          };
+          var layoutOverrides = {
+            yaxis: { title: "", autorange: "reversed" },
+            xaxis: { title: "", side: "top" },
+            margin: { l: 140, r: 30, t: 50, b: 30 }
+          };
+          var cfg = window.MV_PlotlyConfig;
+          if (cfg && cfg.renderChart) {
+            cfg.renderChart("ea-surface-9-seasonality-heatmap", [trace], layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-9-seasonality-heatmap", [trace], layoutOverrides, { responsive: true });
+          }
+        }
+        // v11.2.3 SVG NaN fix: wait for the heatmap div to have non-zero
+        // dimensions before rendering. The seasonality heatmap lives in the
+        // hidden strategy_engine tab on page-load; rendering into the hidden
+        // div emitted NaN SVG coordinates (axis labels + <image> height).
+        function scheduleRender() {
+          if (window.mvRenderWhenReady) {
+            window.mvRenderWhenReady("ea-surface-9-seasonality-heatmap", tryRender);
+          } else {
+            setTimeout(tryRender, 100);
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          scheduleRender();
+        } else {
+          document.addEventListener("DOMContentLoaded", scheduleRender);
+        }
+      })();
+    </script>
+
+    <h4 class="text-sm font-semibold text-gray-800 mb-2 mt-4">Mean monthly return by calendar month</h4>
     <div class="overflow-x-auto">
       <table class="text-xs w-full">
         <thead class="bg-gray-100 text-left uppercase text-gray-600">

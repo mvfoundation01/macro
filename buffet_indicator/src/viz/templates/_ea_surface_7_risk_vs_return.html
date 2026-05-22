@@ -10,6 +10,83 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.5 — Risk-return scatter: annualized vol vs CAGR,
+         one labeled point per strategy. SPY highlighted via marker size. -->
+    {% if s7.scatter_points %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">Risk vs Return (annualized)</h4>
+      <div id="ea-surface-7-scatter"
+           style="width:100%;height:340px;"
+           data-points='{{ s7.scatter_points|tojson|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-7-scatter");
+          if (!el) return;
+          var pts;
+          try { pts = JSON.parse(el.dataset.points || "[]"); }
+          catch (e) { pts = []; }
+          if (!pts.length) return;
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          // One trace per strategy so the legend lists them individually.
+          var traces = [];
+          for (var i = 0; i < pts.length; i++) {
+            var p = pts[i];
+            var isSPY = (p.label === "SPY");
+            traces.push({
+              x: [p.vol_pct], y: [p.cagr_pct],
+              name: (p.label || "").replace("_", " "),
+              type: "scatter", mode: "markers+text",
+              marker: {
+                color: palette[p.label] || "#888",
+                size: isSPY ? 16 : 12,
+                symbol: isSPY ? "diamond" : "circle",
+                line: { color: "#222", width: isSPY ? 1.5 : 0.5 },
+                opacity: p.is_v2 ? 0.55 : 0.95
+              },
+              text: [(p.label || "").replace("_", " ")],
+              textposition: "top center",
+              textfont: { size: 10 },
+              hovertemplate: (p.label || "") +
+                "<br>Vol %{x:.1f}%<br>CAGR %{y:.1f}%" +
+                (p.sharpe != null ? "<br>Sharpe " + p.sharpe.toFixed(2) : "") +
+                "<extra></extra>"
+            });
+          }
+          var layoutOverrides = {
+            yaxis: { title: "CAGR (%)", zeroline: true, zerolinecolor: "#888" },
+            xaxis: { title: "Annualized Vol (%)", zeroline: false, rangemode: "tozero" },
+            margin: { l: 60, r: 15, t: 20, b: 50 },
+            showlegend: false  // labels inline; legend would be redundant
+          };
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-7-scatter", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-7-scatter", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     <div class="overflow-x-auto">
       <table class="text-sm w-full">
         <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">

@@ -15,7 +15,6 @@ import pytest
 from src.quant_engine.extended_analytics import (
     V2_LABELS,
     _swr_survival_pct,
-    build_drawdowns_surface,
     build_lump_sum_surface,
     build_returns_surface,
     build_risk_metrics_surface,

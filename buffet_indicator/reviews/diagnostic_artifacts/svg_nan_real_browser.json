@@ -1,0 +1,206 @@
+{
+  "url": "http://127.0.0.1:8000/dashboard.html",
+  "total_errors": 0,
+  "actions": [
+    {
+      "action": "initial-load",
+      "errors_after": 0
+    },
+    {
+      "action": "tab:overview",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:cape",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:buffett",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:mvci",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:strategy_engine",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:diagnostics",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:data",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:methodology",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "tab:backtest",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[26]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[27]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[28]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[29]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[30]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[31]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[32]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[33]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[34]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[35]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[36]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[37]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[38]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[39]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[40]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[41]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:details[60]",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-1-summary",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-2-drawdowns",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-3-rolling",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-4-risk-metrics",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-5-returns",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-6-lump-sum",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-7-risk-vs-return",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-8-withdrawal",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "open-details:ea-surface-9-seasonality",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "select:ea-surface-8-heatmap-select=>V1_Combination",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "select:ea-surface-8-heatmap-select=>V2_R-PRIMARY",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "select:ea-surface-8-heatmap-select=>V2_R-ALT1",
+      "delta": 0,
+      "total": 0
+    },
+    {
+      "action": "select:ea-surface-8-heatmap-select=>V2_R-ALT2",
+      "delta": 0,
+      "total": 0
+    }
+  ],
+  "errors_sample": []
+}

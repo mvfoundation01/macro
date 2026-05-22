@@ -9,6 +9,98 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.4 — Terminal wealth bar chart: $10K invested at
+         series start, sorted descending. Benchmark highlighted via dashed
+         reference line at its terminal value. -->
+    {% if s6.terminal_wealth %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">Terminal wealth — $10,000 invested at start</h4>
+      <div id="ea-surface-6-terminal"
+           style="width:100%;height:260px;"
+           data-strategies='{{ s6.terminal_wealth|tojson|e }}'
+           data-benchmark='{{ s6.benchmark_label|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-6-terminal");
+          if (!el) return;
+          var rows;
+          try { rows = JSON.parse(el.dataset.strategies || "[]"); }
+          catch (e) { rows = []; }
+          if (!rows.length) return;
+          var benchmark_label = el.dataset.benchmark || "";
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          var labels = rows.map(function (r) { return r.label.replace("_", " "); });
+          var values = rows.map(function (r) { return r.terminal_value; });
+          var colors = rows.map(function (r) { return palette[r.label] || "#888"; });
+          var opacities = rows.map(function (r) { return r.is_v2 ? 0.55 : 0.95; });
+          // Find benchmark terminal for a horizontal reference line.
+          var benchVal = null;
+          for (var i = 0; i < rows.length; i++) {
+            if (rows[i].is_benchmark || rows[i].label === benchmark_label) {
+              benchVal = rows[i].terminal_value;
+              break;
+            }
+          }
+          var traces = [{
+            x: labels, y: values,
+            type: "bar",
+            marker: { color: colors, opacity: 1, line: { color: "#fff", width: 1 } },
+            text: values.map(function (v) { return "$" + Math.round(v).toLocaleString(); }),
+            textposition: "outside",
+            hovertemplate: "%{x}<br>$%{y:,.0f}<extra></extra>",
+            // Per-bar opacity — emulate via marker.color rgba.
+            marker_opacity: opacities
+          }];
+          var layoutOverrides = {
+            yaxis: { title: "$ value", tickformat: "$,.0f", rangemode: "tozero" },
+            xaxis: { title: "" },
+            margin: { l: 65, r: 15, t: 20, b: 60 },
+            showlegend: false
+          };
+          if (benchVal != null) {
+            layoutOverrides.shapes = [{
+              type: "line",
+              xref: "paper", x0: 0, x1: 1,
+              y0: benchVal, y1: benchVal,
+              line: { color: palette[benchmark_label] || "#1F77B4", dash: "dash", width: 1.5 }
+            }];
+            layoutOverrides.annotations = [{
+              xref: "paper", x: 1, xanchor: "right",
+              y: benchVal, yanchor: "bottom",
+              text: benchmark_label.replace("_", " ") + " ref ($" + Math.round(benchVal).toLocaleString() + ")",
+              showarrow: false,
+              font: { size: 10, color: palette[benchmark_label] || "#1F77B4" }
+            }];
+          }
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-6-terminal", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-6-terminal", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     {% for row in s6.rows %}
     <div class="mb-3">
       <h4 class="text-sm font-semibold text-gray-800 mb-1">

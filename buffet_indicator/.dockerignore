@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+data/raw/
+data/master/_vintages/
+.git/
+.github/
+tests/
+notebooks/
+reviews/
+logs/
+*.log
+.env
+config.yaml

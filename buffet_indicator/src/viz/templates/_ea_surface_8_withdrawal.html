@@ -12,6 +12,90 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.6 — SWR survival heatmap: rows = annual withdrawal
+         rate (categorical), cols = horizon in years (categorical). The
+         v11.2.3-svgnan heatmap skip in MV_PlotlyConfig.applyUniversalDefaults
+         ensures the categorical y-axis isn't forced to type:"linear",
+         preventing the SVG NaN errors from Session 1. -->
+    {% if s8.heatmap and s8.heatmap.by_strategy %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">
+        SWR survival heatmap
+        <span class="ml-2 text-xs font-normal text-gray-500">
+          (rows = annual draw rate, cols = horizon years; z = % rolling windows where $10k survived)
+        </span>
+      </h4>
+      <label class="text-xs text-gray-600 mr-2">Strategy:</label>
+      <select id="ea-surface-8-heatmap-select" class="text-xs border rounded px-1 py-0.5">
+        {% for s in s8.heatmap.by_strategy %}
+        <option value="{{ s.label }}" {% if s.label == s8.heatmap.primary_label %}selected{% endif %}>
+          {{ s.label }}{% if s.is_v2 %} (DIAG){% endif %}
+        </option>
+        {% endfor %}
+      </select>
+      <div id="ea-surface-8-heatmap"
+           style="width:100%;height:280px;margin-top:6px;"
+           data-heatmap='{{ s8.heatmap|tojson|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-8-heatmap");
+          var sel = document.getElementById("ea-surface-8-heatmap-select");
+          if (!el) return;
+          var spec;
+          try { spec = JSON.parse(el.dataset.heatmap || "{}"); }
+          catch (e) { spec = {}; }
+          if (!spec.by_strategy || !spec.by_strategy.length) return;
+          var cfg = window.MV_PlotlyConfig || {};
+
+          function render(label) {
+            var entry = null;
+            for (var i = 0; i < spec.by_strategy.length; i++) {
+              if (spec.by_strategy[i].label === label) { entry = spec.by_strategy[i]; break; }
+            }
+            if (!entry) entry = spec.by_strategy[0];
+            var trace = {
+              x: spec.x_labels,
+              y: spec.y_labels,
+              z: entry.z,
+              type: "heatmap",
+              colorscale: "RdYlGn",
+              zmin: 0, zmax: 100,
+              colorbar: { title: "% survival", ticksuffix: "%" },
+              hovertemplate: "Horizon %{x}y<br>Rate %{y}<br>Survival %{z:.1f}%<extra></extra>"
+            };
+            var layoutOverrides = {
+              xaxis: { title: spec.x_axis_title, type: "category" },
+              yaxis: { title: spec.y_axis_title, type: "category" },
+              margin: { l: 80, r: 15, t: 20, b: 50 }
+            };
+            if (cfg.renderChart) {
+              cfg.renderChart("ea-surface-8-heatmap", [trace], layoutOverrides);
+            } else {
+              Plotly.newPlot("ea-surface-8-heatmap", [trace], layoutOverrides, { responsive: true });
+            }
+          }
+
+          render(spec.primary_label || spec.by_strategy[0].label);
+          if (sel) {
+            sel.addEventListener("change", function (e) { render(e.target.value); });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     {% for row in s8.rows %}
     <div class="mb-4">
       <h4 class="text-sm font-semibold text-gray-800 mb-1">

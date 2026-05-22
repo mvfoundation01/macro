@@ -9,7 +9,6 @@ import pandas as pd
 import pytest
 
 from src.transform.mrc_v2 import (
-    GROUP_ASSIGNMENT,
     GROUP_SHARES,
     MRC_V2_CONSTITUENTS,
     compute_mrc_v2,

@@ -1,0 +1,91 @@
+{
+  "no_click_baseline": {
+    "tab": "<no-clicks-no-hover>",
+    "total": 0,
+    "text_y": 0,
+    "image_height": 0
+  },
+  "per_tab": [
+    {
+      "tab": "overview",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 0
+    },
+    {
+      "tab": "cape",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 12
+    },
+    {
+      "tab": "buffett",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 12
+    },
+    {
+      "tab": "mvci",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 12
+    },
+    {
+      "tab": "strategy_engine",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 3
+    },
+    {
+      "tab": "diagnostics",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 12
+    },
+    {
+      "tab": "data",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 0
+    },
+    {
+      "tab": "methodology",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 0
+    },
+    {
+      "tab": "backtest",
+      "total": 0,
+      "text_y": 0,
+      "image_height": 0,
+      "other": 0,
+      "hovered_default": 30,
+      "hovered_tab": 9
+    }
+  ]
+}

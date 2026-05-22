@@ -297,9 +297,14 @@
         });
       }
     }, true);
-    // Initial-render: render any Plotly figs in the first <details open> section
+    // Initial-render: render any Plotly figs in the first <details open> section.
+    // v11.2.3 SVG NaN fix: each render waits for its host div to have non-zero
+    // dimensions via window.mvRenderWhenReady (defined in dashboard.js). When
+    // strategy_engine is hidden at page-load time, this defers the renders
+    // until the tab is activated and CSS reflow has run.
     window.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('[data-tab="strategy_engine"] details[open] .se-plotly-chart[data-plotly-data]').forEach(div => {
+      function renderOne(div) {
+        if (div._rendered) return;
         try {
           const spec = JSON.parse(div.getAttribute('data-plotly-data'));
           Plotly.newPlot(div, spec.data, spec.layout, spec.config || {responsive:true});
@@ -307,14 +312,15 @@
         } catch (err) {
           console.error('Plotly render failed for', div.id, err);
         }
+      }
+      const wait = window.mvRenderWhenReady || function (id, fn) { fn(); };
+      document.querySelectorAll('[data-tab="strategy_engine"] details[open] .se-plotly-chart[data-plotly-data]').forEach(div => {
+        if (!div.id) return;
+        wait(div.id, () => renderOne(div));
       });
       // Also render the bonus period heatmap if present (outside <details>)
       document.querySelectorAll('[data-tab="strategy_engine"] #se-period-heatmap-bonus[data-plotly-data]').forEach(div => {
-        try {
-          const spec = JSON.parse(div.getAttribute('data-plotly-data'));
-          Plotly.newPlot(div, spec.data, spec.layout, spec.config || {responsive:true});
-          div._rendered = true;
-        } catch (err) { console.error('Period heatmap render failed', err); }
+        wait(div.id, () => renderOne(div));
       });
     });
   </script>

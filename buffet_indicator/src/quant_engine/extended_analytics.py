@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -242,7 +241,6 @@ def find_drawdown_episodes(
     peak_equity_at_episode: float = 0.0
     EPS = 1e-6
     for date, dd_val in drawdown.items():
-        eq_val = float(eq.loc[date])
         if not in_dd:
             if dd_val < -EPS:
                 in_dd = True
@@ -374,8 +372,23 @@ def build_drawdowns_surface(
         pass
 
     per_strategy: list[dict[str, Any]] = []
+    underwater_curves: list[dict[str, Any]] = []  # v11.2.3 Surface 2 chart
     for label, sr in strategies.items():
-        episodes = find_drawdown_episodes(sr.monthly.dropna(), min_depth=min_depth)
+        r = sr.monthly.dropna()
+        # v11.2.3 — underwater curve time series for the Plotly chart
+        # (one trace per strategy; nullable for any pre-history months).
+        if not r.empty:
+            eq_series = (1.0 + r).cumprod() * 10_000.0
+            running_max_series = eq_series.cummax()
+            dd_series = (eq_series - running_max_series) / running_max_series
+            underwater_curves.append({
+                "label": label,
+                "is_v2": _is_v2(label),
+                "dates": [d.strftime("%Y-%m-%d") for d in dd_series.index],
+                "dd_values": [None if pd.isna(v) else float(v) for v in dd_series],
+            })
+
+        episodes = find_drawdown_episodes(r, min_depth=min_depth)
         if not episodes.empty:
             episodes = tag_episodes_with_macro_regime(episodes, mvci_z, mrc_z)
             episodes = episodes.sort_values("depth_pct").reset_index(drop=True)
@@ -437,6 +450,7 @@ def build_drawdowns_surface(
         "available": True,
         "min_depth_pct": _fmt_pct(min_depth, digits=0),
         "per_strategy": per_strategy,
+        "underwater_curves": underwater_curves,  # v11.2.3 Surface 2 chart
         "meta": {
             "macro_overlay_available": mvci_z is not None,
         },
@@ -498,6 +512,7 @@ def build_rolling_metrics_surface(
         return {"available": False, "reason": "no strategy returns available", "per_strategy": []}
 
     per_strategy: list[dict[str, Any]] = []
+    rolling_series: list[dict[str, Any]] = []  # v11.2.3 Surface 3 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if len(r) < window + 1:
@@ -515,6 +530,16 @@ def build_rolling_metrics_surface(
                 "reason": "rolling computation returned empty",
             })
             continue
+        # v11.2.3 — expose rolling time series so the chart can plot
+        # 3 sub-panels (sharpe / vol / sortino) per strategy.
+        rolling_series.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "dates": [d.strftime("%Y-%m-%d") for d in roll.index],
+            "sharpe": [None if pd.isna(v) else float(v) for v in roll["rolling_sharpe"]],
+            "vol": [None if pd.isna(v) else float(v) for v in roll["rolling_vol"]],
+            "sortino": [None if pd.isna(v) else float(v) for v in roll["rolling_sortino"]],
+        })
         per_strategy.append({
             "label": label,
             "is_v2": _is_v2(label),
@@ -548,6 +573,7 @@ def build_rolling_metrics_surface(
         "available": True,
         "window_months": window,
         "per_strategy": per_strategy,
+        "rolling_series": rolling_series,  # v11.2.3 Surface 3 chart
     }
 
 
@@ -567,6 +593,7 @@ def build_risk_metrics_surface(
     benchmark_r = strategies[benchmark_label].monthly.dropna() if benchmark_label in strategies else None
 
     rows: list[dict[str, Any]] = []
+    metric_chart_data: list[dict[str, Any]] = []  # v11.2.3 Surface 4 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -625,11 +652,32 @@ def build_risk_metrics_surface(
             "up_capture_fmt": _fmt_signed(up_cap, digits=3),
             "down_capture_fmt": _fmt_signed(down_cap, digits=3),
         })
+        # v11.2.3 — raw scalar metrics for the grouped bar chart.
+        # All values returned in *percent* (e.g. 0.012 → 1.2) so the
+        # chart axis can display % consistently.
+        def _pct(x: float) -> float | None:
+            return None if (x is None or not np.isfinite(x)) else float(x) * 100.0
+
+        def _raw(x: float) -> float | None:
+            return None if (x is None or not np.isfinite(x)) else float(x)
+
+        metric_chart_data.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "mean_pct": _pct(mean),
+            "std_pct": _pct(std),
+            "downside_dev_pct": _pct(dsd),
+            "var_5_pct": _pct(var_5),
+            "cvar_5_pct": _pct(cvar_5),
+            "skew": _raw(skew),
+            "beta": _raw(beta),
+        })
 
     return {
         "available": True,
         "benchmark_label": benchmark_label,
         "rows": rows,
+        "metric_chart_data": metric_chart_data,  # v11.2.3 Surface 4 chart
     }
 
 
@@ -646,6 +694,8 @@ def build_returns_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    cum_log_curves: list[dict[str, Any]] = []  # v11.2.3 Surface 5 panel (a)
+    annual_returns_by_strategy: list[dict[str, Any]] = []  # panel (b)
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -654,6 +704,23 @@ def build_returns_surface(
         annual = r.resample("YE").apply(lambda s: float((1.0 + s).prod() - 1.0))
         annual_arr = annual.to_numpy(dtype=np.float64)
         arr_m = r.to_numpy(dtype=np.float64)
+
+        # v11.2.3 — cumulative log-equity series for panel (a).
+        cum = (1.0 + r).cumprod()
+        log_eq = np.log(cum.to_numpy(dtype=np.float64))
+        cum_log_curves.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "dates": [d.strftime("%Y-%m-%d") for d in cum.index],
+            "log_eq": [None if not np.isfinite(v) else float(v) for v in log_eq],
+        })
+        # v11.2.3 — per-year returns for panel (b) grouped bar.
+        annual_returns_by_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "years": [int(d.year) for d in annual.index],
+            "values": [None if pd.isna(v) else float(v) * 100.0 for v in annual_arr],
+        })
 
         rows.append({
             "label": label,
@@ -670,7 +737,12 @@ def build_returns_surface(
             "pct_positive_months_fmt": f"{(arr_m > 0).mean() * 100:.1f}%" if len(arr_m) else "n/a",
         })
 
-    return {"available": True, "rows": rows}
+    return {
+        "available": True,
+        "rows": rows,
+        "cum_log_curves": cum_log_curves,  # v11.2.3 Surface 5 panel (a)
+        "annual_returns": annual_returns_by_strategy,  # v11.2.3 panel (b)
+    }
 
 
 # ── Surface 6 — Lump Sum (win rate vs benchmark) ────────────────────────
@@ -740,10 +812,29 @@ def build_lump_sum_surface(
             "horizons": horizon_rows,
         })
 
+    # v11.2.3 — terminal wealth of $10k at series end, per strategy, for
+    # the Surface 6 bar chart. Sorted descending so the leader is leftmost.
+    terminal_wealth: list[dict[str, Any]] = []
+    for label, sr in strategies.items():
+        r = sr.monthly.dropna()
+        if r.empty:
+            continue
+        cum = float((1.0 + r).prod())
+        terminal_wealth.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "is_benchmark": label == benchmark_label,
+            "terminal_value": cum * 10_000.0,
+            "cagr_pct": (cum ** (12.0 / len(r)) - 1.0) * 100.0 if len(r) > 0 else None,
+            "n_months": int(len(r)),
+        })
+    terminal_wealth.sort(key=lambda d: d["terminal_value"], reverse=True)
+
     return {
         "available": True,
         "benchmark_label": benchmark_label,
         "rows": rows,
+        "terminal_wealth": terminal_wealth,  # v11.2.3 Surface 6 chart
     }
 
 
@@ -760,6 +851,7 @@ def build_risk_vs_return_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    scatter_points: list[dict[str, Any]] = []  # v11.2.3 Surface 7 chart
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
@@ -782,8 +874,21 @@ def build_risk_vs_return_surface(
             "ulcer_fmt": f"{ulcer:.2f}" if np.isfinite(ulcer) else "n/a",
             "upi_fmt": _fmt_signed(upi, digits=3),
         })
+        # v11.2.3 — annualized vol on x, CAGR on y, both in %.
+        if np.isfinite(vol) and np.isfinite(cagr):
+            scatter_points.append({
+                "label": label,
+                "is_v2": _is_v2(label),
+                "vol_pct": float(vol) * 100.0,
+                "cagr_pct": float(cagr) * 100.0,
+                "sharpe": float(sharpe) if np.isfinite(sharpe) else None,
+            })
 
-    return {"available": True, "rows": rows}
+    return {
+        "available": True,
+        "rows": rows,
+        "scatter_points": scatter_points,  # v11.2.3 Surface 7 chart
+    }
 
 
 # ── Surface 8 — Withdrawal Stats (SWR survival analysis) ────────────────
@@ -829,31 +934,67 @@ def build_withdrawal_surface(
         return {"available": False, "reason": "no strategy returns available", "rows": []}
 
     rows: list[dict[str, Any]] = []
+    # v11.2.3 — heatmap matrices per strategy: rows=rates, cols=horizons.
+    heatmap_by_strategy: list[dict[str, Any]] = []
+    rates_pct = [f"{rate * 100:.0f}%" for rate in rates]
+    horizons_lbl = [str(h) for h in horizons_years]  # categorical x-axis
     for label, sr in strategies.items():
         r = sr.monthly.dropna()
         if r.empty:
             continue
         arr = r.to_numpy(dtype=np.float64)
         cells: list[dict[str, Any]] = []
-        for h in horizons_years:
-            for rate in rates:
+        z_matrix: list[list[float | None]] = []
+        for rate in rates:
+            z_row: list[float | None] = []
+            for h in horizons_years:
                 surv = _swr_survival_pct(arr, rate, h)
+                z_row.append(surv if surv is None else float(surv))
                 cells.append({
                     "horizon_years": h,
                     "rate_fmt": f"{rate * 100:.0f}%",
                     "survival_fmt": f"{surv:.1f}%" if surv is not None else "n/a",
                 })
+            z_matrix.append(z_row)
         rows.append({
             "label": label, "is_v2": _is_v2(label),
             "n_months": int(len(r)),
             "cells": cells,
         })
+        heatmap_by_strategy.append({
+            "label": label,
+            "is_v2": _is_v2(label),
+            "z": z_matrix,  # [rate_idx][horizon_idx]
+        })
+
+    # Pick the primary V1 strategy if present, else the first non-V2 strategy,
+    # else the first strategy. Used as the default heatmap shown in the UI.
+    primary_label = None
+    for cand in ("V1_Combination", "SPY"):
+        if any(h["label"] == cand for h in heatmap_by_strategy):
+            primary_label = cand
+            break
+    if primary_label is None:
+        non_v2 = [h for h in heatmap_by_strategy if not h["is_v2"]]
+        if non_v2:
+            primary_label = non_v2[0]["label"]
+        elif heatmap_by_strategy:
+            primary_label = heatmap_by_strategy[0]["label"]
 
     return {
         "available": True,
         "horizons_years": list(horizons_years),
-        "rates_fmt": [f"{rate * 100:.0f}%" for rate in rates],
+        "rates_fmt": rates_pct,
         "rows": rows,
+        "heatmap": {  # v11.2.3 Surface 8 chart
+            "x_labels": horizons_lbl,
+            "y_labels": rates_pct,
+            "x_axis_title": "Horizon (years)",
+            "y_axis_title": "Annual withdrawal rate",
+            "z_unit": "% survival",
+            "primary_label": primary_label,
+            "by_strategy": heatmap_by_strategy,
+        },
     }
 
 
@@ -880,19 +1021,22 @@ def build_seasonality_surface(
         r = sr.monthly.dropna()
         if r.empty:
             continue
-        by_month: list[dict[str, str]] = []
+        by_month: list[dict[str, Any]] = []
         for i, m_label in enumerate(months, start=1):
             mask = r.index.month == i
             if mask.any():
                 vals = r[mask].to_numpy(dtype=np.float64)
+                # v11.2.2.9 — also emit raw `mean` (decimal) so a Plotly heatmap
+                # can plot numeric values without parsing formatted strings.
                 by_month.append({
                     "month": m_label,
+                    "mean": float(vals.mean()),
                     "mean_fmt": _fmt_pct(float(vals.mean()), digits=2),
                     "n": int(len(vals)),
                     "pct_positive_fmt": f"{(vals > 0).mean() * 100:.0f}%",
                 })
             else:
-                by_month.append({"month": m_label, "mean_fmt": "n/a", "n": 0, "pct_positive_fmt": "n/a"})
+                by_month.append({"month": m_label, "mean": None, "mean_fmt": "n/a", "n": 0, "pct_positive_fmt": "n/a"})
         rows.append({
             "label": label, "is_v2": _is_v2(label),
             "by_month": by_month,

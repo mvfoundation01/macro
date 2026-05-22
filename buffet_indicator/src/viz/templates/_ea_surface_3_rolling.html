@@ -12,6 +12,106 @@
     <p class="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2 mb-3">
       <strong>Note:</strong> V2 rules failed pre-registered falsifiability test. V2 metrics shown for transparency only.
     </p>
+
+    <!-- v11.2.3 Stage 2.1 — Three stacked Plotly subplots: rolling Sharpe,
+         rolling Vol, rolling Sortino. Shared x-axis (Plotly `matches`).
+         Data inlined via data-series attribute. -->
+    {% if s3.rolling_series %}
+    <div class="mb-4">
+      <h4 class="text-sm font-semibold text-gray-800 mb-1">Rolling {{ s3.window_months }}-month metrics over time</h4>
+      <div id="ea-surface-3-rolling-chart"
+           style="width:100%;height:480px;"
+           data-series='{{ s3.rolling_series|tojson|e }}'></div>
+    </div>
+    <script>
+      (function () {
+        function tryRender() {
+          if (typeof Plotly === "undefined") {
+            window.addEventListener("load", tryRender);
+            return;
+          }
+          var el = document.getElementById("ea-surface-3-rolling-chart");
+          if (!el) return;
+          var series;
+          try { series = JSON.parse(el.dataset.series || "[]"); }
+          catch (e) { series = []; }
+          if (!series.length) return;
+          var cfg = window.MV_PlotlyConfig || {};
+          var palette = (cfg && cfg.strategyColors) || {
+            "V1_Combination": "#1F77B4",
+            "V2_R-PRIMARY":   "#FF7F0E",
+            "V2_R-ALT1":      "#FFB78C",
+            "V2_R-ALT2":      "#FFCBA8",
+            "SPY":            "#666666"
+          };
+          var traces = [];
+          for (var i = 0; i < series.length; i++) {
+            var s = series[i];
+            var color = palette[s.label] || "#888";
+            var lineWidth = s.is_v2 ? 1.2 : 1.6;
+            var dash = s.is_v2 ? "dot" : "solid";
+            var opacity = s.is_v2 ? 0.6 : 0.95;
+            // Sharpe (top subplot — yaxis: y)
+            traces.push({
+              x: s.dates, y: s.sharpe,
+              name: (s.label || "").replace("_", " "),
+              legendgroup: s.label,
+              xaxis: "x", yaxis: "y",
+              type: "scatter", mode: "lines",
+              line: { color: color, width: lineWidth, dash: dash },
+              opacity: opacity,
+              hovertemplate: "%{x}<br>Sharpe %{y:.2f}<extra>" + (s.label || "") + "</extra>"
+            });
+            // Vol (middle subplot — yaxis: y2)
+            var vol_pct = (s.vol || []).map(function (v) { return v == null ? null : v * 100.0; });
+            traces.push({
+              x: s.dates, y: vol_pct,
+              name: (s.label || "").replace("_", " "),
+              legendgroup: s.label,
+              showlegend: false,
+              xaxis: "x", yaxis: "y2",
+              type: "scatter", mode: "lines",
+              line: { color: color, width: lineWidth, dash: dash },
+              opacity: opacity,
+              hovertemplate: "%{x}<br>Vol %{y:.1f}%<extra>" + (s.label || "") + "</extra>"
+            });
+            // Sortino (bottom subplot — yaxis: y3)
+            traces.push({
+              x: s.dates, y: s.sortino,
+              name: (s.label || "").replace("_", " "),
+              legendgroup: s.label,
+              showlegend: false,
+              xaxis: "x", yaxis: "y3",
+              type: "scatter", mode: "lines",
+              line: { color: color, width: lineWidth, dash: dash },
+              opacity: opacity,
+              hovertemplate: "%{x}<br>Sortino %{y:.2f}<extra>" + (s.label || "") + "</extra>"
+            });
+          }
+          var layoutOverrides = {
+            xaxis:  { domain: [0, 1], anchor: "y3" },
+            yaxis:  { domain: [0.69, 1.00], title: "Sharpe", zeroline: true, zerolinecolor: "#ccc" },
+            yaxis2: { domain: [0.35, 0.65], title: "Vol (%)", tickformat: ".0f", rangemode: "tozero" },
+            yaxis3: { domain: [0.00, 0.31], title: "Sortino", zeroline: true, zerolinecolor: "#ccc" },
+            margin: { l: 55, r: 15, t: 20, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: 1.08, x: 0 }
+          };
+          if (cfg.renderChart) {
+            cfg.renderChart("ea-surface-3-rolling-chart", traces, layoutOverrides);
+          } else {
+            Plotly.newPlot("ea-surface-3-rolling-chart", traces, layoutOverrides, { responsive: true });
+          }
+        }
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(tryRender, 100);
+        } else {
+          document.addEventListener("DOMContentLoaded", function () { setTimeout(tryRender, 100); });
+        }
+      })();
+    </script>
+    {% endif %}
+
     <div class="overflow-x-auto">
       <table class="text-sm w-full">
         <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
