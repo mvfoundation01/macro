@@ -269,6 +269,28 @@ New session-scoped fixture `http_server_fixture` in `tests/conftest.py` boots a 
 
 These 4 tests would have caught the Stage 2 regression at any surface. No future surface ships without passing them.
 
+---
+
+### Post-v11.3.0 stabilization session — 2026-05-23 (Claude Code, autonomous)
+
+> Note: prompt header dated 2026-05-26; today's actual date is 2026-05-23. All artifacts dated 2026-05-23 (the day the work landed).
+
+**Accomplished**:
+- §2.0 Tech debt audit (data gathering across 7 categories: untracked files, stale branches, BLOCKED reports, multiple PROGRESS files, coverage gaps, CI health, bundle/disk health)
+- §2.1 Baseline verification: 1000 tests collected; fast subset (no viz/deploy, no-cov) passes cleanly (544 tests, 0 failed, ~29 INTEGRATION_TESTS skips); ruff 8 errors; mypy strict 134 errors in 33 files; bandit 17 Low / 0 Medium / 0 High; LFS fsck OK; v11.3.0 verdict.json parses (verdict=FAIL, n_pass=0/7); all invariants intact (pre-reg a90b02d + a8635ef + v50 SHA verified)
+- §2.2 [`TECH_DEBT.md`](TECH_DEBT.md) created — 0 P0, 4 P1, 10 P2 items. Commit `3d0dc0f`, tag `post-v11_3_0-tech-debt-2026-05-23`
+- §2.3 `pre-v11.4-baseline` tag on main HEAD (`3d0dc0f`)
+- §2.4 `spec/liquidity-composite-v2.0` branch scaffolded with `MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md.TEMPLATE`, `v11_4_amendment_candidates_FROM_v11_3_0.md`, and `README_v11_4_BRANCH.md`. Commit `362a527`. EMPTY scaffold; pre-reg NOT yet sealed.
+- §2.5 [`POST_V11_3_0_STABILIZATION_REPORT.md`](POST_V11_3_0_STABILIZATION_REPORT.md) written.
+
+**Test deltas**: 0 new tests (stabilization session).
+
+**Invariants**: all green except partial baseline tests (viz suite hangs — see TECH_DEBT.md §1 P1 item 4).
+
+**Stashes outstanding (owner reviews)**: 3 — see report §"Stashes created" for ordering.
+
+**Next**: Strategist arbitrates (a) merge-to-main of v11.3.0 spec branch (3 options per closeout report §8) and (b) v11.4 LC v2.0 pre-reg design — both via separate Claude Code prompts. Third candidate: a focused CI hotfix + viz-suite-slowdown investigation session (no Strategist dependency).
+
 
 
 
