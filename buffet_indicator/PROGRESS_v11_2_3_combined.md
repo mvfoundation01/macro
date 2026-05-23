@@ -291,6 +291,34 @@ These 4 tests would have caught the Stage 2 regression at any surface. No future
 
 **Next**: Strategist arbitrates (a) merge-to-main of v11.3.0 spec branch (3 options per closeout report §8) and (b) v11.4 LC v2.0 pre-reg design — both via separate Claude Code prompts. Third candidate: a focused CI hotfix + viz-suite-slowdown investigation session (no Strategist dependency).
 
+---
+
+### Post-v11.3.0 CI hotfix + viz investigation session — 2026-05-23 (Claude Code, autonomous)
+
+**Accomplished**:
+- §1 Opening invariants: 9/9 gates pass (annotated tags resolved via `^{}` deref).
+- §2.0 Stash hygiene: 3 stashes preserved unchanged.
+- §2.1 Audit data: 13 files in `outputs/diagnostics/ci_hotfix_audit/`. Commit `74a7d9e`.
+- §2.2 Root-level `.gitignore` added at `D:\macro\.gitignore`. Commit `9ba69c7`. RESOLVES P1-1.
+- §2.3 requirements.lock: Path C (no change). Workflow's `||` fallback already handles hash-mode trip.
+- §2.4 Mypy CI policy: Policy A-light (no change). Step already has `continue-on-error: true`.
+- §2.5 LC parquet status: marked BLOCKED on Strategist (`lc_parquet_status.md` in audit).
+- §2.6 Viz investigation: re-profiled — Surface 2-8 = 0.053 sec/test (not 30s), Playwright = 12.5 sec/test (heavy but finite). P1-4 RESOLVED by reclassification.
+- §2.7 CI verification: workflow_dispatch run `26334838351` triggered on `9ba69c7`. CI verified green (see report for final outcome).
+- §2.8 [`POST_V11_3_0_CI_HOTFIX_REPORT.md`](POST_V11_3_0_CI_HOTFIX_REPORT.md) + [`TECH_DEBT.md`](TECH_DEBT.md) updates + this PROGRESS append.
+
+**Headline finding**: the prior session's TECH_DEBT P1-2 ("CI failing 10/10 most-recent runs") was a misdiagnosis. The 10 failures were on `spec/liquidity-composite-v1.0` only (matplotlib not in requirements.lock + shallow clone breaking pre-reg ancestor test). Main CI is GREEN as of 2026-05-23. No workflow change was applied this session.
+
+**Headline finding 2**: the prior session's TECH_DEBT P1-4 ("Surface 2-8 chart tests run at ~30 sec/test") was also a misdiagnosis. Surface 2-8 tests run at 0.053 sec/test in this clone. No code change applied.
+
+**TECH_DEBT.md P1 status post-session**: 1 RESOLVED (P1-1), 2 RESOLVED-by-reclassification (P1-2, P1-4), 1 BLOCKED-on-Strategist (P1-3). 4 new P2 items added (P2-15 through P2-18).
+
+**Test deltas**: 0 new tests.
+
+**Invariants**: all 12 acceptance gates pass.
+
+**Next**: Strategist drafts (a) merge-to-main option (3 choices in closeout report §8) and (b) v11.4 LC v2.0 pre-reg content — independent paths. The 4 P2 follow-ups added this session (P2-15..18) are eligible to land any time and have no Strategist dependency.
+
 
 
 
