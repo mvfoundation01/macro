@@ -1,0 +1,23 @@
+src\cli.py:14: error: Library stubs not installed for "yaml"  [import-untyped]
+src\cli.py:42: error: Missing type arguments for generic type "dict"  [type-arg]
+src\cli.py:52: error: Missing type arguments for generic type "dict"  [type-arg]
+src\models\macro_orchestrator.py:171: error: Incompatible return value type (got "Series[Any]", expected "DataFrame")  [return-value]
+Found 134 errors in 33 files (checked 72 source files)
+
+--- Error count by code ---
+     23 [arg-type]
+     19 [import-untyped]
+     14 [union-attr]
+     14 [type-arg]
+     14 [no-any-return]
+     13 [attr-defined]
+      9 [operator]
+      8 [index]
+      8 [assignment]
+      4 [str]
+      4 [return-value]
+      4 [call-overload]
+      2 [valid-type]
+      1 [untyped-decorator]
+      1 [misc]
+      1 [bytes]

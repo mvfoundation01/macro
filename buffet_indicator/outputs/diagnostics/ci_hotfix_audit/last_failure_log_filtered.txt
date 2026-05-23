@@ -1,0 +1,28 @@
+test	UNKNOWN STEP	2026-05-22T18:31:42.3817654Z ^[[36;1mpip install pillow  # required by test_v11_0b_screenshots, test_v11_0c_recapture^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:46.5630848Z   Using cached pytest_cov-5.0.0-py3-none-any.whl.metadata (27 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.5915766Z   Using cached pytest_mock-3.14.0-py3-none-any.whl.metadata (3.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1773430Z Using cached pytest_cov-5.0.0-py3-none-any.whl (21 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1786199Z Using cached pytest_mock-3.14.0-py3-none-any.whl (9.9 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:46.3741150Z src/models/lc_v1_calibration.py:339: note: Error code "import-not-found" not covered by "type: ignore[import-untyped]" comment
+test	UNKNOWN STEP	2026-05-22T18:39:31.2986517Z __________________ test_TG9_render_reliability_diagram_smoke ___________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2987221Z tests/models/test_lc_v1_calibration.py:186: in test_TG9_render_reliability_diagram_smoke
+test	UNKNOWN STEP	2026-05-22T18:39:31.2989364Z E   ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.2989880Z _____________________ test_TG10_render_pit_histogram_smoke _____________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2990551Z tests/models/test_lc_v1_calibration.py:197: in test_TG10_render_pit_histogram_smoke
+test	UNKNOWN STEP	2026-05-22T18:39:31.2992218Z E   ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.2992968Z ________________ test_TD5_pre_reg_ancestor_passes_on_real_repo _________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2993591Z tests/models/test_lc_v1_composite.py:193: in test_TD5_pre_reg_ancestor_passes_on_real_repo
+test	UNKNOWN STEP	2026-05-22T18:39:31.2994919Z     raise RuntimeError(
+test	UNKNOWN STEP	2026-05-22T18:39:31.2998132Z E   RuntimeError: Pre-reg invariant VIOLATED: a8635ef is not an ancestor of HEAD. Spec §0.1 HARD REJECTION — refuse to write composite parquet.
+test	UNKNOWN STEP	2026-05-22T18:39:31.2999437Z tests/ingest/test_master_archive.py::test_M5_build_first_run
+test	UNKNOWN STEP	2026-05-22T18:39:31.2999931Z tests/ingest/test_master_archive.py::test_M6_second_run_idempotent
+test	UNKNOWN STEP	2026-05-22T18:39:31.3000430Z tests/ingest/test_master_archive.py::test_M7_tail_only_update
+test	UNKNOWN STEP	2026-05-22T18:39:31.3000914Z tests/ingest/test_master_archive.py::test_M9_load_master_basic
+test	UNKNOWN STEP	2026-05-22T18:39:31.3001393Z tests/ingest/test_master_archive.py::test_M10_load_master_window
+test	UNKNOWN STEP	2026-05-22T18:39:31.3004738Z tests/transform/test_huber_scale.py: 1 warning
+test	UNKNOWN STEP	2026-05-22T18:39:31.3005068Z tests/transform/test_v11_0_1_mrc_v2.py: 1 warning
+test	UNKNOWN STEP	2026-05-22T18:39:31.3005655Z tests/viz/test_build_dashboard.py: 24 warnings
+test	UNKNOWN STEP	2026-05-22T18:39:31.3009623Z FAILED tests/models/test_lc_v1_calibration.py::test_TG9_render_reliability_diagram_smoke - ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.3010564Z FAILED tests/models/test_lc_v1_calibration.py::test_TG10_render_pit_histogram_smoke - ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.3012006Z FAILED tests/models/test_lc_v1_composite.py::test_TD5_pre_reg_ancestor_passes_on_real_repo - RuntimeError: Pre-reg invariant VIOLATED: a8635ef is not an ancestor of HEAD. Spec §0.1 HARD REJECTION — refuse to write composite parquet.
+test	UNKNOWN STEP	2026-05-22T18:39:32.4993007Z Could not pull latest version information: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON

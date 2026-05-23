@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: D:\macro\buffet_indicator
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: cov-7.1.0, mock-3.15.1
+collected 5 items
+
+tests\viz\test_v11_2_3_surface_2_chart.py .....                          [100%]
+
+============================== 5 passed in 0.62s ==============================
+EXIT=0

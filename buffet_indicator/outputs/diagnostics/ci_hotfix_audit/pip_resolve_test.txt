@@ -1,0 +1,4 @@
+Collecting pandas==2.2.3 (from -r requirements.lock (line 1))
+  Downloading pandas-2.2.3.tar.gz (4.4 MB)
+     ---------------------------------------- 4.4/4.4 MB 49.2 MB/s  0:00:00
+PIP_EXIT=1

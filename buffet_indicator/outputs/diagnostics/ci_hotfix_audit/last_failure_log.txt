@@ -1,0 +1,1094 @@
+test	UNKNOWN STEP	﻿2026-05-22T18:31:33.8050535Z Current runner version: '2.334.0'
+test	UNKNOWN STEP	2026-05-22T18:31:33.8074320Z ##[group]Runner Image Provisioner
+test	UNKNOWN STEP	2026-05-22T18:31:33.8075100Z Hosted Compute Agent
+test	UNKNOWN STEP	2026-05-22T18:31:33.8076056Z Version: 20260213.493
+test	UNKNOWN STEP	2026-05-22T18:31:33.8076669Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+test	UNKNOWN STEP	2026-05-22T18:31:33.8077394Z Build Date: 2026-02-13T00:28:41Z
+test	UNKNOWN STEP	2026-05-22T18:31:33.8078068Z Worker ID: {0ce3e34c-2c57-4280-91f1-c922c68a44c9}
+test	UNKNOWN STEP	2026-05-22T18:31:33.8078743Z Azure Region: centralus
+test	UNKNOWN STEP	2026-05-22T18:31:33.8079328Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:33.8080965Z ##[group]Operating System
+test	UNKNOWN STEP	2026-05-22T18:31:33.8081628Z Ubuntu
+test	UNKNOWN STEP	2026-05-22T18:31:33.8082090Z 24.04.4
+test	UNKNOWN STEP	2026-05-22T18:31:33.8082576Z LTS
+test	UNKNOWN STEP	2026-05-22T18:31:33.8082973Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:33.8083520Z ##[group]Runner Image
+test	UNKNOWN STEP	2026-05-22T18:31:33.8084079Z Image: ubuntu-24.04
+test	UNKNOWN STEP	2026-05-22T18:31:33.8084596Z Version: 20260518.149.1
+test	UNKNOWN STEP	2026-05-22T18:31:33.8086182Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260518.149/images/ubuntu/Ubuntu2404-Readme.md
+test	UNKNOWN STEP	2026-05-22T18:31:33.8087807Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260518.149
+test	UNKNOWN STEP	2026-05-22T18:31:33.8088734Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:33.8089809Z ##[group]GITHUB_TOKEN Permissions
+test	UNKNOWN STEP	2026-05-22T18:31:33.8091934Z Contents: read
+test	UNKNOWN STEP	2026-05-22T18:31:33.8092514Z Metadata: read
+test	UNKNOWN STEP	2026-05-22T18:31:33.8092975Z Packages: write
+test	UNKNOWN STEP	2026-05-22T18:31:33.8093554Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:33.8096884Z Secret source: Actions
+test	UNKNOWN STEP	2026-05-22T18:31:33.8097591Z Prepare workflow directory
+test	UNKNOWN STEP	2026-05-22T18:31:33.8497596Z Prepare all required actions
+test	UNKNOWN STEP	2026-05-22T18:31:33.8536373Z Getting action download info
+test	UNKNOWN STEP	2026-05-22T18:31:34.2662670Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+test	UNKNOWN STEP	2026-05-22T18:31:34.4534224Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+test	UNKNOWN STEP	2026-05-22T18:31:34.5306669Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+test	UNKNOWN STEP	2026-05-22T18:31:35.0408752Z Complete job name: test
+test	UNKNOWN STEP	2026-05-22T18:31:35.1177539Z ##[group]Run actions/checkout@v4
+test	UNKNOWN STEP	2026-05-22T18:31:35.1178424Z with:
+test	UNKNOWN STEP	2026-05-22T18:31:35.1178830Z   lfs: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1179236Z   repository: mvfoundation01/macro
+test	UNKNOWN STEP	2026-05-22T18:31:35.1179928Z   token: ***
+test	UNKNOWN STEP	2026-05-22T18:31:35.1180345Z   ssh-strict: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1180778Z   ssh-user: git
+test	UNKNOWN STEP	2026-05-22T18:31:35.1181202Z   persist-credentials: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1181683Z   clean: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1182169Z   sparse-checkout-cone-mode: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1182676Z   fetch-depth: 1
+test	UNKNOWN STEP	2026-05-22T18:31:35.1183123Z   fetch-tags: false
+test	UNKNOWN STEP	2026-05-22T18:31:35.1183552Z   show-progress: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1183996Z   submodules: false
+test	UNKNOWN STEP	2026-05-22T18:31:35.1184430Z   set-safe-directory: true
+test	UNKNOWN STEP	2026-05-22T18:31:35.1185377Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:35.2311679Z Syncing repository: mvfoundation01/macro
+test	UNKNOWN STEP	2026-05-22T18:31:35.2314617Z ##[group]Getting Git version info
+test	UNKNOWN STEP	2026-05-22T18:31:35.2316164Z Working directory is '/home/runner/work/macro/macro'
+test	UNKNOWN STEP	2026-05-22T18:31:35.2318199Z [command]/usr/bin/git version
+test	UNKNOWN STEP	2026-05-22T18:31:35.2397495Z git version 2.54.0
+test	UNKNOWN STEP	2026-05-22T18:31:35.2447808Z [command]/usr/bin/git lfs version
+test	UNKNOWN STEP	2026-05-22T18:31:35.7622074Z git-lfs/3.7.1 (GitHub; linux amd64; go 1.24.4)
+test	UNKNOWN STEP	2026-05-22T18:31:35.7635621Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:35.7651660Z Temporarily overriding HOME='/home/runner/work/_temp/bb9e2e5b-808e-4ec4-8aea-feb62bf27155' before making global git config changes
+test	UNKNOWN STEP	2026-05-22T18:31:35.7654135Z Adding repository directory to the temporary git global config as a safe directory
+test	UNKNOWN STEP	2026-05-22T18:31:35.7657291Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/macro/macro
+test	UNKNOWN STEP	2026-05-22T18:31:35.7704629Z Deleting the contents of '/home/runner/work/macro/macro'
+test	UNKNOWN STEP	2026-05-22T18:31:35.7708403Z ##[group]Initializing the repository
+test	UNKNOWN STEP	2026-05-22T18:31:35.7712834Z [command]/usr/bin/git init /home/runner/work/macro/macro
+test	UNKNOWN STEP	2026-05-22T18:31:35.7876705Z hint: Using 'master' as the name for the initial branch. This default branch name
+test	UNKNOWN STEP	2026-05-22T18:31:35.7879212Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+test	UNKNOWN STEP	2026-05-22T18:31:35.7881158Z hint: to use in all of your new repositories, which will suppress this warning,
+test	UNKNOWN STEP	2026-05-22T18:31:35.7883577Z hint: call:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7884722Z hint:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7886775Z hint: 	git config --global init.defaultBranch <name>
+test	UNKNOWN STEP	2026-05-22T18:31:35.7889038Z hint:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7891144Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test	UNKNOWN STEP	2026-05-22T18:31:35.7894684Z hint: 'development'. The just-created branch can be renamed via this command:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7897877Z hint:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7899274Z hint: 	git branch -m <name>
+test	UNKNOWN STEP	2026-05-22T18:31:35.7900876Z hint:
+test	UNKNOWN STEP	2026-05-22T18:31:35.7903039Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test	UNKNOWN STEP	2026-05-22T18:31:35.7905808Z Initialized empty Git repository in /home/runner/work/macro/macro/.git/
+test	UNKNOWN STEP	2026-05-22T18:31:35.7911226Z [command]/usr/bin/git remote add origin https://github.com/mvfoundation01/macro
+test	UNKNOWN STEP	2026-05-22T18:31:35.7942647Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:35.7945581Z ##[group]Disabling automatic garbage collection
+test	UNKNOWN STEP	2026-05-22T18:31:35.7948033Z [command]/usr/bin/git config --local gc.auto 0
+test	UNKNOWN STEP	2026-05-22T18:31:35.7974641Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:35.7977391Z ##[group]Setting up auth
+test	UNKNOWN STEP	2026-05-22T18:31:35.7981759Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	UNKNOWN STEP	2026-05-22T18:31:35.8018467Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	UNKNOWN STEP	2026-05-22T18:31:35.8362477Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	UNKNOWN STEP	2026-05-22T18:31:35.8399423Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	UNKNOWN STEP	2026-05-22T18:31:35.8643263Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test	UNKNOWN STEP	2026-05-22T18:31:35.8678461Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test	UNKNOWN STEP	2026-05-22T18:31:35.8920284Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test	UNKNOWN STEP	2026-05-22T18:31:35.8954414Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:35.8958715Z [command]/usr/bin/git lfs install --local
+test	UNKNOWN STEP	2026-05-22T18:31:35.9335883Z Updated Git hooks.
+test	UNKNOWN STEP	2026-05-22T18:31:35.9337172Z Git LFS initialized.
+test	UNKNOWN STEP	2026-05-22T18:31:35.9349719Z ##[group]Fetching the repository
+test	UNKNOWN STEP	2026-05-22T18:31:35.9361508Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d56174c02ae2173b5cfdda08f44a0389e79b3140:refs/remotes/origin/spec/liquidity-composite-v1.0
+test	UNKNOWN STEP	2026-05-22T18:31:37.5655516Z From https://github.com/mvfoundation01/macro
+test	UNKNOWN STEP	2026-05-22T18:31:37.5657442Z  * [new ref]         d56174c02ae2173b5cfdda08f44a0389e79b3140 -> origin/spec/liquidity-composite-v1.0
+test	UNKNOWN STEP	2026-05-22T18:31:37.5695737Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:37.5696349Z ##[group]Determining the checkout info
+test	UNKNOWN STEP	2026-05-22T18:31:37.5698975Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:37.5699680Z ##[group]Fetching LFS objects
+test	UNKNOWN STEP	2026-05-22T18:31:37.5705528Z [command]/usr/bin/git lfs fetch origin refs/remotes/origin/spec/liquidity-composite-v1.0
+test	UNKNOWN STEP	2026-05-22T18:31:37.5919632Z Fetching reference refs/remotes/origin/spec/liquidity-composite-v1.0
+test	UNKNOWN STEP	2026-05-22T18:31:38.3069183Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:38.3074201Z [command]/usr/bin/git sparse-checkout disable
+test	UNKNOWN STEP	2026-05-22T18:31:38.3123551Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test	UNKNOWN STEP	2026-05-22T18:31:38.3151419Z ##[group]Checking out the ref
+test	UNKNOWN STEP	2026-05-22T18:31:38.3166165Z [command]/usr/bin/git checkout --progress --force -B spec/liquidity-composite-v1.0 refs/remotes/origin/spec/liquidity-composite-v1.0
+test	UNKNOWN STEP	2026-05-22T18:31:38.5937691Z Switched to a new branch 'spec/liquidity-composite-v1.0'
+test	UNKNOWN STEP	2026-05-22T18:31:38.5939968Z branch 'spec/liquidity-composite-v1.0' set up to track 'origin/spec/liquidity-composite-v1.0'.
+test	UNKNOWN STEP	2026-05-22T18:31:38.6205852Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:38.6258976Z [command]/usr/bin/git log -1 --format=%H
+test	UNKNOWN STEP	2026-05-22T18:31:38.6282451Z d56174c02ae2173b5cfdda08f44a0389e79b3140
+test	UNKNOWN STEP	2026-05-22T18:31:38.6501735Z ##[group]Run actions/setup-python@v5
+test	UNKNOWN STEP	2026-05-22T18:31:38.6502036Z with:
+test	UNKNOWN STEP	2026-05-22T18:31:38.6502228Z   python-version: 3.11
+test	UNKNOWN STEP	2026-05-22T18:31:38.6502437Z   cache: pip
+test	UNKNOWN STEP	2026-05-22T18:31:38.6502710Z   cache-dependency-path: buffet_indicator/requirements.lock
+test	UNKNOWN STEP	2026-05-22T18:31:38.6503045Z   check-latest: false
+test	UNKNOWN STEP	2026-05-22T18:31:38.6503382Z   token: ***
+test	UNKNOWN STEP	2026-05-22T18:31:38.6503586Z   update-environment: true
+test	UNKNOWN STEP	2026-05-22T18:31:38.6503822Z   allow-prereleases: false
+test	UNKNOWN STEP	2026-05-22T18:31:38.6504047Z   freethreaded: false
+test	UNKNOWN STEP	2026-05-22T18:31:38.6504243Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:38.8181527Z ##[group]Installed versions
+test	UNKNOWN STEP	2026-05-22T18:31:38.8290126Z Successfully set up CPython (3.11.15)
+test	UNKNOWN STEP	2026-05-22T18:31:38.8290952Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:38.8749380Z [command]/opt/hostedtoolcache/Python/3.11.15/x64/bin/pip cache dir
+test	UNKNOWN STEP	2026-05-22T18:31:40.4601424Z /home/runner/.cache/pip
+test	UNKNOWN STEP	2026-05-22T18:31:40.6355778Z Cache hit for: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.15-pip-6a765563e6f0d066875e6b8fb14c31ae4c3bfad120633d0e42eed7b0a45eee7d
+test	UNKNOWN STEP	2026-05-22T18:31:41.7892894Z Received 125829120 of 175390088 (71.7%), 120.0 MBs/sec
+test	UNKNOWN STEP	2026-05-22T18:31:42.0939400Z Received 175390088 of 175390088 (100.0%), 128.0 MBs/sec
+test	UNKNOWN STEP	2026-05-22T18:31:42.0941684Z Cache Size: ~167 MB (175390088 B)
+test	UNKNOWN STEP	2026-05-22T18:31:42.1060228Z [command]/usr/bin/tar -xf /home/runner/work/_temp/e4cf557f-2915-4e00-b4d5-581c61dcd3ed/cache.tzst -P -C /home/runner/work/macro/macro --use-compress-program unzstd
+test	UNKNOWN STEP	2026-05-22T18:31:42.3508375Z Cache restored successfully
+test	UNKNOWN STEP	2026-05-22T18:31:42.3592940Z Cache restored from key: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.15-pip-6a765563e6f0d066875e6b8fb14c31ae4c3bfad120633d0e42eed7b0a45eee7d
+test	UNKNOWN STEP	2026-05-22T18:31:42.3814886Z ##[group]Run python -m pip install --upgrade pip
+test	UNKNOWN STEP	2026-05-22T18:31:42.3815689Z ^[[36;1mpython -m pip install --upgrade pip^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3816233Z ^[[36;1mpip install -r requirements.lock --require-hashes || pip install -r requirements.lock^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3816784Z ^[[36;1mpip install ruff mypy bandit pytest pytest-cov^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3817174Z ^[[36;1mpip install pandas-stubs types-PyYAML types-requests^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3817654Z ^[[36;1mpip install pillow  # required by test_v11_0b_screenshots, test_v11_0c_recapture^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3818187Z ^[[36;1mpip install playwright  # v11.2.3 Session 4: real-browser SVG NaN tests^[[0m
+test	UNKNOWN STEP	2026-05-22T18:31:42.3859698Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:31:42.3859952Z env:
+test	UNKNOWN STEP	2026-05-22T18:31:42.3860217Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:31:42.3860676Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:31:42.3861158Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:31:42.3861530Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:31:42.3861918Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:31:42.3862303Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:31:42.3862608Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:31:43.6096394Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (26.1.1)
+test	UNKNOWN STEP	2026-05-22T18:31:44.8443060Z Collecting pandas==2.2.3 (from -r requirements.lock (line 1))
+test	UNKNOWN STEP	2026-05-22T18:31:44.8460219Z   Using cached pandas-2.2.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.1 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:44.8611999Z ERROR: Hashes are required in --require-hashes mode, but they are missing from some requirements. Here is a list of those requirements along with the hashes their downloaded archives actually had. Add lines like these to your requirements files to prevent tampering. (If you did not enable --require-hashes manually, note that it turns on automatically when any package has a hash.)
+test	UNKNOWN STEP	2026-05-22T18:31:44.8614886Z     pandas==2.2.3 --hash=sha256:c124333816c3a9b03fbeef3a9f230ba9a737e9e5bb4060aa2107a86cc0a497fc
+test	UNKNOWN STEP	2026-05-22T18:31:45.7908625Z Collecting pandas==2.2.3 (from -r requirements.lock (line 1))
+test	UNKNOWN STEP	2026-05-22T18:31:45.7925591Z   Using cached pandas-2.2.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (89 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:45.9963134Z Collecting numpy==1.26.4 (from -r requirements.lock (line 2))
+test	UNKNOWN STEP	2026-05-22T18:31:45.9979775Z   Using cached numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.0839964Z Collecting pyarrow==15.0.2 (from -r requirements.lock (line 3))
+test	UNKNOWN STEP	2026-05-22T18:31:46.0855576Z   Using cached pyarrow-15.0.2-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (3.0 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.2294768Z Collecting pydantic==2.7.4 (from -r requirements.lock (line 4))
+test	UNKNOWN STEP	2026-05-22T18:31:46.2310437Z   Using cached pydantic-2.7.4-py3-none-any.whl.metadata (109 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.2752037Z Collecting requests==2.32.3 (from -r requirements.lock (line 5))
+test	UNKNOWN STEP	2026-05-22T18:31:46.2765704Z   Using cached requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.2996891Z Collecting tenacity==8.3.0 (from -r requirements.lock (line 6))
+test	UNKNOWN STEP	2026-05-22T18:31:46.3010146Z   Using cached tenacity-8.3.0-py3-none-any.whl.metadata (1.2 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.3257762Z Collecting filelock==3.15.4 (from -r requirements.lock (line 7))
+test	UNKNOWN STEP	2026-05-22T18:31:46.3271375Z   Using cached filelock-3.15.4-py3-none-any.whl.metadata (2.9 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.3525570Z Collecting openpyxl==3.1.2 (from -r requirements.lock (line 8))
+test	UNKNOWN STEP	2026-05-22T18:31:46.3544578Z   Using cached openpyxl-3.1.2-py2.py3-none-any.whl.metadata (2.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.3746936Z Collecting xlrd==2.0.1 (from -r requirements.lock (line 9))
+test	UNKNOWN STEP	2026-05-22T18:31:46.3759781Z   Using cached xlrd-2.0.1-py2.py3-none-any.whl.metadata (3.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.4098638Z Collecting chardet==5.2.0 (from -r requirements.lock (line 10))
+test	UNKNOWN STEP	2026-05-22T18:31:46.4111338Z   Using cached chardet-5.2.0-py3-none-any.whl.metadata (3.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.4393821Z Collecting yfinance==0.2.40 (from -r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:46.4407274Z   Using cached yfinance-0.2.40-py2.py3-none-any.whl.metadata (11 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.4629075Z Collecting fredapi==0.5.2 (from -r requirements.lock (line 12))
+test	UNKNOWN STEP	2026-05-22T18:31:46.4642273Z   Using cached fredapi-0.5.2-py3-none-any.whl.metadata (5.0 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.5051730Z Collecting pyyaml==6.0.1 (from -r requirements.lock (line 13))
+test	UNKNOWN STEP	2026-05-22T18:31:46.5065731Z   Using cached PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.1 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.5375598Z Collecting pytest==8.2.2 (from -r requirements.lock (line 14))
+test	UNKNOWN STEP	2026-05-22T18:31:46.5390530Z   Using cached pytest-8.2.2-py3-none-any.whl.metadata (7.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.5617235Z Collecting pytest-cov==5.0.0 (from -r requirements.lock (line 15))
+test	UNKNOWN STEP	2026-05-22T18:31:46.5630848Z   Using cached pytest_cov-5.0.0-py3-none-any.whl.metadata (27 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.5902138Z Collecting pytest-mock==3.14.0 (from -r requirements.lock (line 16))
+test	UNKNOWN STEP	2026-05-22T18:31:46.5915766Z   Using cached pytest_mock-3.14.0-py3-none-any.whl.metadata (3.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.6171237Z Collecting responses==0.25.3 (from -r requirements.lock (line 17))
+test	UNKNOWN STEP	2026-05-22T18:31:46.6184814Z   Using cached responses-0.25.3-py3-none-any.whl.metadata (46 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.6450602Z Collecting freezegun==1.5.1 (from -r requirements.lock (line 18))
+test	UNKNOWN STEP	2026-05-22T18:31:46.6464155Z   Using cached freezegun-1.5.1-py3-none-any.whl.metadata (11 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.6960415Z Collecting statsmodels==0.14.2 (from -r requirements.lock (line 19))
+test	UNKNOWN STEP	2026-05-22T18:31:46.6974356Z   Using cached statsmodels-0.14.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.2 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.7501871Z Collecting arch==7.0.0 (from -r requirements.lock (line 20))
+test	UNKNOWN STEP	2026-05-22T18:31:46.7515925Z   Using cached arch-7.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (13 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.8644801Z Collecting scipy==1.13.1 (from -r requirements.lock (line 21))
+test	UNKNOWN STEP	2026-05-22T18:31:46.8660324Z   Using cached scipy-1.13.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.8987669Z Collecting Jinja2==3.1.4 (from -r requirements.lock (line 22))
+test	UNKNOWN STEP	2026-05-22T18:31:46.9001633Z   Using cached jinja2-3.1.4-py3-none-any.whl.metadata (2.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.9236420Z Collecting python-dateutil>=2.8.2 (from pandas==2.2.3->-r requirements.lock (line 1))
+test	UNKNOWN STEP	2026-05-22T18:31:46.9250567Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.9656828Z Collecting pytz>=2020.1 (from pandas==2.2.3->-r requirements.lock (line 1))
+test	UNKNOWN STEP	2026-05-22T18:31:46.9672027Z   Using cached pytz-2026.2-py2.py3-none-any.whl.metadata (22 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:46.9906273Z Collecting tzdata>=2022.7 (from pandas==2.2.3->-r requirements.lock (line 1))
+test	UNKNOWN STEP	2026-05-22T18:31:46.9920255Z   Using cached tzdata-2026.2-py2.py3-none-any.whl.metadata (1.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:47.0193995Z Collecting annotated-types>=0.4.0 (from pydantic==2.7.4->-r requirements.lock (line 4))
+test	UNKNOWN STEP	2026-05-22T18:31:47.0207890Z   Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:47.8068273Z Collecting pydantic-core==2.18.4 (from pydantic==2.7.4->-r requirements.lock (line 4))
+test	UNKNOWN STEP	2026-05-22T18:31:47.8083722Z   Using cached pydantic_core-2.18.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:47.8352848Z Collecting typing-extensions>=4.6.1 (from pydantic==2.7.4->-r requirements.lock (line 4))
+test	UNKNOWN STEP	2026-05-22T18:31:47.8367692Z   Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:47.9273468Z Collecting charset-normalizer<4,>=2 (from requests==2.32.3->-r requirements.lock (line 5))
+test	UNKNOWN STEP	2026-05-22T18:31:47.9289268Z   Using cached charset_normalizer-3.4.7-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:47.9547483Z Collecting idna<4,>=2.5 (from requests==2.32.3->-r requirements.lock (line 5))
+test	UNKNOWN STEP	2026-05-22T18:31:48.0573540Z   Downloading idna-3.16-py3-none-any.whl.metadata (6.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.0893889Z Collecting urllib3<3,>=1.21.1 (from requests==2.32.3->-r requirements.lock (line 5))
+test	UNKNOWN STEP	2026-05-22T18:31:48.0907465Z   Using cached urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.1176448Z Collecting certifi>=2017.4.17 (from requests==2.32.3->-r requirements.lock (line 5))
+test	UNKNOWN STEP	2026-05-22T18:31:48.1189591Z   Using cached certifi-2026.5.20-py3-none-any.whl.metadata (2.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.1393885Z Collecting et-xmlfile (from openpyxl==3.1.2->-r requirements.lock (line 8))
+test	UNKNOWN STEP	2026-05-22T18:31:48.1407103Z   Using cached et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.1637652Z Collecting multitasking>=0.0.7 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.1650807Z   Using cached multitasking-0.0.13-py3-none-any.whl.metadata (16 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.3686562Z Collecting lxml>=4.9.1 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.3702083Z   Using cached lxml-6.1.1-cp311-cp311-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (3.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.3964117Z Collecting platformdirs>=2.0.0 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.3977322Z   Using cached platformdirs-4.9.6-py3-none-any.whl.metadata (4.7 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.4442007Z Collecting frozendict>=2.3.4 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.4456413Z   Using cached frozendict-2.4.7-py3-none-any.whl.metadata (23 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.4722536Z Collecting peewee>=3.16.2 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.4735905Z   Using cached peewee-4.0.6-py3-none-any.whl.metadata (8.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.4979710Z Collecting beautifulsoup4>=4.11.1 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.4992681Z   Using cached beautifulsoup4-4.14.3-py3-none-any.whl.metadata (3.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.5201179Z Collecting html5lib>=1.1 (from yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:48.5213890Z   Using cached html5lib-1.1-py2.py3-none-any.whl.metadata (16 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.5438950Z Collecting iniconfig (from pytest==8.2.2->-r requirements.lock (line 14))
+test	UNKNOWN STEP	2026-05-22T18:31:48.5451718Z   Using cached iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.5698912Z Collecting packaging (from pytest==8.2.2->-r requirements.lock (line 14))
+test	UNKNOWN STEP	2026-05-22T18:31:48.5712226Z   Using cached packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.5924527Z Collecting pluggy<2.0,>=1.5 (from pytest==8.2.2->-r requirements.lock (line 14))
+test	UNKNOWN STEP	2026-05-22T18:31:48.5937785Z   Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.9521792Z Collecting coverage>=5.2.1 (from coverage[toml]>=5.2.1->pytest-cov==5.0.0->-r requirements.lock (line 15))
+test	UNKNOWN STEP	2026-05-22T18:31:48.9537425Z   Using cached coverage-7.14.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:48.9854860Z Collecting patsy>=0.5.6 (from statsmodels==0.14.2->-r requirements.lock (line 19))
+test	UNKNOWN STEP	2026-05-22T18:31:48.9868540Z   Using cached patsy-1.0.2-py2.py3-none-any.whl.metadata (3.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.0455661Z Collecting MarkupSafe>=2.0 (from Jinja2==3.1.4->-r requirements.lock (line 22))
+test	UNKNOWN STEP	2026-05-22T18:31:49.0469959Z   Using cached markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.0755263Z Collecting soupsieve>=1.6.1 (from beautifulsoup4>=4.11.1->yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:49.0768364Z   Using cached soupsieve-2.8.3-py3-none-any.whl.metadata (4.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1016067Z Collecting six>=1.9 (from html5lib>=1.1->yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:49.1028755Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1218969Z Collecting webencodings (from html5lib>=1.1->yfinance==0.2.40->-r requirements.lock (line 11))
+test	UNKNOWN STEP	2026-05-22T18:31:49.1231771Z   Using cached webencodings-0.5.1-py2.py3-none-any.whl.metadata (2.1 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1344807Z Using cached pandas-2.2.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.1 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1404897Z Using cached numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.3 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1479186Z Using cached pyarrow-15.0.2-cp311-cp311-manylinux_2_28_x86_64.whl (38.3 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1624551Z Using cached pydantic-2.7.4-py3-none-any.whl (409 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1639749Z Using cached requests-2.32.3-py3-none-any.whl (64 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1653014Z Using cached tenacity-8.3.0-py3-none-any.whl (25 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1665879Z Using cached filelock-3.15.4-py3-none-any.whl (16 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1678733Z Using cached openpyxl-3.1.2-py2.py3-none-any.whl (249 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1692010Z Using cached xlrd-2.0.1-py2.py3-none-any.whl (96 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1704909Z Using cached chardet-5.2.0-py3-none-any.whl (199 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1718554Z Using cached yfinance-0.2.40-py2.py3-none-any.whl (73 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1731729Z Using cached fredapi-0.5.2-py3-none-any.whl (11 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1744453Z Using cached PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (757 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1759771Z Using cached pytest-8.2.2-py3-none-any.whl (339 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1773430Z Using cached pytest_cov-5.0.0-py3-none-any.whl (21 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1786199Z Using cached pytest_mock-3.14.0-py3-none-any.whl (9.9 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1798953Z Using cached responses-0.25.3-py3-none-any.whl (55 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1811765Z Using cached freezegun-1.5.1-py3-none-any.whl (17 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1824669Z Using cached statsmodels-0.14.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.7 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1874068Z Using cached arch-7.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (983 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.1890281Z Using cached scipy-1.13.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (38.6 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2034596Z Using cached jinja2-3.1.4-py3-none-any.whl (133 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2051496Z Using cached pydantic_core-2.18.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2072006Z Using cached charset_normalizer-3.4.7-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (214 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2232493Z Downloading idna-3.16-py3-none-any.whl (74 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2522033Z Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2534688Z Using cached urllib3-2.7.0-py3-none-any.whl (131 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2548565Z Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2561392Z Using cached beautifulsoup4-4.14.3-py3-none-any.whl (107 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2574468Z Using cached certifi-2026.5.20-py3-none-any.whl (134 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2588829Z Using cached coverage-7.14.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (252 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2602131Z Using cached frozendict-2.4.7-py3-none-any.whl (16 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2614818Z Using cached html5lib-1.1-py2.py3-none-any.whl (112 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2628601Z Using cached lxml-6.1.1-cp311-cp311-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (5.2 MB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2660303Z Using cached markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2672971Z Using cached multitasking-0.0.13-py3-none-any.whl (16 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2685602Z Using cached packaging-26.2-py3-none-any.whl (100 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2698730Z Using cached patsy-1.0.2-py2.py3-none-any.whl (233 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2712293Z Using cached peewee-4.0.6-py3-none-any.whl (146 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2725215Z Using cached platformdirs-4.9.6-py3-none-any.whl (21 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2738709Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2752069Z Using cached pytz-2026.2-py2.py3-none-any.whl (510 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2766518Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2779173Z Using cached soupsieve-2.8.3-py3-none-any.whl (37 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2791907Z Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2804697Z Using cached tzdata-2026.2-py2.py3-none-any.whl (349 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2819068Z Using cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2831717Z Using cached iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.2844430Z Using cached webencodings-0.5.1-py2.py3-none-any.whl (11 kB)
+test	UNKNOWN STEP	2026-05-22T18:31:49.5607804Z Installing collected packages: webencodings, pytz, peewee, multitasking, xlrd, urllib3, tzdata, typing-extensions, tenacity, soupsieve, six, pyyaml, pluggy, platformdirs, packaging, numpy, MarkupSafe, lxml, iniconfig, idna, frozendict, filelock, et-xmlfile, coverage, charset-normalizer, chardet, certifi, annotated-types, scipy, requests, python-dateutil, pytest, pydantic-core, pyarrow, patsy, openpyxl, Jinja2, html5lib, beautifulsoup4, responses, pytest-mock, pytest-cov, pydantic, pandas, freezegun, yfinance, statsmodels, fredapi, arch
+test	UNKNOWN STEP	2026-05-22T18:32:04.6882157Z 
+test	UNKNOWN STEP	2026-05-22T18:32:04.6908889Z Successfully installed Jinja2-3.1.4 MarkupSafe-3.0.3 annotated-types-0.7.0 arch-7.0.0 beautifulsoup4-4.14.3 certifi-2026.5.20 chardet-5.2.0 charset-normalizer-3.4.7 coverage-7.14.0 et-xmlfile-2.0.0 filelock-3.15.4 fredapi-0.5.2 freezegun-1.5.1 frozendict-2.4.7 html5lib-1.1 idna-3.16 iniconfig-2.3.0 lxml-6.1.1 multitasking-0.0.13 numpy-1.26.4 openpyxl-3.1.2 packaging-26.2 pandas-2.2.3 patsy-1.0.2 peewee-4.0.6 platformdirs-4.9.6 pluggy-1.6.0 pyarrow-15.0.2 pydantic-2.7.4 pydantic-core-2.18.4 pytest-8.2.2 pytest-cov-5.0.0 pytest-mock-3.14.0 python-dateutil-2.9.0.post0 pytz-2026.2 pyyaml-6.0.1 requests-2.32.3 responses-0.25.3 scipy-1.13.1 six-1.17.0 soupsieve-2.8.3 statsmodels-0.14.2 tenacity-8.3.0 typing-extensions-4.15.0 tzdata-2026.2 urllib3-2.7.0 webencodings-0.5.1 xlrd-2.0.1 yfinance-0.2.40
+test	UNKNOWN STEP	2026-05-22T18:32:05.4988699Z Collecting ruff
+test	UNKNOWN STEP	2026-05-22T18:32:05.5006569Z   Using cached ruff-0.15.14-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (26 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6040205Z Collecting mypy
+test	UNKNOWN STEP	2026-05-22T18:32:05.6057020Z   Using cached mypy-2.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.3 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6317141Z Collecting bandit
+test	UNKNOWN STEP	2026-05-22T18:32:05.6330949Z   Using cached bandit-1.9.4-py3-none-any.whl.metadata (7.1 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6362628Z Requirement already satisfied: pytest in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (8.2.2)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6366536Z Requirement already satisfied: pytest-cov in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (5.0.0)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6376121Z Requirement already satisfied: typing_extensions>=4.6.0 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from mypy) (4.15.0)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6557911Z Collecting mypy_extensions>=1.0.0 (from mypy)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6572549Z   Using cached mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6785599Z Collecting pathspec>=1.0.0 (from mypy)
+test	UNKNOWN STEP	2026-05-22T18:32:05.6799860Z   Using cached pathspec-1.1.1-py3-none-any.whl.metadata (14 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.7935216Z Collecting librt>=0.11.0 (from mypy)
+test	UNKNOWN STEP	2026-05-22T18:32:05.7951750Z   Using cached librt-0.11.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8270388Z Collecting ast-serialize<1.0.0,>=0.3.0 (from mypy)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8284829Z   Using cached ast_serialize-0.5.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.3 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8304415Z Requirement already satisfied: PyYAML>=5.3.1 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from bandit) (6.0.1)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8566886Z Collecting stevedore>=1.20.0 (from bandit)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8581174Z   Using cached stevedore-5.8.0-py3-none-any.whl.metadata (2.3 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.8992816Z Collecting rich (from bandit)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9008159Z   Using cached rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9039781Z Requirement already satisfied: iniconfig in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from pytest) (2.3.0)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9043970Z Requirement already satisfied: packaging in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from pytest) (26.2)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9049723Z Requirement already satisfied: pluggy<2.0,>=1.5 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from pytest) (1.6.0)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9078672Z Requirement already satisfied: coverage>=5.2.1 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from coverage[toml]>=5.2.1->pytest-cov) (7.14.0)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9343087Z Collecting markdown-it-py>=2.2.0 (from rich->bandit)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9357283Z   Using cached markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9639775Z Collecting pygments<3.0.0,>=2.13.0 (from rich->bandit)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9654106Z   Using cached pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9854988Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich->bandit)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9868992Z   Using cached mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9902261Z Using cached ruff-0.15.14-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (11.5 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:05.9957767Z Using cached mypy-2.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (14.9 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0024149Z Using cached ast_serialize-0.5.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0042323Z Using cached bandit-1.9.4-py3-none-any.whl (134 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0056926Z Using cached librt-0.11.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (497 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0071961Z Using cached mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0085401Z Using cached pathspec-1.1.1-py3-none-any.whl (57 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0099202Z Using cached stevedore-5.8.0-py3-none-any.whl (54 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0112527Z Using cached rich-15.0.0-py3-none-any.whl (310 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0126938Z Using cached pygments-2.20.0-py3-none-any.whl (1.2 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0144278Z Using cached markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.0159894Z Using cached mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:06.1189768Z Installing collected packages: stevedore, ruff, pygments, pathspec, mypy_extensions, mdurl, librt, ast-serialize, mypy, markdown-it-py, rich, bandit
+test	UNKNOWN STEP	2026-05-22T18:32:08.6981154Z 
+test	UNKNOWN STEP	2026-05-22T18:32:08.7007264Z Successfully installed ast-serialize-0.5.0 bandit-1.9.4 librt-0.11.0 markdown-it-py-4.2.0 mdurl-0.1.2 mypy-2.1.0 mypy_extensions-1.1.0 pathspec-1.1.1 pygments-2.20.0 rich-15.0.0 ruff-0.15.14 stevedore-5.8.0
+test	UNKNOWN STEP	2026-05-22T18:32:09.1711481Z Collecting pandas-stubs
+test	UNKNOWN STEP	2026-05-22T18:32:09.1727333Z   Using cached pandas_stubs-3.0.0.260204-py3-none-any.whl.metadata (10 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.1987934Z Collecting types-PyYAML
+test	UNKNOWN STEP	2026-05-22T18:32:09.2002468Z   Using cached types_pyyaml-6.0.12.20260518-py3-none-any.whl.metadata (1.7 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2342056Z Collecting types-requests
+test	UNKNOWN STEP	2026-05-22T18:32:09.2356680Z   Using cached types_requests-2.33.0.20260518-py3-none-any.whl.metadata (2.2 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2372646Z Requirement already satisfied: numpy>=1.23.5 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from pandas-stubs) (1.26.4)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2381558Z Requirement already satisfied: urllib3>=2 in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from types-requests) (2.7.0)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2431148Z Using cached pandas_stubs-3.0.0.260204-py3-none-any.whl (168 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2445264Z Using cached types_pyyaml-6.0.12.20260518-py3-none-any.whl (20 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.2458360Z Using cached types_requests-2.33.0.20260518-py3-none-any.whl (21 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:09.3129641Z Installing collected packages: types-requests, types-PyYAML, pandas-stubs
+test	UNKNOWN STEP	2026-05-22T18:32:09.3569512Z 
+test	UNKNOWN STEP	2026-05-22T18:32:09.3593416Z Successfully installed pandas-stubs-3.0.0.260204 types-PyYAML-6.0.12.20260518 types-requests-2.33.0.20260518
+test	UNKNOWN STEP	2026-05-22T18:32:10.0030534Z Collecting pillow
+test	UNKNOWN STEP	2026-05-22T18:32:10.0047936Z   Using cached pillow-12.2.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (8.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:10.0099567Z Using cached pillow-12.2.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:10.0731483Z Installing collected packages: pillow
+test	UNKNOWN STEP	2026-05-22T18:32:10.3666311Z Successfully installed pillow-12.2.0
+test	UNKNOWN STEP	2026-05-22T18:32:10.8453955Z Collecting playwright
+test	UNKNOWN STEP	2026-05-22T18:32:10.9348207Z   Downloading playwright-1.60.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:10.9625467Z Collecting pyee<14,>=13 (from playwright)
+test	UNKNOWN STEP	2026-05-22T18:32:10.9788929Z   Downloading pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:11.1652238Z Collecting greenlet<4.0.0,>=3.1.1 (from playwright)
+test	UNKNOWN STEP	2026-05-22T18:32:11.1815054Z   Downloading greenlet-3.5.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:11.1870813Z Requirement already satisfied: typing-extensions in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (from pyee<14,>=13->playwright) (4.15.0)
+test	UNKNOWN STEP	2026-05-22T18:32:11.2047825Z Downloading playwright-1.60.0-py3-none-manylinux1_x86_64.whl (47.5 MB)
+test	UNKNOWN STEP	2026-05-22T18:32:11.5219037Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 47.5/47.5 MB 177.0 MB/s  0:00:00
+test	UNKNOWN STEP	2026-05-22T18:32:11.5384580Z Downloading greenlet-3.5.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (614 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:11.5437912Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 614.8/614.8 kB 109.5 MB/s  0:00:00
+test	UNKNOWN STEP	2026-05-22T18:32:11.5602555Z Downloading pyee-13.0.1-py3-none-any.whl (15 kB)
+test	UNKNOWN STEP	2026-05-22T18:32:11.6609002Z Installing collected packages: pyee, greenlet, playwright
+test	UNKNOWN STEP	2026-05-22T18:32:12.4601060Z 
+test	UNKNOWN STEP	2026-05-22T18:32:12.4627470Z Successfully installed greenlet-3.5.1 playwright-1.60.0 pyee-13.0.1
+test	UNKNOWN STEP	2026-05-22T18:32:12.5140392Z ##[group]Run python -m playwright install --with-deps chromium
+test	UNKNOWN STEP	2026-05-22T18:32:12.5140863Z ^[[36;1mpython -m playwright install --with-deps chromium^[[0m
+test	UNKNOWN STEP	2026-05-22T18:32:12.5174558Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:32:12.5174799Z env:
+test	UNKNOWN STEP	2026-05-22T18:32:12.5175060Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:12.5175801Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:32:12.5176250Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:12.5176633Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:12.5176998Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:12.5177366Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:32:12.5177682Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:32:12.8636701Z Installing dependencies...
+test	UNKNOWN STEP	2026-05-22T18:32:12.8701379Z Switching to root user to install dependencies...
+test	UNKNOWN STEP	2026-05-22T18:32:13.0061791Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.0447426Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+test	UNKNOWN STEP	2026-05-22T18:32:13.0448601Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+test	UNKNOWN STEP	2026-05-22T18:32:13.0453286Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.0625922Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.0711975Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.0769186Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.1340395Z Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [1825 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.2631874Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [126 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.2817400Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [155 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3166466Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [2007 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3277766Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [355 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3306685Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [177 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3328426Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1690 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3441324Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [328 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3452055Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [386 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3478942Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [3202 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3663258Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [740 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3669433Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [44.7 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.3689251Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [10.9 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4127365Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4198296Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5776 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4200423Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4225747Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1698 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4346508Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [267 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4368722Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [22.0 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4383189Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1188 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4449462Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [229 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4471510Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [74.1 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4488786Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2997 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4657104Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [697 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4696472Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [39.3 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:13.4708825Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [8564 B]
+test	UNKNOWN STEP	2026-05-22T18:32:13.5083622Z Get:34 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1219 B]
+test	UNKNOWN STEP	2026-05-22T18:32:20.6670550Z Fetched 16.8 MB in 2s (8685 kB/s)
+test	UNKNOWN STEP	2026-05-22T18:32:21.4306450Z Reading package lists...
+test	UNKNOWN STEP	2026-05-22T18:32:21.4548917Z Reading package lists...
+test	UNKNOWN STEP	2026-05-22T18:32:21.6201299Z Building dependency tree...
+test	UNKNOWN STEP	2026-05-22T18:32:21.6208863Z Reading state information...
+test	UNKNOWN STEP	2026-05-22T18:32:21.7678806Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.2).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7679660Z libasound2t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7680406Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7681219Z libatk-bridge2.0-0t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7681945Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7682627Z libatk1.0-0t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7683258Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7684061Z libatspi2.0-0t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7684823Z libcairo2 is already the newest version (1.18.0-3build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7685576Z libcairo2 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7686053Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.9).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7686507Z libcups2t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7686929Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7687345Z libdbus-1-3 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7687988Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7688401Z libdrm2 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7688737Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7689086Z libgbm1 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7689422Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.8).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7689800Z libglib2.0-0t64 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7690138Z libnspr4 is already the newest version (2:4.35-1.1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7690566Z libnspr4 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7690884Z libnss3 is already the newest version (2:3.98-1ubuntu0.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7691211Z libnss3 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7691548Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7691918Z libpango-1.0-0 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7692241Z libx11-6 is already the newest version (2:1.8.7-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7692569Z libx11-6 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7692874Z libxcb1 is already the newest version (1.15-1ubuntu2).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7693526Z libxcb1 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7693861Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7694229Z libxcomposite1 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7694580Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7694921Z libxdamage1 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7695514Z libxext6 is already the newest version (2:1.3.4-1build2).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7695849Z libxext6 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7696345Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7696692Z libxfixes3 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7697032Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7697383Z libxkbcommon0 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7697712Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7698046Z libxrandr2 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7698381Z xvfb is already the newest version (2:21.1.12-1ubuntu1.5).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7698829Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7699328Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7699686Z libfontconfig1 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7700042Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.1).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7700399Z libfreetype6 set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7700733Z fonts-liberation is already the newest version (1:2.1.5-3).
+test	UNKNOWN STEP	2026-05-22T18:32:21.7701077Z fonts-liberation set to manually installed.
+test	UNKNOWN STEP	2026-05-22T18:32:21.7701405Z The following additional packages will be installed:
+test	UNKNOWN STEP	2026-05-22T18:32:21.7701721Z   xfonts-encodings xfonts-utils
+test	UNKNOWN STEP	2026-05-22T18:32:21.7701974Z Recommended packages:
+test	UNKNOWN STEP	2026-05-22T18:32:21.7702206Z   fonts-ipafont-mincho fonts-tlwg-loma
+test	UNKNOWN STEP	2026-05-22T18:32:22.1969455Z The following NEW packages will be installed:
+test	UNKNOWN STEP	2026-05-22T18:32:22.1970346Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+test	UNKNOWN STEP	2026-05-22T18:32:22.1977651Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+test	UNKNOWN STEP	2026-05-22T18:32:22.1978296Z   xfonts-utils
+test	UNKNOWN STEP	2026-05-22T18:32:22.2155015Z 0 upgraded, 9 newly installed, 0 to remove and 16 not upgraded.
+test	UNKNOWN STEP	2026-05-22T18:32:22.2155876Z Need to get 21.1 MB of archives.
+test	UNKNOWN STEP	2026-05-22T18:32:22.2156492Z After this operation, 79.5 MB of additional disk space will be used.
+test	UNKNOWN STEP	2026-05-22T18:32:22.2157253Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test	UNKNOWN STEP	2026-05-22T18:32:22.2615822Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.3429399Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.5086008Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.5499406Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.6761971Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.8855689Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.9341809Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:22.9676567Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:23.0092140Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+test	UNKNOWN STEP	2026-05-22T18:32:23.2688545Z Fetched 21.1 MB in 1s (26.0 MB/s)
+test	UNKNOWN STEP	2026-05-22T18:32:23.3177999Z Selecting previously unselected package fonts-ipafont-gothic.
+test	UNKNOWN STEP	2026-05-22T18:32:23.9740912Z (Reading database ... 
+test	UNKNOWN STEP	2026-05-22T18:32:23.9741582Z (Reading database ... 5%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9741884Z (Reading database ... 10%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9742174Z (Reading database ... 15%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9742443Z (Reading database ... 20%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9742698Z (Reading database ... 25%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9742956Z (Reading database ... 30%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9743214Z (Reading database ... 35%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9743474Z (Reading database ... 40%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9743735Z (Reading database ... 45%
+test	UNKNOWN STEP	2026-05-22T18:32:23.9744003Z (Reading database ... 50%
+test	UNKNOWN STEP	2026-05-22T18:32:24.0166214Z (Reading database ... 55%
+test	UNKNOWN STEP	2026-05-22T18:32:24.3635978Z (Reading database ... 60%
+test	UNKNOWN STEP	2026-05-22T18:32:24.6227669Z (Reading database ... 65%
+test	UNKNOWN STEP	2026-05-22T18:32:24.8889063Z (Reading database ... 70%
+test	UNKNOWN STEP	2026-05-22T18:32:25.1204005Z (Reading database ... 75%
+test	UNKNOWN STEP	2026-05-22T18:32:25.6164739Z (Reading database ... 80%
+test	UNKNOWN STEP	2026-05-22T18:32:26.1912729Z (Reading database ... 85%
+test	UNKNOWN STEP	2026-05-22T18:32:26.8798209Z (Reading database ... 90%
+test	UNKNOWN STEP	2026-05-22T18:32:27.5367019Z (Reading database ... 95%
+test	UNKNOWN STEP	2026-05-22T18:32:27.5367499Z (Reading database ... 100%
+test	UNKNOWN STEP	2026-05-22T18:32:27.5368064Z (Reading database ... 202288 files and directories currently installed.)
+test	UNKNOWN STEP	2026-05-22T18:32:27.5409979Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.5506570Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.7805789Z Selecting previously unselected package fonts-freefont-ttf.
+test	UNKNOWN STEP	2026-05-22T18:32:27.7930335Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.7939153Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.8777737Z Selecting previously unselected package fonts-tlwg-loma-otf.
+test	UNKNOWN STEP	2026-05-22T18:32:27.8902412Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.8910504Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.9116909Z Selecting previously unselected package fonts-unifont.
+test	UNKNOWN STEP	2026-05-22T18:32:27.9243497Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:27.9252980Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.0289778Z Selecting previously unselected package fonts-wqy-zenhei.
+test	UNKNOWN STEP	2026-05-22T18:32:28.0416119Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.0559876Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.5237208Z Selecting previously unselected package xfonts-encodings.
+test	UNKNOWN STEP	2026-05-22T18:32:28.5360542Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.5369546Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.5698811Z Selecting previously unselected package xfonts-utils.
+test	UNKNOWN STEP	2026-05-22T18:32:28.5821457Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.5829348Z Unpacking xfonts-utils (1:7.7+6build3) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.6486166Z Selecting previously unselected package xfonts-cyrillic.
+test	UNKNOWN STEP	2026-05-22T18:32:28.6613217Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.6621492Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.6975547Z Selecting previously unselected package xfonts-scalable.
+test	UNKNOWN STEP	2026-05-22T18:32:28.7100464Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7110133Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7513677Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7631716Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7654530Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7676776Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7696912Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7762509Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+test	UNKNOWN STEP	2026-05-22T18:32:28.7777421Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7797822Z Setting up xfonts-utils (1:7.7+6build3) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.7855715Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.8206969Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.8570707Z Processing triggers for man-db (2.12.0-4build2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:28.8593449Z Not building database; man-db/auto-update is not 'true'.
+test	UNKNOWN STEP	2026-05-22T18:32:28.8608481Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+test	UNKNOWN STEP	2026-05-22T18:32:30.1678799Z 
+test	UNKNOWN STEP	2026-05-22T18:32:30.1679781Z Running kernel seems to be up-to-date.
+test	UNKNOWN STEP	2026-05-22T18:32:30.1680275Z 
+test	UNKNOWN STEP	2026-05-22T18:32:30.1680489Z No services need to be restarted.
+test	UNKNOWN STEP	2026-05-22T18:32:30.1680863Z 
+test	UNKNOWN STEP	2026-05-22T18:32:30.1681079Z No containers need to be restarted.
+test	UNKNOWN STEP	2026-05-22T18:32:30.1681453Z 
+test	UNKNOWN STEP	2026-05-22T18:32:30.1681714Z No user sessions are running outdated binaries.
+test	UNKNOWN STEP	2026-05-22T18:32:30.1682157Z 
+test	UNKNOWN STEP	2026-05-22T18:32:30.1682577Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+test	UNKNOWN STEP	2026-05-22T18:32:31.0499272Z Downloading Chrome for Testing 148.0.7778.96 (playwright chromium v1223) from https://cdn.playwright.dev/builds/cft/148.0.7778.96/linux64/chrome-linux64.zip
+test	UNKNOWN STEP	2026-05-22T18:32:32.1433438Z |                                                                                |   0% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.5628483Z |■■■■■■■■                                                                        |  10% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.6523639Z |■■■■■■■■■■■■■■■■                                                                |  20% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.7474217Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.8136922Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.9022929Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:32.9840545Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:33.0588205Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:33.1199522Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:33.2276342Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:33.3320451Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 175.4 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:36.3941443Z Chrome for Testing 148.0.7778.96 (playwright chromium v1223) downloaded to /home/runner/.cache/ms-playwright/chromium-1223
+test	UNKNOWN STEP	2026-05-22T18:32:36.3945524Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+test	UNKNOWN STEP	2026-05-22T18:32:37.4684752Z |                                                                                |   0% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.5194332Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.5534299Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.5684760Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.5826182Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.5992723Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6057124Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6155672Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6237340Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6288915Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6380747Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:37.6996090Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+test	UNKNOWN STEP	2026-05-22T18:32:37.6999620Z Downloading Chrome Headless Shell 148.0.7778.96 (playwright chromium-headless-shell v1223) from https://cdn.playwright.dev/builds/cft/148.0.7778.96/linux64/chrome-headless-shell-linux64.zip
+test	UNKNOWN STEP	2026-05-22T18:32:38.7793124Z |                                                                                |   0% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.1035021Z |■■■■■■■■                                                                        |  10% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.1646985Z |■■■■■■■■■■■■■■■■                                                                |  20% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.2231325Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.2888139Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.3309848Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.3705011Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.4283662Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.4655346Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.5031321Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:39.5533259Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 113.2 MiB
+test	UNKNOWN STEP	2026-05-22T18:32:41.8263930Z Chrome Headless Shell 148.0.7778.96 (playwright chromium-headless-shell v1223) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1223
+test	UNKNOWN STEP	2026-05-22T18:32:41.8522223Z ##[group]Run ruff check src/ tests/
+test	UNKNOWN STEP	2026-05-22T18:32:41.8522544Z ^[[36;1mruff check src/ tests/^[[0m
+test	UNKNOWN STEP	2026-05-22T18:32:41.8573403Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:32:41.8573710Z env:
+test	UNKNOWN STEP	2026-05-22T18:32:41.8573998Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.8574491Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:32:41.8574971Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.8575670Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.8576092Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.8576506Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:32:41.8576843Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:32:41.9001549Z All checks passed!
+test	UNKNOWN STEP	2026-05-22T18:32:41.9037954Z ##[group]Run mypy --strict src/
+test	UNKNOWN STEP	2026-05-22T18:32:41.9038299Z ^[[36;1mmypy --strict src/^[[0m
+test	UNKNOWN STEP	2026-05-22T18:32:41.9072060Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:32:41.9072325Z env:
+test	UNKNOWN STEP	2026-05-22T18:32:41.9072613Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.9073108Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:32:41.9073580Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.9073996Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.9074409Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:41.9074830Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:32:41.9075500Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3795646Z src/quant_engine/runner.py:56: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3797400Z src/quant_engine/runner.py:97: error: Incompatible types in assignment (expression has type "TextIOWrapper[_WrappedBuffer]", variable has type "Path")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3799032Z src/quant_engine/runner.py:98: error: No overload variant of "run" matches argument types "list[str]", "str", "dict[str, str]", "Path", "int", "int", "bool"  [call-overload]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3800128Z src/quant_engine/runner.py:98: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:45.3806484Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., universal_newlines: bool | None = ..., startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., *, capture_output: bool = ..., check: bool = ..., encoding: str | None = ..., errors: str | None = ..., input: str | None = ..., text: Literal[True], timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[str]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3814814Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., universal_newlines: bool | None = ..., startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., *, capture_output: bool = ..., check: bool = ..., encoding: str, errors: str | None = ..., input: str | None = ..., text: bool | None = ..., timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[str]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3823014Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., universal_newlines: bool | None = ..., startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., *, capture_output: bool = ..., check: bool = ..., encoding: str | None = ..., errors: str, input: str | None = ..., text: bool | None = ..., timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[str]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3830815Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., *, universal_newlines: Literal[True], startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., capture_output: bool = ..., check: bool = ..., encoding: str | None = ..., errors: str | None = ..., input: str | None = ..., text: bool | None = ..., timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[str]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3838655Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., universal_newlines: Literal[False] | None = ..., startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., *, capture_output: bool = ..., check: bool = ..., encoding: None = ..., errors: None = ..., input: Buffer | None = ..., text: Literal[False] | None = ..., timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[bytes]
+test	UNKNOWN STEP	2026-05-22T18:32:45.3846771Z src/quant_engine/runner.py:98: note:     def run(args: str | bytes | PathLike[str] | PathLike[bytes] | Sequence[str | bytes | PathLike[str] | PathLike[bytes]], bufsize: int = ..., executable: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., stdin: int | IO[Any] | None = ..., stdout: int | IO[Any] | None = ..., stderr: int | IO[Any] | None = ..., preexec_fn: Callable[[], object] | None = ..., close_fds: bool = ..., shell: bool = ..., cwd: str | bytes | PathLike[str] | PathLike[bytes] | None = ..., env: Mapping[bytes, str | bytes | PathLike[str] | PathLike[bytes]] | Mapping[str, str | bytes | PathLike[str] | PathLike[bytes]] | None = ..., universal_newlines: bool | None = ..., startupinfo: Any = ..., creationflags: int = ..., restore_signals: bool = ..., start_new_session: bool = ..., pass_fds: Collection[int] = ..., *, capture_output: bool = ..., check: bool = ..., encoding: str | None = ..., errors: str | None = ..., input: Buffer | str | None = ..., text: bool | None = ..., timeout: float | None = ..., user: str | int | None = ..., group: str | int | None = ..., extra_groups: Iterable[str | int] | None = ..., umask: int = ..., pipesize: int = ..., process_group: int | None = ...) -> CompletedProcess[Any]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3034286Z src/models/probability_engine.py:60: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3709644Z src/models/lc_v1_calibration.py:46: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3711030Z src/models/lc_v1_calibration.py:47: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3712293Z src/models/lc_v1_calibration.py:48: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3713552Z src/models/lc_v1_calibration.py:49: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3714846Z src/models/lc_v1_calibration.py:53: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3716426Z src/models/lc_v1_calibration.py:54: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3717745Z src/models/lc_v1_calibration.py:161: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3719042Z src/models/lc_v1_calibration.py:162: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3720356Z src/models/lc_v1_calibration.py:163: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3721693Z src/models/lc_v1_calibration.py:199: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3722985Z src/models/lc_v1_calibration.py:200: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3724277Z src/models/lc_v1_calibration.py:201: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3725846Z src/models/lc_v1_calibration.py:233: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3727177Z src/models/lc_v1_calibration.py:234: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3728475Z src/models/lc_v1_calibration.py:235: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3729797Z src/models/lc_v1_calibration.py:241: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3731499Z src/models/lc_v1_calibration.py:242: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3732917Z src/models/lc_v1_calibration.py:243: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3734434Z src/models/lc_v1_calibration.py:306: error: Cannot find implementation or library stub for module named "matplotlib"  [import-not-found]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3736494Z src/models/lc_v1_calibration.py:309: error: Cannot find implementation or library stub for module named "matplotlib.pyplot"  [import-not-found]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3737984Z src/models/lc_v1_calibration.py:339: error: Unused "type: ignore" comment  [unused-ignore]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3739464Z src/models/lc_v1_calibration.py:339: error: Cannot find implementation or library stub for module named "sklearn.isotonic"  [import-not-found]
+test	UNKNOWN STEP	2026-05-22T18:32:46.3741150Z src/models/lc_v1_calibration.py:339: note: Error code "import-not-found" not covered by "type: ignore[import-untyped]" comment
+test	UNKNOWN STEP	2026-05-22T18:32:47.5739911Z src/transform/huber_scale.py:17: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.5741652Z src/transform/huber_scale.py:38: error: Skipping analyzing "statsmodels.robust.scale": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:47.5743377Z src/transform/huber_scale.py:59: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6210063Z src/transform/align_monthly.py:25: error: Incompatible return value type (got "Series[Any] | DataFrame", expected "Series[Any]")  [return-value]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6211599Z src/transform/align_monthly.py:38: error: "Index[Any]" has no attribute "to_period"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6212807Z src/transform/align_monthly.py:72: error: "Index[Any]" has no attribute "to_period"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6213988Z src/transform/align_monthly.py:133: error: "Index[Any]" has no attribute "to_period"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6900666Z src/quant_engine/stats_v1_v2.py:17: error: Library stubs not installed for "scipy"  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6901979Z src/quant_engine/stats_v1_v2.py:74: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.6903311Z src/quant_engine/stats_v1_v2.py:157: error: Returning Any from function declared to return "list[bool]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:47.8024050Z src/models/oos_validation.py:8: error: Library stubs not installed for "scipy"  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:47.8025491Z src/models/oos_validation.py:8: note: Hint: "python3 -m pip install scipy-stubs"
+test	UNKNOWN STEP	2026-05-22T18:32:47.8026684Z src/models/oos_validation.py:8: note: (or run "mypy --install-types" to install all missing stub packages)
+test	UNKNOWN STEP	2026-05-22T18:32:47.8028392Z src/models/oos_validation.py:28: error: Skipping analyzing "statsmodels.api": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:47.8030500Z src/models/oos_validation.py:28: error: Skipping analyzing "statsmodels": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:47.8552181Z src/models/conditional_distribution.py:10: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.8553716Z src/models/conditional_distribution.py:103: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9125325Z src/models/bai_perron.py:23: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9126869Z src/models/bai_perron.py:66: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9128086Z src/models/bai_perron.py:67: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9129255Z src/models/bai_perron.py:105: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9130453Z src/models/bai_perron.py:132: error: Returning Any from function declared to return "float"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9132071Z src/models/bai_perron.py:136: error: Returning Any from function declared to return "float"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9133411Z src/models/bai_perron.py:146: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9134584Z src/models/bai_perron.py:147: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9520694Z src/backtest/metrics.py:38: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9521905Z src/backtest/metrics.py:88: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9523064Z src/backtest/metrics.py:95: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:47.9524229Z src/backtest/metrics.py:104: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:48.0056069Z src/backtest/engine.py:181: error: Returning Any from function declared to return "Series[Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:48.2403620Z src/models/trend.py:26: error: Skipping analyzing "statsmodels.api": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.2405889Z src/models/trend.py:26: error: Skipping analyzing "statsmodels": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.2407846Z src/models/trend.py:55: error: Skipping analyzing "statsmodels.tsa.filters.hp_filter": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.3487395Z src/models/predictive_regression.py:29: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:48.3488822Z src/models/predictive_regression.py:60: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:48.3490689Z src/models/predictive_regression.py:111: error: Skipping analyzing "statsmodels.api": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.3492870Z src/models/predictive_regression.py:111: error: Skipping analyzing "statsmodels": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.7836996Z src/ingest/yahoo_loader.py:52: error: Skipping analyzing "yfinance": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:48.7838667Z src/ingest/yahoo_loader.py:71: error: Returning Any from function declared to return "DataFrame"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:48.8442312Z src/ingest/shiller_loader.py:286: error: No overload variant of "read_excel" matches argument types "Path", "str | int", "str", "None", "type[object]"  [call-overload]
+test	UNKNOWN STEP	2026-05-22T18:32:48.8443799Z src/ingest/shiller_loader.py:286: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:48.8453658Z src/ingest/shiller_loader.py:286: note:     def [IntStrT: (int, str)] read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: list[IntStrT], *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[IntStrT, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.8474097Z src/ingest/shiller_loader.py:286: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: None, *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[str, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.8493771Z src/ingest/shiller_loader.py:286: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: list[int | str], *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[int | str, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.8513908Z src/ingest/shiller_loader.py:286: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: int | str = ..., *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> DataFrame
+test	UNKNOWN STEP	2026-05-22T18:32:48.9145010Z src/ingest/fred_loader.py:139: error: Untyped decorator makes function "_http_get_json" untyped  [untyped-decorator]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9146464Z src/ingest/fred_loader.py:153: error: Returning Any from function declared to return "dict[str, Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9147473Z src/ingest/fred_loader.py:208: error: "Index[Any]" has no attribute "to_period"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9148325Z src/ingest/fred_loader.py:336: error: "Index[Any]" has no attribute "normalize"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9862494Z src/ingest/csv_loader.py:72: error: Returning Any from function declared to return "DataFrame"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9864105Z src/ingest/csv_loader.py:72: error: No overload variant of "read_excel" matches argument types "Path", "str | int", "str"  [call-overload]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9865087Z src/ingest/csv_loader.py:72: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:48.9872649Z src/ingest/csv_loader.py:72: note:     def [IntStrT: (int, str)] read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: list[IntStrT], *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[IntStrT, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9885304Z src/ingest/csv_loader.py:72: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: None, *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[str, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9896651Z src/ingest/csv_loader.py:72: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: list[int | str], *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> dict[int | str, DataFrame]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9907854Z src/ingest/csv_loader.py:72: note:     def read_excel(io: str | PathLike[str] | ReadBuffer[bytes] | ExcelFile | Any | Any | Any | Any, sheet_name: int | str = ..., *, header: int | Sequence[int] | None = ..., names: MutableSequence[Any] | ndarray[tuple[int], dtype[Any]] | tuple[Any, ...] | range | None = ..., index_col: int | Sequence[int] | str | None = ..., usecols: str | SequenceNotStr[Hashable] | range | ExtensionArray | ndarray[Any, dtype[Any]] | Index[Any] | Series[Any] | Callable[[Any], bool] | None = ..., dtype: str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str] | Mapping[str, str | ExtensionDtype | str | dtype[generic] | type[complex] | type[bool] | type[object] | type[str]] | None = ..., engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] | None = ..., converters: Mapping[int | str, Callable[[Any], Any]] | None = ..., true_values: Iterable[Hashable] | None = ..., false_values: Iterable[Hashable] | None = ..., skiprows: int | Sequence[int] | Callable[[object], bool] | None = ..., nrows: int | None = ..., na_values: Sequence[str] | dict[str | int, Sequence[str]] | None = ..., keep_default_na: bool = ..., na_filter: bool = ..., verbose: bool = ..., parse_dates: bool | Sequence[int] | Sequence[Sequence[str] | Sequence[int]] | dict[str, Sequence[int] | list[str]] = ..., date_format: dict[Hashable, str] | str | None = ..., thousands: str | None = ..., decimal: str = ..., comment: str | None = ..., skipfooter: int = ..., storage_options: dict[str, Any] | None = ..., dtype_backend: Literal['pyarrow', 'numpy_nullable'] | Literal[_NoDefault.no_default] = ..., engine_kwargs: dict[str, Any] | None = ...) -> DataFrame
+test	UNKNOWN STEP	2026-05-22T18:32:48.9914141Z src/ingest/csv_loader.py:101: error: Incompatible types in assignment (expression has type "Series[Timestamp]", variable has type "DatetimeIndex")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9915396Z src/ingest/csv_loader.py:104: error: Incompatible types in assignment (expression has type "Series[Timestamp]", variable has type "DatetimeIndex")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9916270Z src/ingest/csv_loader.py:105: error: "Index[bool]" has no attribute "all"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9917155Z src/ingest/csv_loader.py:137: error: Incompatible types in assignment (expression has type "Series[Timestamp]", variable has type "DatetimeIndex")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9918026Z src/ingest/csv_loader.py:138: error: "Index[bool]" has no attribute "all"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:48.9918834Z src/ingest/csv_loader.py:200: error: Argument 1 to "_infer_frequency" has incompatible type "Index[Any]"; expected "DatetimeIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:49.1437683Z src/transform/forward_returns.py:170: error: Returning Any from function declared to return "Series[Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:49.2036982Z src/transform/ey_deficit_compute.py:95: error: Returning Any from function declared to return "Series[Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3731511Z src/quant_engine/mv_conditional.py:230: error: Returning Any from function declared to return "Series[Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3733023Z src/quant_engine/mv_conditional.py:237: error: Missing type arguments for generic type "Callable"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3871545Z src/backtest/data.py:83: error: Argument 1 to "_monthend_normalize" has incompatible type "Index[Any]"; expected "DatetimeIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3873388Z src/backtest/data.py:99: error: Argument 1 to "_monthend_normalize" has incompatible type "Index[Any]"; expected "DatetimeIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3874873Z src/backtest/data.py:102: error: "ndarray[Any, dtype[Any]]" has no attribute "diff"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:49.3876364Z src/backtest/data.py:111: error: "ndarray[Any, dtype[Any]]" has no attribute "diff"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9073431Z src/ingest/master_archive.py:59: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9074737Z src/ingest/master_archive.py:61: error: Returning Any from function declared to return "dict[str, dict[Any, Any]]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9076334Z src/ingest/master_archive.py:65: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9077813Z src/ingest/master_archive.py:69: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9079195Z src/ingest/master_archive.py:71: error: Returning Any from function declared to return "dict[str, dict[Any, Any]]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9080562Z src/ingest/master_archive.py:75: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9081751Z src/ingest/master_archive.py:107: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9082913Z src/ingest/master_archive.py:155: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9084108Z src/ingest/master_archive.py:272: error: Function "builtins.callable" is not valid as a type  [valid-type]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9085507Z src/ingest/master_archive.py:272: note: Perhaps you meant "typing.Callable" instead of "callable"?
+test	UNKNOWN STEP	2026-05-22T18:32:49.9086965Z src/ingest/master_archive.py:500: error: Function "builtins.callable" is not valid as a type  [valid-type]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9088250Z src/ingest/master_archive.py:500: note: Perhaps you meant "typing.Callable" instead of "callable"?
+test	UNKNOWN STEP	2026-05-22T18:32:49.9089755Z src/ingest/fred_alfred_loader.py:48: error: Module "src.ingest.master_archive" does not explicitly export attribute "MASTER_DIR"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9091553Z src/ingest/fred_alfred_loader.py:132: error: Skipping analyzing "fredapi": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:49.9093324Z src/ingest/fred_alfred_loader.py:132: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+test	UNKNOWN STEP	2026-05-22T18:32:49.9094685Z src/ingest/fred_alfred_loader.py:136: error: Unused "type: ignore" comment  [unused-ignore]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1244202Z src/viz/build_strategy_equity_curves.py:71: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1246009Z src/viz/build_strategy_equity_curves.py:127: error: Missing type arguments for generic type "list"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1247345Z src/viz/build_strategy_equity_curves.py:129: error: Missing type arguments for generic type "list"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1248990Z src/viz/build_strategy_equity_curves.py:140: error: Incompatible types in assignment (expression has type "dict[str, Any]", target has type "list[Any]")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1777026Z src/quant_engine/analytics_core.py:39: error: Incompatible return value type (got "Series[Any] | DataFrame", expected "Series[Any]")  [return-value]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1778736Z src/quant_engine/analytics_core.py:101: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1780116Z src/quant_engine/analytics_core.py:115: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.1781494Z src/quant_engine/analytics_core.py:119: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.3470969Z src/viz/chart_specs.py:183: error: Argument 1 to "get_indexer" of "Index" has incompatible type "list[Timestamp]"; expected "Index[Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.3472861Z src/viz/chart_specs.py:1166: error: Skipping analyzing "statsmodels.tsa.stattools": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:50.3474701Z src/viz/chart_specs.py:1866: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.3476183Z src/viz/chart_specs.py:1874: error: Library stubs not installed for "scipy"  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:50.3635635Z src/ingest/orchestrator.py:35: error: Returning Any from function declared to return "str"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:50.4172511Z src/ingest/lc_v1_loader.py:349: error: Untyped decorator makes function "_fetch_stooq_csv" untyped  [untyped-decorator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7387397Z src/quant_engine/extended_analytics.py:77: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7389948Z src/quant_engine/extended_analytics.py:101: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7391517Z src/quant_engine/extended_analytics.py:108: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7392792Z src/quant_engine/extended_analytics.py:120: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7394467Z src/quant_engine/extended_analytics.py:249: error: Incompatible types in assignment (expression has type "int | str", variable has type "Timestamp | None")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7396736Z src/quant_engine/extended_analytics.py:250: error: No overload variant of "__getitem__" of "_LocIndexerSeries" matches argument type "Hashable"  [call-overload]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7398242Z src/quant_engine/extended_analytics.py:250: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:50.7399861Z src/quant_engine/extended_analytics.py:250: note:     def __getitem__(self, str | bytes | date | datetime | timedelta | <12 more items>, /) -> Any
+test	UNKNOWN STEP	2026-05-22T18:32:50.7407034Z src/quant_engine/extended_analytics.py:250: note:     def __getitem__(self, Series[bool] | ndarray[tuple[Any, ...], dtype[Any]] | list[bool] | Index[Any] | Series[Any] | SequenceNotStr[float | str | Timestamp] | slice[Any, Any, Any] | tuple[IndexOpsMixin[Any, Any] | Series[bool] | ndarray[tuple[Any, ...], dtype[Any]] | list[bool] | str | bytes | date | datetime | timedelta | <7 more items> | complex | integer[Any] | floating[Any] | complexfloating[Any, Any] | Sequence[str | bytes | date | datetime | timedelta | <7 more items> | complex | integer[Any] | floating[Any] | complexfloating[Any, Any]] | slice[Any, Any, Any], ...] | Sequence[tuple[IndexOpsMixin[Any, Any] | Series[bool] | ndarray[tuple[Any, ...], dtype[Any]] | list[bool] | str | bytes | date | datetime | timedelta | <7 more items> | complex | integer[Any] | floating[Any] | complexfloating[Any, Any] | Sequence[str | bytes | date | datetime | timedelta | <7 more items> | complex | integer[Any] | floating[Any] | complexfloating[Any, Any]] | slice[Any, Any, Any], ...]] | Callable[..., Any], /) -> Series[Any]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7414558Z src/quant_engine/extended_analytics.py:252: error: Incompatible types in assignment (expression has type "Hashable", variable has type "Timestamp | None")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7416915Z src/quant_engine/extended_analytics.py:256: error: Incompatible types in assignment (expression has type "Hashable", variable has type "Timestamp | None")  [assignment]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7418819Z src/quant_engine/extended_analytics.py:260: error: No overload variant of "__sub__" of "Timestamp" matches argument type "None"  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7420238Z src/quant_engine/extended_analytics.py:260: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:50.7421437Z src/quant_engine/extended_analytics.py:260: note:     def __sub__(self, datetime | datetime64, /) -> Timedelta
+test	UNKNOWN STEP	2026-05-22T18:32:50.7422810Z src/quant_engine/extended_analytics.py:260: note:     def __sub__(self, timedelta | timedelta64 | Tick, /) -> Timestamp
+test	UNKNOWN STEP	2026-05-22T18:32:50.7424168Z src/quant_engine/extended_analytics.py:260: note:     def __sub__(self, TimedeltaIndex, /) -> DatetimeIndex
+test	UNKNOWN STEP	2026-05-22T18:32:50.7426090Z src/quant_engine/extended_analytics.py:260: note:     def [ShapeT: tuple[int, ...]] __sub__(self, ndarray[ShapeT, dtype[timedelta64]], /) -> ndarray[ShapeT, dtype[datetime64]]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7427862Z src/quant_engine/extended_analytics.py:260: error: Unsupported operand types for - ("None" and "Timestamp")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7429297Z src/quant_engine/extended_analytics.py:260: error: Unsupported left operand type for - ("None")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7430539Z src/quant_engine/extended_analytics.py:260: note: Both left and right operands are unions
+test	UNKNOWN STEP	2026-05-22T18:32:50.7432178Z src/quant_engine/extended_analytics.py:261: error: Unsupported operand types for - ("Hashable" and "Timestamp")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7433673Z src/quant_engine/extended_analytics.py:261: error: Unsupported left operand type for - ("Hashable")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7434970Z src/quant_engine/extended_analytics.py:261: note: Right operand is of type "Timestamp | None"
+test	UNKNOWN STEP	2026-05-22T18:32:50.7436711Z src/quant_engine/extended_analytics.py:279: error: No overload variant of "__sub__" of "Timestamp" matches argument type "None"  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7438067Z src/quant_engine/extended_analytics.py:279: note: Possible overload variants:
+test	UNKNOWN STEP	2026-05-22T18:32:50.7439212Z src/quant_engine/extended_analytics.py:279: note:     def __sub__(self, datetime | datetime64, /) -> Timedelta
+test	UNKNOWN STEP	2026-05-22T18:32:50.7440577Z src/quant_engine/extended_analytics.py:279: note:     def __sub__(self, timedelta | timedelta64 | Tick, /) -> Timestamp
+test	UNKNOWN STEP	2026-05-22T18:32:50.7442129Z src/quant_engine/extended_analytics.py:279: note:     def __sub__(self, TimedeltaIndex, /) -> DatetimeIndex
+test	UNKNOWN STEP	2026-05-22T18:32:50.7443849Z src/quant_engine/extended_analytics.py:279: note:     def [ShapeT: tuple[int, ...]] __sub__(self, ndarray[ShapeT, dtype[timedelta64]], /) -> ndarray[ShapeT, dtype[datetime64]]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7445909Z src/quant_engine/extended_analytics.py:279: error: Unsupported operand types for - ("None" and "Timestamp")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7447354Z src/quant_engine/extended_analytics.py:279: error: Unsupported left operand type for - ("None")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7448586Z src/quant_engine/extended_analytics.py:279: note: Both left and right operands are unions
+test	UNKNOWN STEP	2026-05-22T18:32:50.7450515Z src/quant_engine/extended_analytics.py:472: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7452662Z src/quant_engine/extended_analytics.py:478: error: Returning Any from function declared to return "float"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7454785Z src/quant_engine/extended_analytics.py:606: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7457710Z src/quant_engine/extended_analytics.py:607: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7460390Z src/quant_engine/extended_analytics.py:822: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7462391Z src/quant_engine/extended_analytics.py:897: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:50.7463726Z src/quant_engine/extended_analytics.py:1026: error: "Index[Any]" has no attribute "month"  [attr-defined]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8891615Z src/viz/data_extraction.py:31: error: Returning Any from function declared to return "dict[str, Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8893251Z src/viz/data_extraction.py:419: error: Skipping analyzing "statsmodels.api": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8895424Z src/viz/data_extraction.py:419: error: Skipping analyzing "statsmodels": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8897058Z src/viz/data_extraction.py:608: error: Invalid index type "Hashable" for "dict[str, Any]"; expected type "str"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8898402Z src/viz/data_extraction.py:611: error: Invalid index type "Hashable" for "dict[str, Any]"; expected type "str"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8899791Z src/viz/data_extraction.py:613: error: Invalid index type "Hashable" for "dict[str, Any]"; expected type "str"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:50.8901577Z src/viz/data_extraction.py:615: error: Invalid index type "Hashable" for "dict[str, Any]"; expected type "str"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2427362Z src/models/lc_v1_regression.py:196: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2428607Z src/models/lc_v1_regression.py:197: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2429829Z src/models/lc_v1_regression.py:245: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2431010Z src/models/lc_v1_regression.py:257: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2432245Z src/models/lc_v1_regression.py:258: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2433457Z src/models/lc_v1_regression.py:262: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2434945Z src/models/lc_v1_regression.py:552: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2436578Z src/models/lc_v1_regression.py:625: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2437854Z src/models/lc_v1_regression.py:626: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2552644Z src/models/bootstrap_ci.py:34: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2553914Z src/models/bootstrap_ci.py:75: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2555797Z src/models/bootstrap_ci.py:83: error: Argument 1 to "_stat" has incompatible type "ndarray[Any, Any] | DataFrame | Series[Any]"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2646405Z src/viz/build_strategy_engine.py:94: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.2648108Z src/viz/build_strategy_engine.py:123: error: Argument 2 to "render_sheet" has incompatible type "DataFrame | None"; expected "DataFrame"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3933582Z src/viz/build_macro_charts.py:241: error: Unsupported operand types for - ("ExtensionArray" and "float")  [operator]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3934902Z src/viz/build_macro_charts.py:241: note: Left operand is of type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"
+test	UNKNOWN STEP	2026-05-22T18:32:51.3936563Z src/viz/build_macro_charts.py:248: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3938253Z src/viz/build_macro_charts.py:259: error: Argument 1 to "_event_indicator" has incompatible type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3940199Z src/viz/build_macro_charts.py:278: error: Argument 1 to "_event_indicator" has incompatible type "Any | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3942052Z src/viz/build_macro_charts.py:355: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3943948Z src/viz/build_macro_charts.py:358: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3946119Z src/viz/build_macro_charts.py:359: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3947962Z src/viz/build_macro_charts.py:361: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3949871Z src/viz/build_macro_charts.py:483: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3951739Z src/viz/build_macro_charts.py:485: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3953906Z src/viz/build_macro_charts.py:486: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.3955987Z src/viz/build_macro_charts.py:488: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.4745660Z src/viz/build_macro_risk.py:117: error: Invalid index type "Hashable" for "dict[int, str]"; expected type "int"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:51.4747112Z src/viz/build_macro_risk.py:162: error: Invalid index type "Hashable" for "dict[int, str]"; expected type "int"  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5071596Z src/models/lc_v1_diagnostics.py:173: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5072925Z src/models/lc_v1_diagnostics.py:174: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5074156Z src/models/lc_v1_diagnostics.py:175: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5628049Z src/models/diagnostics.py:26: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5629743Z src/models/diagnostics.py:29: error: Skipping analyzing "statsmodels.tsa.stattools": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5631368Z src/models/diagnostics.py:40: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5632501Z src/models/diagnostics.py:54: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5633619Z src/models/diagnostics.py:69: error: Missing type arguments for generic type "ndarray"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5636039Z src/models/diagnostics.py:124: error: Argument 1 to "_safe_adf_pvalue" has incompatible type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5637827Z src/models/diagnostics.py:125: error: Argument 1 to "_safe_kpss_pvalue" has incompatible type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5639407Z src/models/diagnostics.py:126: error: Argument 1 to "_safe_pp_pvalue" has incompatible type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5640757Z src/models/diagnostics.py:127: error: Argument 1 to "_safe_za_pvalue" has incompatible type "ndarray[tuple[int], dtype[Any]] | ExtensionArray"; expected "ndarray[Any, Any]"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5641995Z src/models/diagnostics.py:177: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5643108Z src/models/diagnostics.py:178: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5644229Z src/models/diagnostics.py:264: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5645571Z src/models/diagnostics.py:265: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5646689Z src/models/diagnostics.py:311: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.5647779Z src/models/diagnostics.py:312: error: Item "ExtensionArray" of "ndarray[tuple[int], dtype[Any]] | ExtensionArray" has no attribute "mean"  [union-attr]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6170780Z src/viz/build_dashboard.py:161: error: Returning Any from function declared to return "dict[str, Any]"  [no-any-return]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6172175Z src/viz/build_dashboard.py:333: error: Value of type "Any | None" is not indexable  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6173067Z src/viz/build_dashboard.py:334: error: Value of type "Any | None" is not indexable  [index]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6174514Z src/viz/build_dashboard.py:996: error: List comprehension has incompatible type List[float | None]; expected List[float]  [misc]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6924845Z src/models/orchestrator_modeling.py:1200: error: Argument 1 to "Timestamp" has incompatible type "Hashable"; expected "integer[Any] | float | str | date | datetime | datetime64"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6927085Z src/models/orchestrator_modeling.py:1219: error: Argument 1 to "Timestamp" has incompatible type "Hashable"; expected "integer[Any] | float | str | date | datetime | datetime64"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6928954Z src/models/orchestrator_modeling.py:1234: error: Argument 1 to "Timestamp" has incompatible type "Hashable"; expected "integer[Any] | float | str | date | datetime | datetime64"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6930824Z src/models/orchestrator_modeling.py:1257: error: Argument 1 to "Timestamp" has incompatible type "Hashable"; expected "integer[Any] | float | str | date | datetime | datetime64"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6932837Z src/models/orchestrator_modeling.py:1289: error: Argument 1 to "Timestamp" has incompatible type "Hashable"; expected "integer[Any] | float | str | date | datetime | datetime64"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.6934476Z src/models/orchestrator_modeling.py:1299: error: Argument 1 to "float" has incompatible type "str | bytes | date | timedelta | datetime64 | <7 more items>"; expected "str | Buffer | SupportsFloat | SupportsIndex"  [arg-type]
+test	UNKNOWN STEP	2026-05-22T18:32:51.7013751Z src/cli.py:42: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.7014573Z src/cli.py:52: error: Missing type arguments for generic type "dict"  [type-arg]
+test	UNKNOWN STEP	2026-05-22T18:32:51.7414060Z src/models/macro_orchestrator.py:171: error: Incompatible return value type (got "Series[Any]", expected "DataFrame")  [return-value]
+test	UNKNOWN STEP	2026-05-22T18:32:51.7776171Z Found 200 errors in 41 files (checked 80 source files)
+test	UNKNOWN STEP	2026-05-22T18:32:51.7991059Z ##[error]Process completed with exit code 1.
+test	UNKNOWN STEP	2026-05-22T18:32:51.8036780Z ##[group]Run bandit -r src/ -ll --skip B101,B404,B603,B607
+test	UNKNOWN STEP	2026-05-22T18:32:51.8037242Z ^[[36;1mbandit -r src/ -ll --skip B101,B404,B603,B607^[[0m
+test	UNKNOWN STEP	2026-05-22T18:32:51.8069997Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:32:51.8070248Z env:
+test	UNKNOWN STEP	2026-05-22T18:32:51.8070532Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:51.8070996Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:32:51.8071456Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:51.8071868Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:51.8072276Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:51.8072696Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:32:51.8073044Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:32:52.0041610Z [main]	INFO	profile include tests: None
+test	UNKNOWN STEP	2026-05-22T18:32:52.0042232Z [main]	INFO	profile exclude tests: None
+test	UNKNOWN STEP	2026-05-22T18:32:52.0042839Z [main]	INFO	cli include tests: None
+test	UNKNOWN STEP	2026-05-22T18:32:52.0043378Z [main]	INFO	cli exclude tests: B101,B404,B603,B607
+test	UNKNOWN STEP	2026-05-22T18:32:52.0044455Z [main]	INFO	running on Python 3.11.15
+test	UNKNOWN STEP	2026-05-22T18:32:52.4496363Z [manager]	WARNING	Test in comment: sklearn is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4497521Z [manager]	WARNING	Test in comment: is is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4498584Z [manager]	WARNING	Test in comment: optional is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4499669Z [manager]	WARNING	Test in comment: skip is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4500731Z [manager]	WARNING	Test in comment: overlay is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4501778Z [manager]	WARNING	Test in comment: if is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.4502651Z [manager]	WARNING	Test in comment: unavailable is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5076637Z [manager]	WARNING	Test in comment: used is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5078260Z [manager]	WARNING	Test in comment: for is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5079333Z [manager]	WARNING	Test in comment: trusted is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5080388Z [manager]	WARNING	Test in comment: git is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5081403Z [manager]	WARNING	Test in comment: commands is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:52.5082150Z [manager]	WARNING	Test in comment: only is not a test name or id, ignoring
+test	UNKNOWN STEP	2026-05-22T18:32:53.7835812Z Working... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:01
+test	UNKNOWN STEP	2026-05-22T18:32:53.7838911Z Run started:2026-05-22 18:32:53.783745+00:00
+test	UNKNOWN STEP	2026-05-22T18:32:53.7839264Z 
+test	UNKNOWN STEP	2026-05-22T18:32:53.7839400Z Test results:
+test	UNKNOWN STEP	2026-05-22T18:32:53.7839730Z 	No issues identified.
+test	UNKNOWN STEP	2026-05-22T18:32:53.7839972Z 
+test	UNKNOWN STEP	2026-05-22T18:32:53.7840096Z Code scanned:
+test	UNKNOWN STEP	2026-05-22T18:32:53.7840434Z 	Total lines of code: 19615
+test	UNKNOWN STEP	2026-05-22T18:32:53.7840843Z 	Total lines skipped (#nosec): 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7841624Z 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 1
+test	UNKNOWN STEP	2026-05-22T18:32:53.7842254Z 
+test	UNKNOWN STEP	2026-05-22T18:32:53.7842379Z Run metrics:
+test	UNKNOWN STEP	2026-05-22T18:32:53.7842641Z 	Total issues (by severity):
+test	UNKNOWN STEP	2026-05-22T18:32:53.7842887Z 		Undefined: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7843090Z 		Low: 11
+test	UNKNOWN STEP	2026-05-22T18:32:53.7843274Z 		Medium: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7843458Z 		High: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7843675Z 	Total issues (by confidence):
+test	UNKNOWN STEP	2026-05-22T18:32:53.7843930Z 		Undefined: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7844122Z 		Low: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7844304Z 		Medium: 0
+test	UNKNOWN STEP	2026-05-22T18:32:53.7844489Z 		High: 11
+test	UNKNOWN STEP	2026-05-22T18:32:53.7844703Z Files skipped (0):
+test	UNKNOWN STEP	2026-05-22T18:32:53.8461625Z ##[group]Run pytest tests/ -q --tb=short --cov=src --cov-report=xml
+test	UNKNOWN STEP	2026-05-22T18:32:53.8462127Z ^[[36;1mpytest tests/ -q --tb=short --cov=src --cov-report=xml^[[0m
+test	UNKNOWN STEP	2026-05-22T18:32:53.8495647Z shell: /usr/bin/bash -e {0}
+test	UNKNOWN STEP	2026-05-22T18:32:53.8495901Z env:
+test	UNKNOWN STEP	2026-05-22T18:32:53.8496169Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:53.8496624Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:32:53.8497046Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:53.8497443Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:53.8497814Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:32:53.8498188Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:32:53.8498497Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:33:09.0329520Z ........s...........s.........................s......................... [  5%]
+test	UNKNOWN STEP	2026-05-22T18:33:23.1968363Z .....ss...................s............s........s.......s............... [ 11%]
+test	UNKNOWN STEP	2026-05-22T18:33:25.5056400Z ............................................FF.......................... [ 17%]
+test	UNKNOWN STEP	2026-05-22T18:33:33.5599278Z ...................F.................................................... [ 23%]
+test	UNKNOWN STEP	2026-05-22T18:33:35.3248679Z ..........................................................ssssssssss.... [ 28%]
+test	UNKNOWN STEP	2026-05-22T18:33:39.9407872Z sssssssssssss.ss..ss...s......................ssssssssss................ [ 34%]
+test	UNKNOWN STEP	2026-05-22T18:33:41.0332319Z ...........ss..........s...s.ssssssssssss....s..ssssss.sssssssssssssssss [ 40%]
+test	UNKNOWN STEP	2026-05-22T18:33:41.9820693Z ss.......................ssss.s..ssss................................... [ 46%]
+test	UNKNOWN STEP	2026-05-22T18:33:49.1440925Z .................................ssssssssssssssssssssss................. [ 52%]
+test	UNKNOWN STEP	2026-05-22T18:33:50.0606505Z ........................................................................ [ 57%]
+test	UNKNOWN STEP	2026-05-22T18:36:05.4087208Z ...sssssssssssss.ssssssssssssssssssss.sss............................... [ 63%]
+test	UNKNOWN STEP	2026-05-22T18:36:06.1708548Z .........................s.............................................. [ 69%]
+test	UNKNOWN STEP	2026-05-22T18:36:06.7271421Z ............................................................ssssssssssss [ 75%]
+test	UNKNOWN STEP	2026-05-22T18:36:11.8499258Z ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 81%]
+test	UNKNOWN STEP	2026-05-22T18:36:17.4728840Z sssssssssssssssssssssss................................................. [ 86%]
+test	UNKNOWN STEP	2026-05-22T18:36:20.4528373Z ................................................s...ss...ss...ss...ss... [ 92%]
+test	UNKNOWN STEP	2026-05-22T18:37:13.7227172Z sss...s...ss............................................................ [ 98%]
+test	UNKNOWN STEP	2026-05-22T18:39:31.2984951Z ....................                                                     [100%]
+test	UNKNOWN STEP	2026-05-22T18:39:31.2985966Z =================================== FAILURES ===================================
+test	UNKNOWN STEP	2026-05-22T18:39:31.2986517Z __________________ test_TG9_render_reliability_diagram_smoke ___________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2987221Z tests/models/test_lc_v1_calibration.py:186: in test_TG9_render_reliability_diagram_smoke
+test	UNKNOWN STEP	2026-05-22T18:39:31.2987955Z     fig = cal.render_reliability_diagram(d, title="test", isotonic_overlay=False)
+test	UNKNOWN STEP	2026-05-22T18:39:31.2988567Z src/models/lc_v1_calibration.py:306: in render_reliability_diagram
+test	UNKNOWN STEP	2026-05-22T18:39:31.2989020Z     import matplotlib
+test	UNKNOWN STEP	2026-05-22T18:39:31.2989364Z E   ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.2989880Z _____________________ test_TG10_render_pit_histogram_smoke _____________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2990551Z tests/models/test_lc_v1_calibration.py:197: in test_TG10_render_pit_histogram_smoke
+test	UNKNOWN STEP	2026-05-22T18:39:31.2991123Z     fig = cal.render_pit_histogram(result, title="test")
+test	UNKNOWN STEP	2026-05-22T18:39:31.2991555Z src/models/lc_v1_calibration.py:363: in render_pit_histogram
+test	UNKNOWN STEP	2026-05-22T18:39:31.2991923Z     import matplotlib
+test	UNKNOWN STEP	2026-05-22T18:39:31.2992218Z E   ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.2992968Z ________________ test_TD5_pre_reg_ancestor_passes_on_real_repo _________________
+test	UNKNOWN STEP	2026-05-22T18:39:31.2993591Z tests/models/test_lc_v1_composite.py:193: in test_TD5_pre_reg_ancestor_passes_on_real_repo
+test	UNKNOWN STEP	2026-05-22T18:39:31.2994120Z     sha = composite._verify_pre_reg_ancestor()
+test	UNKNOWN STEP	2026-05-22T18:39:31.2994528Z src/models/lc_v1_composite.py:117: in _verify_pre_reg_ancestor
+test	UNKNOWN STEP	2026-05-22T18:39:31.2994919Z     raise RuntimeError(
+test	UNKNOWN STEP	2026-05-22T18:39:31.2998132Z E   RuntimeError: Pre-reg invariant VIOLATED: a8635ef is not an ancestor of HEAD. Spec §0.1 HARD REJECTION — refuse to write composite parquet.
+test	UNKNOWN STEP	2026-05-22T18:39:31.2998946Z =============================== warnings summary ===============================
+test	UNKNOWN STEP	2026-05-22T18:39:31.2999437Z tests/ingest/test_master_archive.py::test_M5_build_first_run
+test	UNKNOWN STEP	2026-05-22T18:39:31.2999931Z tests/ingest/test_master_archive.py::test_M6_second_run_idempotent
+test	UNKNOWN STEP	2026-05-22T18:39:31.3000430Z tests/ingest/test_master_archive.py::test_M7_tail_only_update
+test	UNKNOWN STEP	2026-05-22T18:39:31.3000914Z tests/ingest/test_master_archive.py::test_M9_load_master_basic
+test	UNKNOWN STEP	2026-05-22T18:39:31.3001393Z tests/ingest/test_master_archive.py::test_M10_load_master_window
+test	UNKNOWN STEP	2026-05-22T18:39:31.3002918Z   /home/runner/work/macro/macro/buffet_indicator/src/ingest/master_archive.py:237: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+test	UNKNOWN STEP	2026-05-22T18:39:31.3004383Z     merged = pd.concat(merged_rows).sort_index()
+test	UNKNOWN STEP	2026-05-22T18:39:31.3004611Z 
+test	UNKNOWN STEP	2026-05-22T18:39:31.3004738Z tests/transform/test_huber_scale.py: 1 warning
+test	UNKNOWN STEP	2026-05-22T18:39:31.3005068Z tests/transform/test_v11_0_1_mrc_v2.py: 1 warning
+test	UNKNOWN STEP	2026-05-22T18:39:31.3005655Z tests/viz/test_build_dashboard.py: 24 warnings
+test	UNKNOWN STEP	2026-05-22T18:39:31.3006346Z   /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/statsmodels/robust/scale.py:297: RuntimeWarning: invalid value encountered in sqrt
+test	UNKNOWN STEP	2026-05-22T18:39:31.3007024Z     nscale = np.sqrt(scale_num / scale_denom)
+test	UNKNOWN STEP	2026-05-22T18:39:31.3007219Z 
+test	UNKNOWN STEP	2026-05-22T18:39:31.3007443Z -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+test	UNKNOWN STEP	2026-05-22T18:39:31.3007775Z 
+test	UNKNOWN STEP	2026-05-22T18:39:31.3007965Z ---------- coverage: platform linux, python 3.11.15-final-0 ----------
+test	UNKNOWN STEP	2026-05-22T18:39:31.3008587Z Coverage XML written to file coverage.xml
+test	UNKNOWN STEP	2026-05-22T18:39:31.3008785Z 
+test	UNKNOWN STEP	2026-05-22T18:39:31.3008935Z =========================== short test summary info ============================
+test	UNKNOWN STEP	2026-05-22T18:39:31.3009623Z FAILED tests/models/test_lc_v1_calibration.py::test_TG9_render_reliability_diagram_smoke - ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.3010564Z FAILED tests/models/test_lc_v1_calibration.py::test_TG10_render_pit_histogram_smoke - ModuleNotFoundError: No module named 'matplotlib'
+test	UNKNOWN STEP	2026-05-22T18:39:31.3012006Z FAILED tests/models/test_lc_v1_composite.py::test_TD5_pre_reg_ancestor_passes_on_real_repo - RuntimeError: Pre-reg invariant VIOLATED: a8635ef is not an ancestor of HEAD. Spec §0.1 HARD REJECTION — refuse to write composite parquet.
+test	UNKNOWN STEP	2026-05-22T18:39:31.7021331Z ##[error]Process completed with exit code 1.
+test	UNKNOWN STEP	2026-05-22T18:39:31.7118597Z ##[group]Run codecov/codecov-action@v4
+test	UNKNOWN STEP	2026-05-22T18:39:31.7118882Z with:
+test	UNKNOWN STEP	2026-05-22T18:39:31.7119087Z   fail_ci_if_error: false
+test	UNKNOWN STEP	2026-05-22T18:39:31.7119301Z env:
+test	UNKNOWN STEP	2026-05-22T18:39:31.7119541Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:39:31.7119987Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+test	UNKNOWN STEP	2026-05-22T18:39:31.7120409Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:39:31.7120785Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:39:31.7121154Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+test	UNKNOWN STEP	2026-05-22T18:39:31.7121524Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+test	UNKNOWN STEP	2026-05-22T18:39:31.7121833Z ##[endgroup]
+test	UNKNOWN STEP	2026-05-22T18:39:31.7980232Z eventName: workflow_dispatch
+test	UNKNOWN STEP	2026-05-22T18:39:31.7989211Z ==> linux OS detected
+test	UNKNOWN STEP	2026-05-22T18:39:32.1418943Z https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+test	UNKNOWN STEP	2026-05-22T18:39:32.3198081Z gpg: directory '/home/runner/.gnupg' created
+test	UNKNOWN STEP	2026-05-22T18:39:32.3200413Z gpg: keybox '/home/runner/.gnupg/pubring.kbx' created
+test	UNKNOWN STEP	2026-05-22T18:39:32.3498283Z gpg: /home/runner/.gnupg/trustdb.gpg: trustdb created
+test	UNKNOWN STEP	2026-05-22T18:39:32.3499180Z gpg: key 806BB28AED779869: public key "Codecov Uploader (Codecov Uploader Verification Key) <security@codecov.io>" imported
+test	UNKNOWN STEP	2026-05-22T18:39:32.3854565Z gpg: Total number processed: 1
+test	UNKNOWN STEP	2026-05-22T18:39:32.3855026Z gpg:               imported: 1
+test	UNKNOWN STEP	2026-05-22T18:39:32.3909060Z gpg: Signature made Tue Apr 21 19:28:03 2026 UTC
+test	UNKNOWN STEP	2026-05-22T18:39:32.3909749Z gpg:                using RSA key 27034E7FDB850E0BBC2C62FF806BB28AED779869
+test	UNKNOWN STEP	2026-05-22T18:39:32.3912569Z gpg: Good signature from "Codecov Uploader (Codecov Uploader Verification Key) <security@codecov.io>" [unknown]
+test	UNKNOWN STEP	2026-05-22T18:39:32.3913641Z gpg: WARNING: This key is not certified with a trusted signature!
+test	UNKNOWN STEP	2026-05-22T18:39:32.3914402Z gpg:          There is no indication that the signature belongs to the owner.
+test	UNKNOWN STEP	2026-05-22T18:39:32.3915503Z Primary key fingerprint: 2703 4E7F DB85 0E0B BC2C  62FF 806B B28A ED77 9869
+test	UNKNOWN STEP	2026-05-22T18:39:32.4149725Z ==> Uploader SHASUM verified (8930c4bb30254a42f3d8c340706b1be340885e20c0df5160a24efa2e030e662b  codecov)
+test	UNKNOWN STEP	2026-05-22T18:39:32.4150776Z ==> Running version latest
+test	UNKNOWN STEP	2026-05-22T18:39:32.4993007Z Could not pull latest version information: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+test	UNKNOWN STEP	2026-05-22T18:39:32.4994670Z ==> Running git config --global --add safe.directory /home/runner/work/macro/macro
+test	UNKNOWN STEP	2026-05-22T18:39:32.5098398Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/macro/macro
+test	UNKNOWN STEP	2026-05-22T18:39:32.5148630Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-commit'
+test	UNKNOWN STEP	2026-05-22T18:39:32.5151403Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-commit --git-service github
+test	UNKNOWN STEP	2026-05-22T18:39:32.8652358Z info - 2026-05-22 18:39:32,864 -- ci service found: github-actions
+test	UNKNOWN STEP	2026-05-22T18:39:32.8740721Z warning - 2026-05-22 18:39:32,873 -- No config file could be found. Ignoring config.
+test	UNKNOWN STEP	2026-05-22T18:39:32.9034148Z warning - 2026-05-22 18:39:32,903 -- Branch `spec/liquidity-composite-v1.0` is protected but no token was provided
+test	UNKNOWN STEP	2026-05-22T18:39:32.9035743Z warning - 2026-05-22 18:39:32,903 -- For information on Codecov upload tokens, see https://docs.codecov.com/docs/codecov-tokens
+test	UNKNOWN STEP	2026-05-22T18:39:33.1444384Z info - 2026-05-22 18:39:33,144 -- Commit creating complete
+test	UNKNOWN STEP	2026-05-22T18:39:33.1445615Z error - 2026-05-22 18:39:33,144 -- Commit creating failed: {"message":"Token required - not valid tokenless upload"}
+test	UNKNOWN STEP	2026-05-22T18:39:33.2494888Z Sentry is attempting to send 1 pending events
+test	UNKNOWN STEP	2026-05-22T18:39:33.2495632Z Waiting up to 2 seconds
+test	UNKNOWN STEP	2026-05-22T18:39:33.2495929Z Press Ctrl-C to quit
+test	UNKNOWN STEP	2026-05-22T18:39:33.3038010Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-report'
+test	UNKNOWN STEP	2026-05-22T18:39:33.3040689Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-report --git-service github
+test	UNKNOWN STEP	2026-05-22T18:39:33.6536428Z info - 2026-05-22 18:39:33,653 -- ci service found: github-actions
+test	UNKNOWN STEP	2026-05-22T18:39:33.6626910Z warning - 2026-05-22 18:39:33,662 -- No config file could be found. Ignoring config.
+test	UNKNOWN STEP	2026-05-22T18:39:33.9751396Z info - 2026-05-22 18:39:33,974 -- Report creating complete
+test	UNKNOWN STEP	2026-05-22T18:39:33.9756428Z error - 2026-05-22 18:39:33,975 -- Report creating failed: {"message":"Token required - not valid tokenless upload"}
+test	UNKNOWN STEP	2026-05-22T18:39:34.0959250Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov do-upload'
+test	UNKNOWN STEP	2026-05-22T18:39:34.0960790Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov do-upload --git-service github
+test	UNKNOWN STEP	2026-05-22T18:39:34.4457188Z info - 2026-05-22 18:39:34,445 -- ci service found: github-actions
+test	UNKNOWN STEP	2026-05-22T18:39:34.4544788Z warning - 2026-05-22 18:39:34,454 -- No config file could be found. Ignoring config.
+test	UNKNOWN STEP	2026-05-22T18:39:34.4854908Z warning - 2026-05-22 18:39:34,485 -- xcrun is not installed or can't be found.
+test	UNKNOWN STEP	2026-05-22T18:39:34.4981240Z warning - 2026-05-22 18:39:34,497 -- No gcov data found.
+test	UNKNOWN STEP	2026-05-22T18:39:34.5000809Z info - 2026-05-22 18:39:34,499 -- Generating coverage.xml report in /home/runner/work/macro/macro/buffet_indicator
+test	UNKNOWN STEP	2026-05-22T18:39:35.6501197Z info - 2026-05-22 18:39:35,649 -- Wrote XML report to coverage.xml
+test	UNKNOWN STEP	2026-05-22T18:39:35.6764403Z info - 2026-05-22 18:39:35,676 -- Found 1 coverage files to report
+test	UNKNOWN STEP	2026-05-22T18:39:35.6767275Z info - 2026-05-22 18:39:35,676 -- > /home/runner/work/macro/macro/buffet_indicator/coverage.xml
+test	UNKNOWN STEP	2026-05-22T18:39:35.9759165Z info - 2026-05-22 18:39:35,975 -- Upload queued for processing complete
+test	UNKNOWN STEP	2026-05-22T18:39:35.9760303Z error - 2026-05-22 18:39:35,975 -- Upload queued for processing failed: {"message":"Token required - not valid tokenless upload"}
+test	UNKNOWN STEP	2026-05-22T18:39:36.0833875Z Sentry is attempting to send 1 pending events
+test	UNKNOWN STEP	2026-05-22T18:39:36.0834376Z Waiting up to 2 seconds
+test	UNKNOWN STEP	2026-05-22T18:39:36.0834688Z Press Ctrl-C to quit
+test	UNKNOWN STEP	2026-05-22T18:39:36.1624997Z Post job cleanup.
+test	UNKNOWN STEP	2026-05-22T18:39:36.2605352Z [command]/usr/bin/git version
+test	UNKNOWN STEP	2026-05-22T18:39:36.2641644Z git version 2.54.0
+test	UNKNOWN STEP	2026-05-22T18:39:36.2678635Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/2fed636c-b392-4d75-8af4-e5d25b20df1d/.gitconfig'
+test	UNKNOWN STEP	2026-05-22T18:39:36.2689165Z Temporarily overriding HOME='/home/runner/work/_temp/2fed636c-b392-4d75-8af4-e5d25b20df1d' before making global git config changes
+test	UNKNOWN STEP	2026-05-22T18:39:36.2690321Z Adding repository directory to the temporary git global config as a safe directory
+test	UNKNOWN STEP	2026-05-22T18:39:36.2702529Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/macro/macro
+test	UNKNOWN STEP	2026-05-22T18:39:36.2737809Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	UNKNOWN STEP	2026-05-22T18:39:36.2769908Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	UNKNOWN STEP	2026-05-22T18:39:36.2996655Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	UNKNOWN STEP	2026-05-22T18:39:36.3023067Z http.https://github.com/.extraheader
+test	UNKNOWN STEP	2026-05-22T18:39:36.3037066Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test	UNKNOWN STEP	2026-05-22T18:39:36.3067391Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	UNKNOWN STEP	2026-05-22T18:39:36.3291350Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test	UNKNOWN STEP	2026-05-22T18:39:36.3322687Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test	UNKNOWN STEP	2026-05-22T18:39:36.3659951Z Cleaning up orphan processes
+test	UNKNOWN STEP	2026-05-22T18:39:36.3964116Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v5, codecov/codecov-action@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

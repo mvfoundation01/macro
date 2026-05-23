@@ -1,0 +1,26 @@
+?? .claude/
+?? API/
+?? buffet_indicator/data/master/busloans.parquet
+?? buffet_indicator/data/master/dtwexbgs.parquet
+?? buffet_indicator/data/master/ioer.parquet
+?? buffet_indicator/data/master/iorb.parquet
+?? buffet_indicator/data/master/m2_sl.parquet
+?? buffet_indicator/data/master/rrpontsyd.parquet
+?? buffet_indicator/data/master/sofr.parquet
+?? buffet_indicator/data/master/tedrate.parquet
+?? buffet_indicator/data/master/totll.parquet
+?? buffet_indicator/data/master/walcl.parquet
+?? buffet_indicator/data/master/wdtgal.parquet
+?? buffet_indicator/outputs/diagnostics/
+?? prompt/
+?? quant_pipeline/
+?? "raw data/"
+?? template/
+
+--- Parent-level untracked dirs (the TECH_DEBT P1-1 set) ---
+.claude
+API
+prompt
+quant_pipeline
+raw data
+template

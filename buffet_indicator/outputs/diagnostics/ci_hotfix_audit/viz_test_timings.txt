@@ -1,0 +1,53 @@
+Viz test timings — 2026-05-23 (local Windows, Python 3.14.3, default tkagg)
+==========================================================================
+
+Collection (from `pytest tests/viz/ --collect-only -q`)
+-------------------------------------------------------
+Total viz tests: 450
+
+Per-file tail of collection (the original §2.1 audit data):
+
+tests/viz/test_v11_2_3_svgnan_real_browser.py: 4
+tests/viz/test_v11_2_3_svgnan_regression.py: 6
+tests/viz/test_v11_2_stage_12_routing.py: 3
+tests/viz/test_v11_2_stat_v2_diagnostic_banner.py: 3
+tests/viz/test_v8b1_bundle.py: 7
+tests/viz/test_v8b1_diagnostics.py: 9
+tests/viz/test_v8b1_patches.py: 9
+tests/viz/test_v8b_chart_specs.py: 25
+tests/viz/test_v8b_visual.py: 10
+
+Representative timings (per actual pytest runs in this session)
+---------------------------------------------------------------
+
+tests/viz/test_v11_2_3_surface_2_chart.py (5 tests) — alone:
+    real 1.592s, user 0s, sys 0.031s
+    pytest reports "5 passed in 0.62s"
+
+tests/viz/test_v11_2_3_surface_{2,3,4,5,6,7,8}_chart.py (36 tests total):
+    real 2.922s
+    pytest reports "36 passed in 1.92s"
+    Slowest test setup: 0.45s (test_v11_2_3_surface_3_chart.py::test_rolling_series_present)
+    Slowest test call:  0.04s (multiple, tied)
+
+tests/viz/test_v11_2_3_svgnan_real_browser.py (4 tests, Playwright):
+    pytest reports "4 passed in 50.16s"
+    Average ~12.5s per test (Chromium launch + page load)
+
+Full tests/viz/ excluding Playwright (446 tests):
+    Killed at ~5 min wall clock / 275 CPU sec without finishing.
+    Output was buffered (pytest -q), so per-test progress not captured.
+    Suspect: a single slow file (test_build_dashboard, test_v8b_visual, or similar
+    that loads parquets via load_master / builds full dashboard HTML).
+
+Conclusion
+----------
+The prior session's "30 sec/test on Surface 2-8 chart tests" claim is not reproducible.
+Surface 2-8 chart tests are 0.053 sec/test in this environment.
+
+The actual local slowdown — if any — is on a single dashboard-build or load_master
+test, not on the chart-rendering layer. No CI change required (CI's pytest step
+on main has been green on all 4 recent runs).
+
+Recommendation: add pytest-timeout to requirements.lock with a default 120s
+per-test guardrail in pyproject.toml. Defer to a future P2 cleanup.
