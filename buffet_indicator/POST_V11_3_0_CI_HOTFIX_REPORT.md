@@ -79,8 +79,14 @@ The failing step was `Run pytest`, NOT `Install deps` or `Type check (mypy stric
 
 | Run ID | Conclusion | Branch | Event | Notes |
 |---|---|---|---|---|
-| `26334837368` | (push of `9ba69c7`) | main | push | (in progress at report-write time; tail below) |
-| `26334838351` | (workflow_dispatch) | main | workflow_dispatch | (in progress at report-write time; tail below) |
+| `26334837368` | (push of `9ba69c7`) | main | push | In progress at tag time (expected SUCCESS — only adds root .gitignore). |
+| `26334838351` | **SUCCESS** | main | workflow_dispatch | Verified at 2026-05-23T14:16Z — all 13 steps green including `Run pytest`. |
+| `26334928852` | (push of `b5c2478`) | main | push | In progress at tag time (expected SUCCESS — only adds .md docs). |
+
+Tag `post-v11_3_0-ci-green-2026-05-23` placed on `b5c2478` based on:
+- Run `26334838351` SUCCESS (verified the gitignore + audit commits up to `9ba69c7`).
+- Four prior consecutive main runs SUCCESS over 13:12Z–13:18Z.
+- `b5c2478` only adds .md documentation files (POST_V11_3_0_CI_HOTFIX_REPORT.md + TECH_DEBT.md / PROGRESS_v11_2_3_combined.md edits); cannot affect CI.
 
 ## Path decisions
 
@@ -128,7 +134,7 @@ This prompt's session-type header has no date; the predecessor stabilization-ses
 
 - Wall time: ~1h 15m (well under 3h target, well under 5h hard stop).
 - New commits on main: 3 (`74a7d9e` audit data, `9ba69c7` root .gitignore, this commit `<this report>`).
-- New tags: 0 (CI green tag `post-v11_3_0-ci-green-2026-05-23` not strictly needed since main was already green; see "Tag note" below).
+- New tags: 1 (`post-v11_3_0-ci-green-2026-05-23` → `b5c2478`). See "Tag note" below.
 - New branches: 0 (no spec-branch work this session).
 - Tests added: 0.
 - CI iterations: 1 explicit `workflow_dispatch` (`26334838351`) + 2 incidental push-triggered runs (1 from `9ba69c7` push, 1 prior from the predecessor session's push). Within the 2-dispatch budget.
@@ -136,7 +142,7 @@ This prompt's session-type header has no date; the predecessor stabilization-ses
 
 ### Tag note
 
-The prompt §2.7 calls for `post-v11_3_0-ci-green-<YYYY-MM-DD>` tag IF CI goes green this session. Since main CI was **already green** at session start, the "first green CI run after the hotfix" framing is degenerate. I will tag this session's HEAD only if the workflow_dispatch run `26334838351` succeeds; if it fails for an unrelated reason (rare), I will document the failure and not tag. See §2.9 chat output for the final decision.
+The prompt §2.7 calls for `post-v11_3_0-ci-green-<YYYY-MM-DD>` tag IF CI goes green this session. Main CI was already green at session start (which is itself a finding); run `26334838351` re-confirmed it. Tag placed on `b5c2478` (final session HEAD) accordingly.
 
 ## Next session entry point
 
