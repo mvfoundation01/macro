@@ -37,7 +37,7 @@ Full registry: [`TECH_DEBT.md`](TECH_DEBT.md).
 ## Branch structure post-stabilization
 
 ```
-main  @ aa46c4d  (this report)
+main  @ <this report commit>
 ├── 3d0dc0f                                (TECH_DEBT.md commit; parent)
 │   ├── pre-v11.4-baseline                 (← tag at 3d0dc0f)
 │   └── post-v11_3_0-tech-debt-2026-05-23  (← tag at 3d0dc0f)
@@ -105,7 +105,7 @@ These can happen in either order or in parallel.
 ## Session metrics
 
 - Wall time: ~1h 30m (well under 3h target, 5h hard stop)
-- New commits: 3 (`3d0dc0f` TECH_DEBT.md on main; `362a527` v2.0 scaffold on spec branch; `aa46c4d` this report + PROGRESS update on main)
+- New commits: 3 (`3d0dc0f` TECH_DEBT.md on main; `362a527` v2.0 scaffold on spec branch; this report + PROGRESS update on main — see `git log` for the head commit hash)
 - New tags: 2 (`post-v11_3_0-tech-debt-2026-05-23`, `pre-v11.4-baseline`)
 - New branches: 1 (`spec/liquidity-composite-v2.0`)
 - Tests added: 0 (stabilization session)
