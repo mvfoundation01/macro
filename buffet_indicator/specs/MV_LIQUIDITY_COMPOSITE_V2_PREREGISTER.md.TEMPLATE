@@ -1,0 +1,47 @@
+# Pre-Registration — Liquidity Composite v2.0 — TEMPLATE (NOT YET SEALED)
+
+> **STATUS**: DRAFT TEMPLATE. NOT YET SEALED.
+>
+> This file is a placeholder. Strategist (Claude AI) drafts the actual v2.0
+> pre-registration content based on the 4 amendment candidates documented in
+> v11.3.0's `outputs/lc_v1_verdict.json` (full text in
+> [`v11_4_amendment_candidates_FROM_v11_3_0.md`](v11_4_amendment_candidates_FROM_v11_3_0.md)):
+>
+> 1. Pre-reg §4.1 priors with both monetarist + mean-reversion literature streams
+> 2. Criterion 4 sign-vs-magnitude disambiguation
+> 3. Non-Gaussian forecast distribution (skewed-t Hansen 1994 or empirical kernel)
+> 4. Insufficient-sample gate (n_obs_insample < 5 × HAC_lag) as explicit pre-reg condition
+>
+> Once Strategist provides the sealed pre-reg content via a new Claude Code
+> prompt, this template is REPLACED (file renamed to drop `.TEMPLATE`) and
+> the sealing commit becomes the v2.0 pre-reg invariant (analog to `a8635ef`).
+>
+> DO NOT begin v11.4 LC v2.0 implementation until the SEALED v2.0 pre-reg
+> commit exists on this branch.
+
+## Placeholder structure (to be filled by Strategist)
+
+### 1. Locked composition
+TBD — Strategist defines components, weights, scopes.
+
+### 2. Locked falsifiability criteria
+TBD — Strategist defines 7 criteria with thresholds.
+
+### 3. Locked methodological choices
+TBD — Strategist specifies regression spec, SE method, bias correction, OOS approach, bootstrap, stationarity diagnostics.
+
+### 4. Empirical priors
+TBD — Strategist defines per-component priors with BOTH monetarist + mean-reversion stream probabilities.
+
+### 5. Pre-registration verification chain
+TBD — Strategist defines the git-log verification requirement.
+
+### 6. Sign-off
+TBD.
+
+### 7. Items explicitly out of scope for v11.4
+TBD.
+
+### 8. Cross-link to prior pre-registrations
+- `specs/MV_CONDITIONAL_RULE_PREREGISTER.md` (commit `a90b02d`, 2026-05-21)
+- `specs/MV_LIQUIDITY_COMPOSITE_PREREGISTER.md` (commit `a8635ef`, 2026-05-21) — v1.0 sealed, FAILED falsifiability test per v11.3.0 closeout
