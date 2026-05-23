@@ -1,0 +1,25 @@
+# Repo root .gitignore — parent of buffet_indicator/ (the actual project).
+# Owner's local-only workspaces at the parent level. NOT part of the project.
+
+# Local working dirs
+.claude/
+API/
+prompt/
+quant_pipeline/
+raw data/
+template/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Python (in case any work spills out of buffet_indicator/)
+__pycache__/
+*.pyc
+.venv/
