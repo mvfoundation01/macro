@@ -1,0 +1,74 @@
+{
+  "schema_version": "v2.0.seal_manifest.1",
+  "seal_commit": "2a94417524e67c7b88cb05ad1ac61fafd6b5711a",
+  "seal_timestamp_iso": "2026-05-24T14:47:07-04:00",
+  "seal_branch": "spec/liquidity-composite-v2.0",
+  "seal_tag": "v11.4-prereg-sealed",
+  "sealed_artifact_path": "buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md",
+  "sealed_artifact_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05",
+  "draft_v4_source_sha256": "023946aae007ec7b40072e305640740a942730e72f6e9509e58f8c179054e618",
+  "v1_seal_commit": "a8635ef",
+  "v1_seal_timestamp": "2026-05-21T11:46:05-04:00",
+  "v1_verdict_commit": "d56174c",
+  "v1_verdict_timestamp": "2026-05-22T14:30:59-04:00",
+  "v1_verdict_descends_from_v1_seal": true,
+  "amendments_file_path": "buffet_indicator/specs/v11_4_amendment_candidates_FROM_v11_3_0.md",
+  "amendments_sha256": "e19d63b562fa730728352525b6a74faed689cbee2f17259aa686944fce1c45f0",
+  "amendments_commit": "1ca4da2d590b64f40c674e6d5722679feca9248f",
+  "invariants_status": {
+    "B-1.1": "PASS",
+    "B-1.2": "PASS",
+    "B-1.3": "PASS",
+    "B-1.4": "PASS",
+    "B-1.5": "PASS"
+  },
+  "strategist_authorization": "DECISIONS_2026_05_24_v11_4_arbitration_ROUND_4.md §8 + PROMPT_CC_v11_4_seal_PHASE3_RESUME.md + PROMPT_CC_v11_4_seal_PHASE4_RESUME.md",
+  "reviewer_verdicts": {
+    "chatgpt_round_4": "SEAL_AS_DRAFTED",
+    "codex_round_4": "SEAL_AS_DRAFTED"
+  },
+  "strategist_authorized_corrections": [
+    {
+      "id": "correction_1_netfed_wdtgal",
+      "phase": 3,
+      "before": "WALCL − RRPONTSYD − WTREGEN",
+      "after": "WALCL − RRPONTSYD − WDTGAL",
+      "authority": "PROMPT_CC_v11_4_seal_PHASE3_RESUME.md §1",
+      "rationale": "WTREGEN typo from ROADMAP; v1.0 sealed text + on-disk data layer (wdtgal.parquet) + FRED canonical all use WDTGAL. Three-source agreement.",
+      "draft_v4_sha256_as_received": "023946aae007ec7b40072e305640740a942730e72f6e9509e58f8c179054e618",
+      "final_sealed_artifact_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05"
+    },
+    {
+      "id": "phase_4_section_10_3_path_d_refined",
+      "phase": 4,
+      "authority": "PROMPT_CC_v11_4_seal_PHASE4_RESUME.md §1 (Path D refined)",
+      "rationale": "v1.0 verdict.json schema mismatch (criterion-based not cell-based; n_obs_insample not n_obs_oos). Path D populates column 3 with documented proxy (n_obs_insample + oos_split_date), column 5 with <NOT_EVALUABLE_WITHOUT_OOS_N> (honest unknown — gate NOT computed on proxy), column 6 with tiered v1.0 verdict status per per-cell criterion mapping availability.",
+      "data_source": "outputs/tables/lc_v1_predictive_regression.csv on spec/liquidity-composite-v1.0 + v1.0 verdict.json scorecard",
+      "deferred_recomputation": "collect_v1_realized_sample_counts(ref='spec/liquidity-composite-v1.0') per DRAFT_v4 §11.1; not blocking seal."
+    },
+    {
+      "id": "phase_3_q4_display_framing_transcription_note",
+      "phase": 3,
+      "authority": "PROMPT_CC_v11_4_seal_PHASE3_RESUME.md §4 (Q4)",
+      "rationale": "Auxiliary metadata note appended after v1.0 §2 verbatim transcription in §10.1 #12. Documents the binary verdict (PASS ⇔ n_pass ≥ 4) ⇔ 3-tier display framing mapping. Not a semantic DRAFT_v4 change."
+    }
+  ],
+  "phase_6_gate_remedy": {
+    "id": "R1",
+    "authority": "PROMPT_CC_v11_4_seal_PHASE3_RESUME.md §5",
+    "rationale": "DRAFT_v4 §11.2 test description necessarily lists forbidden markers; gate pre-skips that single line",
+    "skip_pattern": "test_sealed_prereg_contains_no_unresolved_placeholders"
+  },
+  "phase_neg1_resolution": {
+    "branch": "A",
+    "themes_detected_in_candidate": 4,
+    "candidate_source_path": "buffet_indicator/_amendments.md",
+    "candidate_source_sha256": "e7e6f10934ea308339b2fdb69e60652324640856f13ab29751025b2850f8ebcb",
+    "discovery": "canonical file already present in scaffold commit 362a527 (blob 07fbdf0c); strategist-blessed version. Erroneous Branch A overwrite (5656c2b) reverted to scaffold via revert commit 1ca4da2 (harness rule precluded reset --hard).",
+    "final_canonical_blob": "07fbdf0cb0ba2339cce53b62c02d1373ebdbc219"
+  },
+  "patches_applied_per_resume_directive": {
+    "patch_1_check_0_4_filter": "Untracked files allowed; only tracked-file changes block. Authority: PROMPT_CC_v11_4_seal_RESUME_FULL.md §2.",
+    "patch_2_v1_prereg_path": "MV_LIQUIDITY_COMPOSITE_PREREGISTER.md (no _V1_ infix). Authority: PROMPT_CC_v11_4_seal_RESUME_FULL.md §3."
+  }
+}
