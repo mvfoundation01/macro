@@ -174,31 +174,83 @@ def _hac_adjusted_n_eff(residuals: np.ndarray, hac_lag: int, n_count: int) -> fl
     return float(n_count) / denom_eff
 
 
-def _oos_r2_goyal_welch(y_oos: np.ndarray, y_pred: np.ndarray, y_bar_train: float) -> float:
-    """OOS R^2 vs prevailing-mean benchmark (Goyal-Welch 2008).
+def _expanding_prevailing_mean_realized_cutoff(
+    y_full: pd.Series,
+    eval_index: pd.DatetimeIndex,
+    horizon_months: int,
+) -> np.ndarray:
+    """Per-row expanding prevailing mean of realized y values per sealed §3.3.
 
-    ``OOS_R2 = 1 - SSE_model / SSE_benchmark`` where benchmark predicts
-    ``y_bar_train`` constantly. Returns NaN if benchmark SSE is zero.
+    For each forecast-origin ``s_oos`` in ``eval_index``, returns the mean of
+    ``y[s]`` over all ``s`` in ``y_full.index`` such that ``s + h <= s_oos``
+    (the realized-return cutoff). Goyal-Welch (2008) prevailing-mean
+    benchmark, EXPANDING (not fixed) as OOS unfolds.
+
+    NaN at any ``s_oos`` for which no realized observation exists.
+
+    Phase F-BLK1.D: replaces the prior fixed-``mean(y_train)`` benchmark
+    (Codex Round 5 MAJOR CR-2).
+    """
+    if y_full.empty or len(eval_index) == 0:
+        return np.full(len(eval_index), np.nan, dtype="float64")
+    y_sorted = y_full.dropna().sort_index()
+    if y_sorted.empty:
+        return np.full(len(eval_index), np.nan, dtype="float64")
+    months_offset = pd.DateOffset(months=int(horizon_months))
+    means = np.empty(len(eval_index), dtype="float64")
+    idx_arr = y_sorted.index
+    val_arr = y_sorted.to_numpy(dtype="float64")
+    for i, s_oos in enumerate(eval_index):
+        cutoff = pd.Timestamp(s_oos) - months_offset
+        pos = idx_arr.searchsorted(cutoff, side="right")
+        if pos <= 0:
+            means[i] = np.nan
+        else:
+            means[i] = float(val_arr[:pos].mean())
+    return means
+
+
+def _oos_r2_goyal_welch(
+    y_oos: np.ndarray,
+    y_pred: np.ndarray,
+    prevailing_mean: np.ndarray,
+) -> float:
+    """OOS R^2 vs expanding prevailing-mean benchmark (Goyal-Welch 2008).
+
+    ``OOS_R2 = 1 - SSE_model / SSE_benchmark`` where benchmark predicts the
+    per-row prevailing mean computed from realized y values per the
+    ``s + h <= t`` cutoff (sealed §3.3). Phase F-BLK1.D: previously used a
+    fixed ``mean(y_train)`` (Codex Round 5 MAJOR CR-2). Returns NaN if
+    benchmark SSE is zero, or any prevailing_mean is non-finite.
     """
     if y_oos.size == 0:
         return float("nan")
+    if not np.all(np.isfinite(prevailing_mean)):
+        return float("nan")
     sse_model = float(np.sum((y_oos - y_pred) ** 2))
-    sse_bench = float(np.sum((y_oos - y_bar_train) ** 2))
+    sse_bench = float(np.sum((y_oos - prevailing_mean) ** 2))
     if sse_bench <= 0.0 or not math.isfinite(sse_bench):
         return float("nan")
     return float(1.0 - sse_model / sse_bench)
 
 
-def _clark_west_stat(y_oos: np.ndarray, y_pred: np.ndarray, y_bar_train: float) -> float:
+def _clark_west_stat(
+    y_oos: np.ndarray,
+    y_pred: np.ndarray,
+    prevailing_mean: np.ndarray,
+) -> float:
     """Clark-West (2007) MSPE-adjusted statistic, mean of f_t / SE(f_t).
 
-    f_t = (y - ybar)^2 - [(y - yhat)^2 - (yhat - ybar)^2]
-    Returns NaN if degenerate.
+    ``f_t = (y - pm_t)^2 - [(y - yhat)^2 - (yhat - pm_t)^2]`` where ``pm_t``
+    is the per-row expanding prevailing mean (Phase F-BLK1.D). Returns NaN
+    if degenerate or any ``pm_t`` is non-finite.
     """
     if y_oos.size < 2:
         return float("nan")
-    f = (y_oos - y_bar_train) ** 2 - (
-        (y_oos - y_pred) ** 2 - (y_pred - y_bar_train) ** 2
+    if not np.all(np.isfinite(prevailing_mean)):
+        return float("nan")
+    f = (y_oos - prevailing_mean) ** 2 - (
+        (y_oos - y_pred) ** 2 - (y_pred - prevailing_mean) ** 2
     )
     mean_f = float(np.mean(f))
     se_f = float(np.std(f, ddof=1) / math.sqrt(f.size))
@@ -368,9 +420,14 @@ def run_predictive_regression_v2(
         x_oos = oos["x"].to_numpy(dtype="float64")
         y_oos = oos["y"].to_numpy(dtype="float64")
         y_pred = alpha_hat + beta_hat * x_oos
-        y_bar_train = float(np.mean(y_train))
-        oos_r2 = _oos_r2_goyal_welch(y_oos, y_pred, y_bar_train)
-        clark_west_stat = _clark_west_stat(y_oos, y_pred, y_bar_train)
+        # Phase F-BLK1.D: expanding prevailing mean per Goyal-Welch (2008) +
+        # sealed §3.3 realized-return cutoff. The mean at OOS forecast-origin
+        # s_oos uses {y[s] : s + h <= s_oos}; expands as OOS unfolds.
+        prevailing_mean = _expanding_prevailing_mean_realized_cutoff(
+            aligned["y"], oos.index, int(horizon_months),
+        )
+        oos_r2 = _oos_r2_goyal_welch(y_oos, y_pred, prevailing_mean)
+        clark_west_stat = _clark_west_stat(y_oos, y_pred, prevailing_mean)
         oos_residuals = y_oos - y_pred
 
     return RegressionResult(

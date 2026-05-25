@@ -118,6 +118,65 @@ def test_oos_rows_counted_after_realization() -> None:
     assert earlier.n_obs_insample < result.n_obs_insample
 
 
+def test_oos_r2_uses_expanding_prevailing_mean_not_fixed() -> None:
+    """Phase F-BLK1.D: prevailing mean expands per Goyal-Welch (2008) +
+    sealed §3.3. A panel with a trending y mean would give different R²
+    under fixed-vs-expanding benchmarks; verify implementation expands.
+
+    References: PROMPT_CC_v11_4_phase_F_BLK1_fix.md §5; Codex Round 5 MAJOR CR-2.
+    """
+    import numpy as np
+    import pandas as pd
+
+    from src.models.predictive_regression_v2 import (
+        _expanding_prevailing_mean_realized_cutoff,
+    )
+
+    # Deterministic trending y series; trend ensures expanding != fixed.
+    n = 240
+    dates = pd.date_range("1990-01-31", periods=n, freq="ME")
+    y = pd.Series(np.linspace(-1.0, 1.0, n), index=dates)
+    eval_idx = dates[120:]  # OOS-like second half
+    pm = _expanding_prevailing_mean_realized_cutoff(y, eval_idx, horizon_months=12)
+    assert pm.shape == (len(eval_idx),)
+    # Expanding behavior: prevailing means MUST differ between first and last OOS row.
+    assert math.isfinite(pm[0]) and math.isfinite(pm[-1])
+    assert not math.isclose(pm[0], pm[-1], rel_tol=1e-3), (
+        f"expanding prevailing mean should change as OOS unfolds: pm[0]={pm[0]} pm[-1]={pm[-1]}"
+    )
+    # Per realized-return cutoff: pm[s_oos] uses y[s] with s <= s_oos - 12 months.
+    # At eval_idx[0] = dates[120], cutoff = dates[120] - 12mo ≈ dates[108].
+    expected_first = float(y.loc[y.index <= dates[120] - pd.DateOffset(months=12)].mean())
+    assert math.isclose(pm[0], expected_first, rel_tol=1e-9), (
+        f"expected pm[0]={expected_first}, got {pm[0]}"
+    )
+
+
+def test_oos_r2_returns_nan_when_benchmark_sse_zero() -> None:
+    """Phase F-BLK1.D: degenerate benchmark (y_oos == prevailing_mean) -> NaN R^2."""
+    import numpy as np
+    from src.models.predictive_regression_v2 import _oos_r2_goyal_welch
+
+    y_oos = np.array([0.5, 0.5, 0.5, 0.5], dtype="float64")
+    y_pred = np.array([0.5, 0.5, 0.5, 0.5], dtype="float64")
+    prevailing = np.array([0.5, 0.5, 0.5, 0.5], dtype="float64")
+    r2 = _oos_r2_goyal_welch(y_oos, y_pred, prevailing)
+    assert math.isnan(r2)
+
+
+def test_oos_r2_returns_nan_when_prevailing_mean_has_nan() -> None:
+    """Phase F-BLK1.D: if any prevailing_mean[s_oos] is non-finite (e.g.,
+    no realized observation by s_oos), R^2 is NaN."""
+    import numpy as np
+    from src.models.predictive_regression_v2 import _oos_r2_goyal_welch
+
+    y_oos = np.array([0.1, 0.2, 0.3], dtype="float64")
+    y_pred = np.array([0.1, 0.2, 0.3], dtype="float64")
+    prevailing = np.array([0.0, np.nan, 0.1], dtype="float64")
+    r2 = _oos_r2_goyal_welch(y_oos, y_pred, prevailing)
+    assert math.isnan(r2)
+
+
 def test_campbell_yogo_status_never_silent_nan() -> None:
     """rho=0.99 -> status enum always set ('computed_v1_grid' or
     'not_evaluable_outside_grid'); never silent NaN.
