@@ -41,7 +41,7 @@ def test_run_regression_sweep_returns_12_cells() -> None:
     from src.models.v2_verdict_run import SweepResult, run_regression_sweep
 
     panel = build_v2_panel()
-    sweep = run_regression_sweep(panel, n_bootstrap=200, fit_skewt=True, bootstrap_beta=True)
+    sweep = run_regression_sweep(panel, n_bootstrap=200, purpose="test", fit_skewt=True, bootstrap_beta=True)
     assert len(sweep) == 12
     for key, sr in sweep.items():
         assert isinstance(sr, SweepResult)
@@ -99,7 +99,7 @@ def test_compose_criteria_panel_includes_all_sections() -> None:
     )
 
     panel = build_v2_panel()
-    sweep = run_regression_sweep(panel, n_bootstrap=100, fit_skewt=False, bootstrap_beta=False)
+    sweep = run_regression_sweep(panel, n_bootstrap=100, purpose="test", fit_skewt=False, bootstrap_beta=False)
     adf = run_adf_per_component(panel)
     vif = run_vif(panel)
     bonferroni = run_bonferroni_sweep(panel)

@@ -62,3 +62,40 @@ def load_bootstrap_policy() -> BootstrapPolicy:
         diagnostic_count=DIAGNOSTIC_N_BOOTSTRAP,
         runtime_downsample_permitted=False,
     )
+
+
+VALID_BOOTSTRAP_PURPOSES: frozenset[str] = frozenset({"verdict", "diagnostic", "test"})
+"""Phase F-BLK1.E: enum of permitted purposes for bootstrap call-sites.
+
+- ``"verdict"`` (default): n_bootstrap MUST equal :data:`VERDICT_N_BOOTSTRAP`.
+- ``"diagnostic"``: configurable n_bootstrap for non-verdict-bearing outputs
+  (e.g., ``outputs/diagnostics/<session>/...``).
+- ``"test"``: configurable n_bootstrap for unit/integration tests.
+"""
+
+
+def ensure_verdict_n_bootstrap(n_bootstrap: int, purpose: str) -> None:
+    """Phase F-BLK1.E: gate verdict-bearing bootstrap calls to n_bootstrap=50_000.
+
+    Per sealed §3.8 + §11.3 invariant #10: ``n_bootstrap = 50_000`` is
+    IMMUTABLE for all verdict-bearing quantities. Pre-BLK1 the CLI accepted
+    arbitrary ``--n-bootstrap`` overrides and downstream sweeps propagated
+    them into verdict cells (Codex Round 5 MAJOR CR-3).
+
+    Raises
+    ------
+    ValueError
+        If ``purpose == "verdict"`` and ``n_bootstrap != VERDICT_N_BOOTSTRAP``,
+        or if ``purpose`` is not in :data:`VALID_BOOTSTRAP_PURPOSES`.
+    """
+    if purpose not in VALID_BOOTSTRAP_PURPOSES:
+        raise ValueError(
+            f"purpose must be one of {sorted(VALID_BOOTSTRAP_PURPOSES)}; "
+            f"got {purpose!r}"
+        )
+    if purpose == "verdict" and int(n_bootstrap) != int(VERDICT_N_BOOTSTRAP):
+        raise ValueError(
+            f"verdict-bearing run requires n_bootstrap={VERDICT_N_BOOTSTRAP} "
+            f"(sealed §3.8 IMMUTABLE); got n_bootstrap={n_bootstrap}. "
+            f"Use purpose='diagnostic' or 'test' for non-verdict call paths."
+        )

@@ -3,11 +3,16 @@
 Usage::
 
     python -m src.models.v2_run_verdict \
-        [--n-bootstrap 50000] \
         [--output outputs/lc_v2_verdict.json]
 
 Composes Phase E.1 panel + E.2 sweep + E.3 diagnostics + E.4 evaluation
 + E.5 JSON writer + E.6 PIT audit per sealed pre-reg §3-§12.
+
+Phase F-BLK1.E: the ``--n-bootstrap`` override is removed; the CLI always
+runs with the sealed IMMUTABLE ``VERDICT_N_BOOTSTRAP = 50_000`` count.
+Diagnostic-only callers may invoke :func:`run_verdict` programmatically with
+``purpose="diagnostic"`` and a custom ``n_bootstrap``. Test callers pass
+``purpose="test"`` (used in :mod:`tests.models.test_v2_verdict_writer`).
 """
 from __future__ import annotations
 
@@ -16,7 +21,10 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from src.stats.bootstrap_policy import VERDICT_N_BOOTSTRAP
+from src.stats.bootstrap_policy import (
+    VERDICT_N_BOOTSTRAP,
+    ensure_verdict_n_bootstrap,
+)
 from src.models.v2_panel_builder import build_v2_panel
 from src.models.v2_verdict_run import (
     compose_criteria_panel,
@@ -35,16 +43,28 @@ from src.models.v2_verdict_writer import (
 def run_verdict(
     *,
     n_bootstrap: int = VERDICT_N_BOOTSTRAP,
+    purpose: str = "verdict",
     output_path: Path = Path("outputs/lc_v2_verdict.json"),
     sealed_prereg_path: Optional[Path] = None,
     master_seed: int = 42,
 ) -> tuple[Path, dict, str]:
     """Run the full verdict-bearing pipeline and write the JSON output.
 
+    Phase F-BLK1.E: ``purpose='verdict'`` (default) requires
+    ``n_bootstrap == VERDICT_N_BOOTSTRAP``. Diagnostic / test callers
+    must pass ``purpose='diagnostic'`` or ``'test'`` to use other counts.
+
     Returns
     -------
     (output_path, verdict_doc, sha256_hex)
+
+    Raises
+    ------
+    ValueError
+        If ``purpose == 'verdict'`` and ``n_bootstrap != VERDICT_N_BOOTSTRAP``.
     """
+    ensure_verdict_n_bootstrap(int(n_bootstrap), purpose)
+
     if sealed_prereg_path is None:
         sealed_prereg_path = Path(SEALED_PREREG_PATH)
         if not sealed_prereg_path.exists():
@@ -57,10 +77,15 @@ def run_verdict(
     print("[E.1] building panel ...", flush=True)
     panel = build_v2_panel()
 
-    print(f"[E.2] regression sweep + skewed-t + bootstrap (n={n_bootstrap}) ...", flush=True)
+    print(
+        f"[E.2] regression sweep + skewed-t + bootstrap "
+        f"(n={n_bootstrap}, purpose={purpose}) ...",
+        flush=True,
+    )
     sweep = run_regression_sweep(
         panel,
         n_bootstrap=int(n_bootstrap),
+        purpose=purpose,
         fit_skewt=True,
         bootstrap_beta=True,
         master_seed=int(master_seed),
@@ -87,12 +112,12 @@ def run_verdict(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI entry-point. Phase F-BLK1.E: verdict-bearing only — no n_bootstrap override."""
     parser = argparse.ArgumentParser(
-        description="Run the v2.0 verdict-bearing pipeline.",
-    )
-    parser.add_argument(
-        "--n-bootstrap", type=int, default=VERDICT_N_BOOTSTRAP,
-        help="Bootstrap reps (sealed default 50000).",
+        description=(
+            "Run the v2.0 verdict-bearing pipeline. n_bootstrap is sealed "
+            "IMMUTABLE at 50000 per §3.8 (Phase F-BLK1.E)."
+        ),
     )
     parser.add_argument(
         "--output", type=Path, default=Path("outputs/lc_v2_verdict.json"),
@@ -100,7 +125,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--master-seed", type=int, default=42)
     args = parser.parse_args(argv)
     run_verdict(
-        n_bootstrap=args.n_bootstrap,
+        n_bootstrap=VERDICT_N_BOOTSTRAP,
+        purpose="verdict",
         output_path=args.output,
         master_seed=args.master_seed,
     )

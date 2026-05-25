@@ -42,7 +42,7 @@ def test_verdict_json_has_required_top_level_keys(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
 
     required = {
         "schema_version", "verdict", "evidence_status", "retest_status",
@@ -60,7 +60,7 @@ def test_verdict_enums_are_schema_valid(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     assert doc["verdict"] in VERDICTS
     assert doc["evidence_status"] in {"NORMAL", "NO_EVALUABLE_CRITERIA", "MIXED"}
     assert doc["retest_status"] in VALID_RETEST_STATUSES
@@ -70,7 +70,7 @@ def test_verdict_has_7_criteria_with_expected_cell_counts(tmp_path: Path) -> Non
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     crits = doc["criteria"]
     assert len(crits) == 7
     cell_counts = {c["criterion_id"]: len(c["cells"]) for c in crits}
@@ -87,7 +87,7 @@ def test_verdict_round_trip_json(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, sha = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, sha = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     # File exists and parses back to a structurally equivalent dict.
     parsed = json.loads(out.read_text(encoding="utf-8"))
     assert parsed["schema_version"] == doc["schema_version"]
@@ -103,7 +103,7 @@ def test_verdict_component_id_map_matches_sealed(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     assert doc["component_id_map"] == {
         "z1": "netfed_liquidity",
         "z2": "m2_growth_yoy",
@@ -117,7 +117,7 @@ def test_verdict_pit_audit_passes(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     audit = doc["look_ahead_audit"]
     assert audit["all_cells_pit_compliant"] is True
     assert audit["violations"] == []
@@ -127,7 +127,7 @@ def test_verdict_decision_rule_matches_n_pass(tmp_path: Path) -> None:
     from src.models.v2_run_verdict import run_verdict
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     rule = doc["decision_rule_check"]
     assert rule["rule"] == "n_pass >= 4 of 7"
     expected_pass = doc["n_pass_total"] >= 4
@@ -143,6 +143,6 @@ def test_verdict_sealed_provenance_present(tmp_path: Path) -> None:
     from src.models.v2_verdict_writer import SEALED_PREREG_COMMIT, SEALED_PREREG_SHA256
 
     out = tmp_path / "lc_v2_verdict.json"
-    _, doc, _ = run_verdict(n_bootstrap=200, output_path=out)
+    _, doc, _ = run_verdict(n_bootstrap=200, purpose="test", output_path=out)
     assert doc["pre_reg_commit"] == SEALED_PREREG_COMMIT
     assert doc["sealed_prereg_sha256"] == SEALED_PREREG_SHA256

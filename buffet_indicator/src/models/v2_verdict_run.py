@@ -38,7 +38,10 @@ from src.models.v2_panel_builder import (
     build_v2_panel,
 )
 from src.stats.bootstrap import choose_stationary_block_length
-from src.stats.bootstrap_policy import VERDICT_N_BOOTSTRAP
+from src.stats.bootstrap_policy import (
+    VERDICT_N_BOOTSTRAP,
+    ensure_verdict_n_bootstrap,
+)
 from src.stats.hac import compute_hac_lag
 from src.stats.sample_gate import sample_gate_status
 from src.stats.skewt import SkewTFitResult, fit_conditional_skew_t
@@ -135,6 +138,7 @@ def run_regression_sweep(
     panel: V2Panel,
     *,
     n_bootstrap: int = VERDICT_N_BOOTSTRAP,
+    purpose: str = "verdict",
     fit_skewt: bool = True,
     bootstrap_beta: bool = True,
     master_seed: int = 42,
@@ -147,6 +151,11 @@ def run_regression_sweep(
         Output of :func:`build_v2_panel`.
     n_bootstrap : int, default 50_000
         Bootstrap reps per cell (sealed §3.8 IMMUTABLE for verdict).
+    purpose : {"verdict", "diagnostic", "test"}, default "verdict"
+        Phase F-BLK1.E: gates ``n_bootstrap`` per sealed §3.8 immutability.
+        ``"verdict"`` requires ``n_bootstrap == VERDICT_N_BOOTSTRAP``; other
+        purposes accept any positive int. See
+        :func:`src.stats.bootstrap_policy.ensure_verdict_n_bootstrap`.
     fit_skewt : bool, default True
         If True, fit conditional skewed-t on in-sample residuals per cell.
     bootstrap_beta : bool, default True
@@ -157,7 +166,13 @@ def run_regression_sweep(
     Returns
     -------
     dict[(scope, horizon_years) -> SweepResult]
+
+    Raises
+    ------
+    ValueError
+        If ``purpose == "verdict"`` and ``n_bootstrap != VERDICT_N_BOOTSTRAP``.
     """
+    ensure_verdict_n_bootstrap(int(n_bootstrap), purpose)
     out: dict[tuple[str, int], SweepResult] = {}
     for key, cell in panel.cells.items():
         scope, horizon_years = key
