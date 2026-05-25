@@ -1,0 +1,37 @@
+# requirements.in — v11.4 sprint direct-dependency manifest
+#
+# Phase F-DOC.A: sealed §3.7.2 + §3.8 pin five IMMUTABLE library versions
+# (sealed pre-reg `c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05`,
+# commit 2a94417 tag v11.4-prereg-sealed). The other entries below are project
+# direct dependencies (preserved from the prior unhashed requirements.lock).
+#
+# This file is the INPUT to `uv pip compile --generate-hashes -o requirements.lock`
+# (or pip-compile / pip-tools). The resulting lock file pins ALL transitive
+# dependencies with cryptographic hashes and is the only file installed at
+# closeout / CI time.
+
+# Sealed §3.7.2 + §3.8 IMMUTABLE pins
+arch==7.0.0
+pandas==2.2.3
+numpy==1.26.4
+scipy==1.13.1
+statsmodels==0.14.2
+
+# Project direct dependencies
+pyarrow==15.0.2
+pydantic==2.7.4
+requests==2.32.3
+tenacity==8.3.0
+filelock==3.15.4
+openpyxl==3.1.2
+xlrd==2.0.1
+chardet==5.2.0
+yfinance==0.2.40
+fredapi==0.5.2
+pyyaml==6.0.1
+pytest==8.2.2
+pytest-cov==5.0.0
+pytest-mock==3.14.0
+responses==0.25.3
+freezegun==1.5.1
+Jinja2==3.1.4
