@@ -13,6 +13,7 @@ References
 """
 from __future__ import annotations
 
+import logging
 import math
 from dataclasses import dataclass
 from typing import Optional
@@ -20,6 +21,8 @@ from typing import Optional
 import hashlib
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 import arch.bootstrap
 from statsmodels.regression.linear_model import OLS
@@ -183,17 +186,48 @@ def run_regression_sweep(
             horizon_months=cell.horizon_months,
             forecast_origin=cell.oos_split_date,
         )
-        # Skewed-t on in-sample residuals (Phase D function handles fallbacks).
+        # Skewed-t on in-sample residuals (Phase D function handles its own
+        # documented fallback gates internally and returns a SkewTFitResult).
+        # Phase F-BLK1.G: replaces pre-BLK1 broad `except Exception` that set
+        # skewt = None silently. Codex Round 5 MAJOR CQ-1. Both branches now
+        # record a SkewTFitResult with distribution_family='gaussian_fallback'
+        # and fallback_reason that surfaces the error class in verdict JSON;
+        # unexpected errors also log with traceback for debugging.
         skewt: Optional[SkewTFitResult] = None
         if fit_skewt and reg.residuals is not None:
-            try:
-                resid = np.asarray(reg.residuals, dtype="float64").ravel()
-                if resid.size > 0:
+            resid = np.asarray(reg.residuals, dtype="float64").ravel()
+            if resid.size > 0:
+                cell_id = f"{scope}_{horizon_years}Y"
+                try:
                     skewt = fit_conditional_skew_t(
-                        resid, seed=_seed_for_cell(scope, horizon_years, master_seed)
+                        resid, seed=_seed_for_cell(scope, horizon_years, master_seed),
                     )
-            except Exception:
-                skewt = None
+                except ValueError as exc:
+                    logger.info(
+                        "skew-t fallback (expected ValueError) at cell %s: %s",
+                        cell_id, exc,
+                    )
+                    skewt = SkewTFitResult(
+                        distribution_family="gaussian_fallback",
+                        eta_tail=None,
+                        lambda_skew=None,
+                        loglikelihood_at_optimum=float("nan"),
+                        fallback_reason=f"value_error: {str(exc)[:200]}",
+                    )
+                except Exception as exc:  # noqa: BLE001 — record + continue
+                    logger.error(
+                        "unexpected skew-t fit error at cell %s: %s: %s",
+                        cell_id, type(exc).__name__, exc, exc_info=True,
+                    )
+                    skewt = SkewTFitResult(
+                        distribution_family="gaussian_fallback",
+                        eta_tail=None,
+                        lambda_skew=None,
+                        loglikelihood_at_optimum=float("nan"),
+                        fallback_reason=(
+                            f"unexpected_{type(exc).__name__}: {str(exc)[:200]}"
+                        ),
+                    )
 
         # Stationary block bootstrap on β.
         bs_lo: Optional[float] = None
