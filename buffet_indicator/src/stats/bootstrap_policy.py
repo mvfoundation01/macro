@@ -11,6 +11,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
+VERDICT_N_BOOTSTRAP: int = 50_000
+"""Sealed-immutable bootstrap count for verdict-bearing CIs (§3.8 / §11.3)."""
+
+DIAGNOSTIC_N_BOOTSTRAP: int = 50_000
+"""Default diagnostic count; equal to verdict count to avoid divergence in
+verdict-vs-diagnostic CI reporting. Diagnostic-only callers may pass a
+smaller ``n_bootstrap`` directly to :func:`stationary_bootstrap_ci`, but
+the policy still pins 50K as the canonical reference number.
+"""
+
+
 @dataclass(frozen=True)
 class BootstrapPolicy:
     """Immutable bootstrap-count policy.
@@ -20,10 +31,12 @@ class BootstrapPolicy:
     verdict_count : int
         Bootstrap reps for verdict-bearing CIs. MUST be 50_000.
     diagnostic_count : int
-        Bootstrap reps for diagnostic-only outputs (allowed to be lower).
+        Bootstrap reps for diagnostic-only outputs (sealed-canonical 50_000;
+        diagnostic-only callers may opt to a lower count via direct
+        ``stationary_bootstrap_ci(..., n_bootstrap=...)``).
     runtime_downsample_permitted : bool
-        MUST be False (§3.8 invariant). Maintained for explicit assertion
-        in tests.
+        MUST be False (§3.8 / §11.3 invariant). No "runtime_exceeded"
+        downsample reason is permitted for verdict-bearing quantities.
     """
 
     verdict_count: int
@@ -37,14 +50,15 @@ def load_bootstrap_policy() -> BootstrapPolicy:
     Returns
     -------
     BootstrapPolicy
-        With ``verdict_count == 50_000`` and
-        ``runtime_downsample_permitted is False``.
+        With ``verdict_count == 50_000``, ``diagnostic_count == 50_000``,
+        and ``runtime_downsample_permitted is False``.
 
     References
     ----------
     Sealed pre-reg §3.8 + §11.3 + §11.1 line 742. Test: ``T19``.
     """
-    raise NotImplementedError(
-        "Scaffolded per PROMPT_CC_v11_4_v2_sprint_kickoff.md §3 "
-        "- implement in subsequent phase"
+    return BootstrapPolicy(
+        verdict_count=VERDICT_N_BOOTSTRAP,
+        diagnostic_count=DIAGNOSTIC_N_BOOTSTRAP,
+        runtime_downsample_permitted=False,
     )

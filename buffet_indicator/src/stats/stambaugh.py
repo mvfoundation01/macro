@@ -1,19 +1,28 @@
-"""Stambaugh-bias gating predicate — DRAFT_v4 §3.5 (seal 2a94417).
+"""Stambaugh-bias gating predicate — DRAFT_v4 §3.6 + §3.9 (seal 2a94417).
 
 References
 ----------
-- Sealed pre-reg §3.5: Stambaugh correction applied iff
-  ``rho_hat > 0.85`` (STRICT ``>``; ``rho_hat == 0.85`` does NOT apply).
+- Sealed pre-reg §3.6: Stambaugh (1999) correction applied iff
+  ``rho_hat > 0.85`` (STRICT ``>``).
+- Sealed pre-reg §3.9 comparator table: ``rho_hat == 0.85`` -> NOT applied
+  (FIX per Codex round-2 New-5).
 - Sealed pre-reg §11.1 line 740: function signature.
 """
 from __future__ import annotations
+
+import math
+
+
+STAMBAUGH_THRESHOLD: float = 0.85
+"""Strict-greater-than threshold for Stambaugh correction (§3.6 + §3.9)."""
 
 
 def should_apply_stambaugh(rho: float) -> bool:
     """Return True iff Stambaugh bias-correction should be applied.
 
-    Per §3.5 the threshold is STRICT: ``rho > 0.85`` triggers the
-    correction; ``rho == 0.85`` does NOT (test ``T10`` pins this).
+    Per §3.6 + §3.9 the threshold is STRICT: ``rho > 0.85`` triggers the
+    correction; ``rho == 0.85`` does NOT. Non-finite ``rho`` returns False
+    (degenerate AR(1) estimate; do not apply correction silently).
 
     Parameters
     ----------
@@ -26,9 +35,8 @@ def should_apply_stambaugh(rho: float) -> bool:
 
     References
     ----------
-    Sealed pre-reg §3.5 + §11.1 line 740. Test: ``T10``.
+    Sealed pre-reg §3.6 + §3.9 + §11.1 line 740. Test: ``T10``.
     """
-    raise NotImplementedError(
-        "Scaffolded per PROMPT_CC_v11_4_v2_sprint_kickoff.md §3 "
-        "- implement in subsequent phase"
-    )
+    if not math.isfinite(rho):
+        return False
+    return rho > STAMBAUGH_THRESHOLD
