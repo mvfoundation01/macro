@@ -400,8 +400,28 @@ def load_master(
     end: str | None = None,
     frequency: Literal["D", "W", "M", "Q", "A"] | None = None,
     fill: Literal["none", "ffill", "interpolate"] = "none",
+    vintage: pd.Timestamp | str = "latest",
 ) -> MasterSeries:
-    """Read a master series. THE single API for downstream consumers."""
+    """Read a master series. THE single API for downstream consumers.
+
+    Vintage semantics (v2.0 approximation per PHASE_B_C_RESUME §2):
+    -----------------------------------------------------------------
+    The ``vintage`` kwarg filters to rows where ``date <= vintage``. This is
+    the OBSERVATION DATE approximation of "as known at time t" - NOT true
+    ALFRED-style release-vintage filtering. For revisable FRED series
+    (M2SL, BUSLOANS, TOTLL, WALCL, WDTGAL), the current value at ``date``
+    is the LATEST REVISION published as of ingestion time, not necessarily
+    the value that was known to a forecaster at ``date``.
+
+    This is a deliberate v2.0 approximation per sealed pre-reg §3.2.2 and
+    ``PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md`` §2. True ALFRED-aware
+    ingestion is deferred to a future sub-sprint as documented in
+    ``outputs/v2_sprint_vintage_approximation_note.md``.
+
+    - ``vintage="latest"`` (default) -> no filter; preserves pre-v2.0 behavior.
+    - ``vintage=pd.Timestamp(...)``  -> filter ``series.loc[index <= vintage]``.
+    - ``vintage`` in the future       -> raises ``ValueError``.
+    """
     path = _master_path(series_id)
     if not path.exists():
         raise SourceMissingError(
@@ -421,6 +441,19 @@ def load_master(
         series = series.loc[series.index >= pd.Timestamp(start)]
     if end is not None:
         series = series.loc[series.index <= pd.Timestamp(end)]
+
+    if isinstance(vintage, str):
+        if vintage != "latest":
+            raise ValueError(
+                f"vintage must be 'latest' or a pd.Timestamp; got string {vintage!r}"
+            )
+    else:
+        vintage_ts = pd.Timestamp(vintage)
+        if vintage_ts > pd.Timestamp.now():
+            raise ValueError(
+                f"vintage={vintage_ts!s} is in the future (now={pd.Timestamp.now()!s})"
+            )
+        series = series.loc[series.index <= vintage_ts]
 
     if frequency is not None:
         freq_alias = {"D": "D", "W": "W-FRI", "M": "M", "Q": "Q", "A": "Y"}[frequency]

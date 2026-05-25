@@ -259,3 +259,80 @@ def test_M10_load_master_window(tmp_path: Path) -> None:
 def test_load_master_missing_raises() -> None:
     with pytest.raises(SourceMissingError):
         ma.load_master("does_not_exist")
+
+
+# ---------------------------------------------------------------------------
+# v2.0 sprint Phase B.1 -- vintage kwarg (extension per
+#   PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §1 Option A1)
+# Vintage = observation-date approximation per §2 Option B3.
+# ---------------------------------------------------------------------------
+
+
+def _seed_master(series_id: str, idx: pd.DatetimeIndex, values: np.ndarray) -> None:
+    """Helper: seed a master parquet via _update_master_atomically for tests."""
+    df = pd.DataFrame(
+        {
+            "value": values.astype("float64"),
+            "source": pd.Series(["test"] * len(idx), dtype="string"),
+            "vintage": pd.to_datetime([pd.Timestamp("2026-01-01")] * len(idx)),
+            "transform": pd.Series(["none"] * len(idx), dtype="string"),
+        },
+        index=idx,
+    )
+    df.index.name = "date"
+    ma._update_master_atomically(series_id, df)
+
+
+def test_load_master_vintage_latest_default_is_no_filter() -> None:
+    """Backward compat: omitting vintage (or vintage='latest') returns full series."""
+    idx = pd.date_range("2020-01-01", periods=100, freq="ME")
+    _seed_master("vintage_default_test", idx, np.arange(100.0))
+    ms_implicit = ma.load_master("vintage_default_test")
+    ms_explicit = ma.load_master("vintage_default_test", vintage="latest")
+    assert ms_implicit.n_observations == 100
+    assert ms_explicit.n_observations == 100
+    assert ms_implicit.latest == ms_explicit.latest == idx[-1]
+
+
+def test_load_master_vintage_timestamp_filters_to_observation_date() -> None:
+    """vintage=pd.Timestamp filters to ``date <= vintage``."""
+    idx = pd.date_range("2020-01-01", periods=100, freq="ME")
+    _seed_master("vintage_filter_test", idx, np.arange(100.0))
+    cutoff = pd.Timestamp("2024-12-31")
+    ms = ma.load_master("vintage_filter_test", vintage=cutoff)
+    assert ms.n_observations > 0
+    assert ms.latest <= cutoff
+    expected = (idx <= cutoff).sum()
+    assert ms.n_observations == expected
+
+
+def test_load_master_vintage_future_raises_value_error() -> None:
+    """vintage in the future raises ValueError."""
+    idx = pd.date_range("2020-01-01", periods=10, freq="ME")
+    _seed_master("vintage_future_test", idx, np.arange(10.0))
+    far_future = pd.Timestamp.now() + pd.Timedelta(days=3650)
+    with pytest.raises(ValueError, match="future"):
+        ma.load_master("vintage_future_test", vintage=far_future)
+
+
+def test_load_master_vintage_bad_string_raises() -> None:
+    """vintage must be 'latest' or a pd.Timestamp; arbitrary strings raise."""
+    idx = pd.date_range("2020-01-01", periods=10, freq="ME")
+    _seed_master("vintage_badstr_test", idx, np.arange(10.0))
+    with pytest.raises(ValueError, match="latest|pd.Timestamp"):
+        ma.load_master("vintage_badstr_test", vintage="bogus")
+
+
+def test_load_master_vintage_combines_with_start_end() -> None:
+    """vintage + start/end compose: most-restrictive cutoff wins."""
+    idx = pd.date_range("2020-01-01", periods=100, freq="ME")
+    _seed_master("vintage_compose_test", idx, np.arange(100.0))
+    ms = ma.load_master(
+        "vintage_compose_test",
+        start="2022-01-01",
+        end="2026-12-31",
+        vintage=pd.Timestamp("2024-06-30"),
+    )
+    assert ms.n_observations > 0
+    assert ms.earliest >= pd.Timestamp("2022-01-01")
+    assert ms.latest <= pd.Timestamp("2024-06-30")  # vintage is tighter than end
