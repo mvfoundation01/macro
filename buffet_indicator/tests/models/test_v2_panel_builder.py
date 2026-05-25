@@ -115,3 +115,45 @@ def test_panel_meta_documents_data_availability() -> None:
     assert panel.meta["icedxy_pre2006_status"] == "not_available"
     assert panel.meta["z5_post_splice_warmup_relaxed_to_24mo"] is True
     assert panel.meta["rrpontsyd_pre2013_treatment"] == "zero_fill_strict_lt_2013_09_23"
+
+
+def test_component_bundle_has_raw_levels_for_all_5_components() -> None:
+    """Phase F-BLK1.A: raw_levels populated per component for PIT vintage audit."""
+    comp = build_all_components()
+    assert isinstance(comp.raw_levels, dict)
+    for cid in ("z1", "z2", "z3", "z4", "z5"):
+        s = comp.raw_levels.get(cid)
+        assert s is not None, f"raw_levels missing {cid}"
+        assert isinstance(s, pd.Series)
+        assert len(s.dropna()) > 0, f"raw_levels[{cid}] empty"
+
+
+def test_panel_cells_have_per_origin_feature_vintage_max() -> None:
+    """Phase F-BLK1.A: each non-empty cell records fvm per origin."""
+    panel = build_v2_panel()
+    for (scope, h_y), cell in panel.cells.items():
+        if cell.n_obs_total == 0:
+            continue
+        fvm_map = cell.feature_vintage_max_at_origin
+        assert isinstance(fvm_map, dict)
+        assert len(fvm_map) > 0, f"{scope}_{h_y}Y: empty per-origin fvm map"
+        # Every origin in aligned index must appear.
+        assert set(map(pd.Timestamp, fvm_map.keys())) == set(
+            map(pd.Timestamp, cell.composite_series.index)
+        )
+
+
+def test_panel_per_origin_fvm_satisfies_audit_invariant() -> None:
+    """Phase F-BLK1.A: fvm[t] <= t for every (origin, cell) pair (sealed §3.2.2)."""
+    panel = build_v2_panel()
+    for (scope, h_y), cell in panel.cells.items():
+        for origin_t, max_obs in cell.feature_vintage_max_at_origin.items():
+            assert pd.Timestamp(max_obs) <= pd.Timestamp(origin_t), (
+                f"{scope}_{h_y}Y: at origin {origin_t}, fvm={max_obs} > origin"
+            )
+
+
+def test_panel_meta_records_per_origin_audit_construction() -> None:
+    """Phase F-BLK1.A: panel.meta documents non-tautological audit construction."""
+    panel = build_v2_panel()
+    assert panel.meta["pit_audit_construction"] == "per_origin_non_tautological_F_BLK1_A"

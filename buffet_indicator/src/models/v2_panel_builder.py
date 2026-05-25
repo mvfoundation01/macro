@@ -101,7 +101,22 @@ HORIZONS_MONTHS: dict[int, int] = {1: 12, 3: 36, 5: 60, 10: 120}
 
 @dataclass(frozen=True)
 class ComponentBundle:
-    """Container for the 5 components' z-scored monthly series + provenance."""
+    """Container for the 5 components' z-scored monthly series + provenance.
+
+    Attributes
+    ----------
+    z1..z5 : pd.Series | None
+        PIT-z-scored monthly EOM components.
+    raw_levels : dict[str, pd.Series]
+        Monthly EOM raw observations per component id (``"z1"``..``"z5"``),
+        the pre-z-score series used as input to ``pit_zscore``. Populated by
+        :func:`build_all_components` for PIT vintage discipline tracking per
+        sealed §3.2.2 + Phase B+C arbitration §B (Option B3, observation-date
+        approximation). Empty dict if components were constructed without
+        raw_levels (legacy callers).
+    metadata : dict
+        Per-component provenance strings.
+    """
 
     z1: Optional[pd.Series]
     z2: Optional[pd.Series]
@@ -114,7 +129,16 @@ class ComponentBundle:
 
 @dataclass(frozen=True)
 class PanelCell:
-    """Single (scope x horizon) candidate cell."""
+    """Single (scope x horizon) candidate cell.
+
+    ``feature_vintage_max_at_origin`` (Phase F-BLK1.A): dict[Timestamp, Timestamp]
+    mapping each forecast-origin ``t`` in the cell's aligned index to the latest
+    raw-data observation_date used by composite[t] under sealed §3.2.2
+    observation-date approximation. Populated when :func:`build_v2_panel`
+    receives raw_levels via :class:`ComponentBundle`. Audit
+    (:func:`src.models.v2_verdict_writer.run_pit_audit_non_tautological`)
+    asserts ``feature_vintage_max_at_origin[t] <= t`` for every (t, cell) pair.
+    """
 
     composite: str
     horizon_months: int
@@ -126,6 +150,7 @@ class PanelCell:
     n_obs_oos: int
     feature_vintage_max: Optional[pd.Timestamp]
     oos_split_date: pd.Timestamp
+    feature_vintage_max_at_origin: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -308,6 +333,83 @@ def build_z5_funding_stress(
 # ---------------------------------------------------------------------------
 
 
+def _build_all_raw_monthly_eom() -> dict[str, pd.Series]:
+    """Build monthly-EOM raw series per component (pre-z-score) for vintage tracking.
+
+    Per sealed §3.2.2 + Phase B+C arbitration §B (Option B3, observation-date
+    approximation): composite[t] is built from z_i[t] for each component i used by
+    the scope, and z_i[t] under strict-shift PIT z-score consumes raw_i observations
+    dated <= t (mean/std from indices < t; value at t included in the z numerator).
+    The relevant ``feature_vintage_max_at_origin[t]`` is therefore
+    ``max(raw_i.index : raw_i.index <= t, raw_i non-NaN)`` across components used
+    by the scope.
+
+    Returns
+    -------
+    dict[str, pd.Series]
+        Component-id (``"z1"``..``"z5"``) -> monthly-EOM raw observation series.
+        Each is the same input the corresponding ``build_zN_xxx`` function feeds
+        into ``pit_zscore``. Re-resamples masters; cheap (~100 ms total) and avoids
+        breaking the existing ``build_zN_xxx`` single-return signatures.
+    """
+    walcl = load_master("walcl").data.astype("float64").dropna()
+    wdtgal = load_master("wdtgal").data.astype("float64").dropna()
+    rrpontsyd = load_master("rrpontsyd").data.astype("float64").dropna()
+    m2sl = load_master("m2_sl").data.astype("float64").dropna()
+    busloans = load_master("busloans").data.astype("float64").dropna()
+    totll = load_master("totll").data.astype("float64").dropna()
+    dtwexbgs = load_master("dtwexbgs").data.astype("float64").dropna()
+    ted = load_master("tedrate").data.astype("float64").dropna()
+    sofr = load_master("sofr").data.astype("float64").dropna()
+    iorb = load_master("iorb").data.astype("float64").dropna()
+    ioer = load_master("ioer").data.astype("float64").dropna()
+
+    walcl_m = _resample_monthly_eom(walcl)
+    wdtgal_m = _resample_monthly_eom(wdtgal)
+    rrp_m = _resample_monthly_eom(rrpontsyd)
+    union = walcl_m.index.union(wdtgal_m.index).union(rrp_m.index)
+    rrp_m = rrp_m.reindex(union)
+    pre_2013 = union < RRPONTSYD_DENSE_FROM
+    rrp_m.loc[pre_2013] = rrp_m.loc[pre_2013].fillna(0.0)
+    idx_z1 = walcl_m.index.intersection(wdtgal_m.index).intersection(rrp_m.index)
+    z1_raw = (walcl_m.loc[idx_z1] - wdtgal_m.loc[idx_z1] - rrp_m.loc[idx_z1]).dropna()
+    z1_raw.name = "z1_raw_netfed_level"
+
+    m2_m = _resample_monthly_eom(m2sl)
+    z2_raw = m2_m.pct_change(periods=12).dropna()
+    z2_raw.name = "z2_raw_m2_yoy"
+
+    bus_m = _resample_monthly_eom(busloans)
+    tot_m = _resample_monthly_eom(totll)
+    bus_yoy = bus_m.pct_change(periods=12)
+    tot_yoy = tot_m.pct_change(periods=12)
+    spliced, _meta = _splice_busloans_totll_yoy_impl(
+        bus_yoy, tot_yoy, pd.Timestamp("1973-01-03"), overlap_months=36,
+    )
+    z3_raw = spliced.dropna()
+    z3_raw.name = "z3_raw_banklend_spliced_yoy"
+
+    dxy_m = _resample_monthly_eom(dtwexbgs)
+    z4_raw = np.log(dxy_m).dropna()
+    z4_raw.name = "z4_raw_log_dxy"
+
+    ted_m = _resample_monthly_eom(ted).dropna()
+    sofr_m = _resample_monthly_eom(sofr)
+    iorb_m = _resample_monthly_eom(iorb)
+    ioer_m = _resample_monthly_eom(ioer)
+    boundary_month = pd.Timestamp("2021-07-31")
+    pre = ioer_m.loc[ioer_m.index < boundary_month]
+    post = iorb_m.loc[iorb_m.index >= boundary_month]
+    iorb_extended = pd.concat([pre, post]).sort_index()
+    iorb_extended = iorb_extended[~iorb_extended.index.duplicated(keep="last")]
+    spread_m = (sofr_m - iorb_extended).dropna()
+    z5_raw = pd.concat([ted_m, spread_m]).sort_index().dropna()
+    z5_raw = z5_raw[~z5_raw.index.duplicated(keep="last")]
+    z5_raw.name = "z5_raw_funding_blend_input"
+
+    return {"z1": z1_raw, "z2": z2_raw, "z3": z3_raw, "z4": z4_raw, "z5": z5_raw}
+
+
 def build_all_components() -> ComponentBundle:
     """Build the 5 z-scored components per sealed §10.1."""
     z1 = build_z1_netfed()
@@ -315,6 +417,8 @@ def build_all_components() -> ComponentBundle:
     z3 = build_z3_banklend_yoy()
     z4 = build_z4_dxy_inverse()
     z5 = build_z5_funding_stress()
+
+    raw_levels = _build_all_raw_monthly_eom()
 
     metadata = {
         "z1_netfed": {
@@ -339,7 +443,8 @@ def build_all_components() -> ComponentBundle:
         },
     }
     return ComponentBundle(
-        z1=z1, z2=z2, z3=z3, z4=z4, z5=z5, metadata=metadata,
+        z1=z1, z2=z2, z3=z3, z4=z4, z5=z5,
+        raw_levels=raw_levels, metadata=metadata,
     )
 
 
@@ -400,6 +505,64 @@ def _feature_vintage_max_in_window(
     return pd.Timestamp(in_window.index.max())
 
 
+def _components_used_by_scope(scope: str) -> list[str]:
+    """Components contributing to ``scope`` per :data:`SCOPE_WEIGHTS`."""
+    return list(SCOPE_WEIGHTS[scope].keys())
+
+
+def _per_origin_feature_vintage_max(
+    origins: pd.DatetimeIndex,
+    raw_levels: dict[str, pd.Series],
+    components_used: list[str],
+) -> dict[pd.Timestamp, pd.Timestamp]:
+    """For each origin ``t``, compute the latest raw observation_date used by
+    composite[t] across ``components_used``.
+
+    Per sealed §3.2.2 + Phase B+C arbitration §B (Option B3): under strict-shift
+    PIT z-score on a monthly EOM grid, ``z_i[t]`` uses ``raw_i`` observations
+    dated ``<= t`` (current value at t in the z numerator; mean/std from indices
+    strictly < t). The composite at t reads ``z_i[t]`` for each component used,
+    so the maximum observation_date consumed at origin t is
+    ``max_i (max{idx in raw_i.index : idx <= t, raw_i[idx] is non-NaN})``.
+
+    Returns
+    -------
+    dict[Timestamp, Timestamp]
+        Maps each origin ``t`` (only those for which at least one component has
+        a non-NaN raw observation dated ``<= t``) to the maximum raw
+        observation_date used by ``composite[t]``. Used by
+        :func:`src.models.v2_verdict_writer.run_pit_audit_non_tautological` to
+        assert ``fvm[t] <= t`` cell-wise — non-tautological per Strategist
+        mistake #10 (forward policy).
+    """
+    out: dict[pd.Timestamp, pd.Timestamp] = {}
+    if not components_used or not raw_levels:
+        return out
+    cached_nonnan_idx: dict[str, pd.DatetimeIndex] = {}
+    for cid in components_used:
+        raw = raw_levels.get(cid)
+        if raw is None or raw.empty:
+            cached_nonnan_idx[cid] = pd.DatetimeIndex([])
+            continue
+        cached_nonnan_idx[cid] = raw.dropna().index.sort_values()
+    for t in origins:
+        t_ts = pd.Timestamp(t)
+        max_obs: Optional[pd.Timestamp] = None
+        for cid in components_used:
+            nonnan_idx = cached_nonnan_idx.get(cid)
+            if nonnan_idx is None or len(nonnan_idx) == 0:
+                continue
+            pos = nonnan_idx.searchsorted(t_ts, side="right") - 1
+            if pos < 0:
+                continue
+            latest = pd.Timestamp(nonnan_idx[pos])
+            if max_obs is None or latest > max_obs:
+                max_obs = latest
+        if max_obs is not None:
+            out[t_ts] = max_obs
+    return out
+
+
 def build_v2_panel(
     horizons_years: tuple[int, ...] = DEFAULT_HORIZONS_YEARS,
     scopes: tuple[str, ...] = ("LC_FULL", "LC_TIER2", "LC_DEEP"),
@@ -458,13 +621,24 @@ def build_v2_panel(
             n_obs_insample = int(in_sample.shape[0])
             n_obs_oos = int(oos.shape[0])
 
-            # PIT feature_vintage_max for the cell: the latest forecast-origin
-            # date in the cell. Under strict-shift PIT z-score, the underlying
-            # data used at row t is observation-dated < t — so this date is an
-            # upper bound on the underlying observation dates used.
-            fvm: Optional[pd.Timestamp] = None
-            if aligned.shape[0] > 0:
+            # Phase F-BLK1.A: per-origin feature_vintage_max from raw_levels.
+            # For each origin t in the cell's aligned index, fvm_at_origin[t] =
+            # max raw observation_date <= t across components used by scope, per
+            # sealed §3.2.2 + Phase B+C §B (Option B3, observation-date approx).
+            # The cell-level feature_vintage_max = max across origins; under
+            # correct strict-shift PIT z-score this equals aligned.index.max(),
+            # but the per-origin map is what the non-tautological PIT audit
+            # (run_pit_audit_non_tautological) checks: fvm[t] <= t per origin.
+            components_used = _components_used_by_scope(scope)
+            fvm_at_origin = _per_origin_feature_vintage_max(
+                aligned.index, components.raw_levels, components_used,
+            )
+            if fvm_at_origin:
+                fvm = pd.Timestamp(max(fvm_at_origin.values()))
+            elif aligned.shape[0] > 0:
                 fvm = pd.Timestamp(aligned.index.max())
+            else:
+                fvm = None
 
             cells[(scope, h_y)] = PanelCell(
                 composite=scope,
@@ -477,6 +651,7 @@ def build_v2_panel(
                 n_obs_oos=n_obs_oos,
                 feature_vintage_max=fvm,
                 oos_split_date=scope_oos_split,
+                feature_vintage_max_at_origin=fvm_at_origin,
             )
 
     meta = {
@@ -486,6 +661,14 @@ def build_v2_panel(
         "feature_vintage_basis_note": (
             "v2.0 approximates vintage by observation date per sealed §3.2.2 + "
             "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §2 (Option B3)."
+        ),
+        "pit_audit_construction": "per_origin_non_tautological_F_BLK1_A",
+        "pit_audit_construction_note": (
+            "Phase F-BLK1.A: each cell records feature_vintage_max_at_origin[t] = "
+            "max raw observation_date <= t across components used by scope. Audit "
+            "(run_pit_audit_non_tautological) iterates (origin, cell) pairs and "
+            "asserts fvm[t] <= t. Pre-BLK1 implementation set fvm to the latest "
+            "aligned origin without per-origin tracking (Codex Round 5 BLOCKER CR-1)."
         ),
         "horizons_years": list(horizons_years),
         "scopes": list(scopes),
