@@ -390,6 +390,62 @@ def _criterion_record_c7(bonferroni: list[BonferroniCell]) -> dict[str, Any]:
     }
 
 
+def run_pit_audit_non_tautological(panel: V2Panel) -> dict[str, Any]:
+    """PIT look-ahead audit per sealed §3.2.2 — non-tautological per Strategist mistake #10.
+
+    For every (origin t, cell) pair in ``panel.cells[*].feature_vintage_max_at_origin``,
+    asserts ``feature_vintage_max_at_origin[t] <= t``. A planted look-ahead
+    violation MUST be caught by this audit (see
+    ``tests/models/test_v2_pit_audit_non_tautological.py``).
+
+    The pre-BLK1 implementation in :func:`compose_verdict_json` set the cell-level
+    ``feature_vintage_max`` to the latest aligned forecast-origin and then
+    compared ``fvm <= max_origin`` — tautologically ``max <= max``. Codex Round 5
+    BLOCKER CR-1 flagged this; Phase F-BLK1.B replaces it with the per-origin
+    construction populated by :func:`build_v2_panel`.
+
+    Returns
+    -------
+    dict
+        ``{"audit_status": "PASS"|"FAIL", "n_cells_audited": int,
+        "n_origins_audited": int, "n_violations": int, "violations": [...]}``.
+    """
+    audit: dict[str, Any] = {
+        "audit_status": "PASS",
+        "n_cells_audited": 0,
+        "n_origins_audited": 0,
+        "n_violations": 0,
+        "violations": [],
+        "feature_vintage_basis": panel.meta.get("feature_vintage_basis"),
+        "feature_vintage_basis_note": panel.meta.get("feature_vintage_basis_note"),
+        "pit_audit_construction": panel.meta.get(
+            "pit_audit_construction", "unknown_pre_blk1"
+        ),
+    }
+    for (scope, h_y), cell in panel.cells.items():
+        audit["n_cells_audited"] += 1
+        fvm_per_origin = getattr(cell, "feature_vintage_max_at_origin", {}) or {}
+        for origin_t, max_obs in fvm_per_origin.items():
+            audit["n_origins_audited"] += 1
+            origin_ts = pd.Timestamp(origin_t)
+            max_obs_ts = pd.Timestamp(max_obs)
+            if max_obs_ts > origin_ts:
+                audit["violations"].append(
+                    {
+                        "cell": f"{scope}_{h_y}Y",
+                        "origin": origin_ts.isoformat(),
+                        "feature_vintage_max": max_obs_ts.isoformat(),
+                        "violation": (
+                            f"feature_vintage_max ({max_obs_ts.isoformat()}) > "
+                            f"origin ({origin_ts.isoformat()})"
+                        ),
+                    }
+                )
+                audit["n_violations"] += 1
+    audit["audit_status"] = "PASS" if audit["n_violations"] == 0 else "FAIL"
+    return audit
+
+
 def _evidence_status(criteria: list[dict[str, Any]]) -> str:
     statuses = [c["status"] for c in criteria]
     if all(s == "NOT_EVALUABLE_COUNTED_FAIL" for s in statuses):
@@ -477,42 +533,22 @@ def compose_verdict_json(
         )
     evidence_status = _evidence_status(criteria)
 
-    # PIT look-ahead audit.
-    violations: list[dict[str, Any]] = []
-    for c in criteria:
-        for cell_rec in c.get("cells", []):
-            fvm = cell_rec.get("feature_vintage_max")
-            score_date = cell_rec.get("score_date")
-            origin_max = cell_rec.get("train_cutoff_inclusive")
-            evaluable = cell_rec.get("evaluable", False)
-            if not evaluable or fvm is None:
-                continue
-            # PIT invariant: fvm <= cell-latest-forecast-origin.
-            # We approximate latest-origin by score_date - h_months ~= train_cutoff_inclusive
-            # (whichever is non-None); strict-shift PIT in pit_zscore guarantees the
-            # underlying data used was observation-dated < cell origin.
-            # Accept the audit if fvm is well-defined and the cell evaluable
-            # (the strict-shift PIT construction makes this invariant trivially true).
-            # Record any mismatch defensively.
-            try:
-                fvm_ts = pd.Timestamp(fvm)
-            except (TypeError, ValueError):
-                violations.append(
-                    {
-                        "criterion_id": c["criterion_id"],
-                        "cell": cell_rec.get("composite", ""),
-                        "issue": "feature_vintage_max_unparseable",
-                        "feature_vintage_max": fvm,
-                    }
-                )
-                continue
-            # No additional violation check needed under strict-shift PIT.
-
+    # Phase F-BLK1.B: non-tautological PIT look-ahead audit per sealed §3.2.2.
+    # Iterates (origin, cell) pairs from panel.cells[*].feature_vintage_max_at_origin
+    # (populated by Phase F-BLK1.A) and asserts fvm[t] <= t. The pre-BLK1 audit
+    # compared cell-level fvm (= max aligned origin) to max origin and was
+    # tautologically PASS (Codex Round 5 BLOCKER CR-1).
+    non_taut_audit = run_pit_audit_non_tautological(panel)
     audit = {
-        "all_cells_pit_compliant": len(violations) == 0,
-        "violations": violations,
-        "feature_vintage_basis": panel.meta.get("feature_vintage_basis"),
-        "feature_vintage_basis_note": panel.meta.get("feature_vintage_basis_note"),
+        "all_cells_pit_compliant": non_taut_audit["audit_status"] == "PASS",
+        "audit_status": non_taut_audit["audit_status"],
+        "n_cells_audited": non_taut_audit["n_cells_audited"],
+        "n_origins_audited": non_taut_audit["n_origins_audited"],
+        "n_violations": non_taut_audit["n_violations"],
+        "violations": non_taut_audit["violations"],
+        "feature_vintage_basis": non_taut_audit["feature_vintage_basis"],
+        "feature_vintage_basis_note": non_taut_audit["feature_vintage_basis_note"],
+        "pit_audit_construction": non_taut_audit["pit_audit_construction"],
     }
 
     verdict_doc: dict[str, Any] = {
