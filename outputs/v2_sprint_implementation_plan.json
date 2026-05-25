@@ -1,0 +1,216 @@
+{
+  "schema_version": "v2.0.implementation_plan.1",
+  "generated_at": "2026-05-24",
+  "sealed_pre_reg_path": "buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md",
+  "sealed_pre_reg_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05",
+  "seal_commit": "2a94417524e67c7b88cb05ad1ac61fafd6b5711a",
+  "project_root": "buffet_indicator/",
+  "src_layout": "buffet_indicator/src/<package>/<module>.py",
+  "test_layout": "buffet_indicator/tests/<package>/test_<module>.py",
+  "import_pattern": "from src.<package>.<module> import <function>",
+  "test_path_pattern": "_ROOT = Path(__file__).resolve().parents[<depth>]; sys.path.insert(0, str(_ROOT))",
+  "phase_a_functions": [
+    {
+      "id": "F01",
+      "name": "compute_hac_lag",
+      "signature": "def compute_hac_lag(horizon_months: int) -> int",
+      "module_path": "buffet_indicator/src/stats/hac.py",
+      "import_path": "src.stats.hac",
+      "spec_refs": ["§3.2 (HAC lag = horizon_months − 1)", "§11.1 line 729"],
+      "test_ids": ["test_compute_hac_lag_uses_v1_formula"]
+    },
+    {
+      "id": "F02",
+      "name": "sample_gate_status",
+      "signature": "def sample_gate_status(n_obs_oos: int, hac_lag: int, n_eff: float) -> Literal[\"evaluable\", \"not_evaluable\"]",
+      "module_path": "buffet_indicator/src/stats/sample_gate.py",
+      "import_path": "src.stats.sample_gate",
+      "spec_refs": ["§3.4 (gate formula)", "§11.1 line 730"],
+      "test_ids": ["test_sample_gate_boundary_basic", "test_sample_gate_boundaries_include_hac_and_neff"]
+    },
+    {
+      "id": "F03",
+      "name": "fit_conditional_skew_t",
+      "signature": "def fit_conditional_skew_t(residuals: np.ndarray, *, seed: int) -> SkewTFitResult",
+      "module_path": "buffet_indicator/src/stats/skewt.py",
+      "import_path": "src.stats.skewt",
+      "spec_refs": ["§3.7 Amendment 3 (Hansen 1994 skewed-t + fallback)", "§11.1 line 731"],
+      "test_ids": ["test_skewstudent_loglikelihood_signature_is_used_correctly", "test_skewed_t_known_distribution_and_fallback"]
+    },
+    {
+      "id": "F04",
+      "name": "run_predictive_regression_v2",
+      "signature": "def run_predictive_regression_v2(x, y, *, horizon_months: int, forecast_origin: pd.Timestamp) -> RegressionResult",
+      "module_path": "buffet_indicator/src/models/predictive_regression_v2.py",
+      "import_path": "src.models.predictive_regression_v2",
+      "spec_refs": ["§3.3 (predictive regression)", "§3.5 (NW HAC, Stambaugh, Campbell-Yogo)", "§11.1 line 732"],
+      "test_ids": ["test_predictive_regression_uses_statsmodels_hac", "test_oos_rows_counted_after_realization"]
+    },
+    {
+      "id": "F05",
+      "name": "stationary_bootstrap_ci",
+      "signature": "def stationary_bootstrap_ci(data, *, n_bootstrap: int, seed: int) -> BootstrapResult",
+      "module_path": "buffet_indicator/src/stats/bootstrap.py",
+      "import_path": "src.stats.bootstrap",
+      "spec_refs": ["§3.8 (stationary block bootstrap, 50K immutable)", "§11.1 line 733"],
+      "test_ids": ["test_stationary_bootstrap_is_byte_identical", "test_bootstrap_count_policy_is_not_runtime_dependent"]
+    },
+    {
+      "id": "F06",
+      "name": "evaluate_v2_criteria",
+      "signature": "def evaluate_v2_criteria(panel: pd.DataFrame) -> VerdictResult",
+      "module_path": "buffet_indicator/src/models/v2_criteria.py",
+      "import_path": "src.models.v2_criteria",
+      "spec_refs": ["§5 (7 criteria evaluation)", "§12 (verdict JSON schema)", "§11.1 line 734"],
+      "test_ids": ["test_all_seven_criteria_known_pass_and_fail", "test_criterion_4_strict_t_boundary", "test_bonferroni_denominator_is_20"]
+    },
+    {
+      "id": "F07",
+      "name": "assert_prereg_ancestor",
+      "signature": "def assert_prereg_ancestor(pre_reg_commit: str, *, sealed: bool, allow_preseal: bool = False, head: str = \"HEAD\") -> None",
+      "module_path": "buffet_indicator/src/stats/hard_gate.py",
+      "import_path": "src.stats.hard_gate",
+      "spec_refs": ["§0.3 + §8.2 (HARD GATE invariant)", "§11.1 line 735"],
+      "test_ids": ["test_hard_gate_handles_ancestor_detached_preseal_and_shallow"],
+      "priority": "FIRST",
+      "criterion_lift": "seal report §16 #6"
+    },
+    {
+      "id": "F08",
+      "name": "annual_retest_status",
+      "signature": "def annual_retest_status(today: date, state: RetestState, data: pd.DataFrame) -> RetestResult",
+      "module_path": "buffet_indicator/src/models/retest.py",
+      "import_path": "src.models.retest",
+      "spec_refs": ["§6.2 (annual re-test cadence)", "§11.1 line 736"],
+      "test_ids": ["test_annual_retest_fires_once_per_year", "test_retest_unstable_verdict_is_schema_valid"]
+    },
+    {
+      "id": "F09",
+      "name": "compare_threshold",
+      "signature": "def compare_threshold(value: float, op: str, threshold: float, *, on_nan: str = \"fail\") -> bool",
+      "module_path": "buffet_indicator/src/stats/compare.py",
+      "import_path": "src.stats.compare",
+      "spec_refs": ["§5 (criterion comparison helper)", "§11.1 line 737"],
+      "test_ids": []
+    },
+    {
+      "id": "F10",
+      "name": "collect_v1_realized_sample_counts",
+      "signature": "def collect_v1_realized_sample_counts(ref: str = \"spec/liquidity-composite-v1.0\") -> pd.DataFrame",
+      "module_path": "buffet_indicator/src/ingest/v1_sample_counts.py",
+      "import_path": "src.ingest.v1_sample_counts",
+      "spec_refs": ["§10.3 footnote (deferred n_obs_oos recomputation)", "§11.1 line 738"],
+      "test_ids": []
+    },
+    {
+      "id": "F11",
+      "name": "parse_component_id_map",
+      "signature": "def parse_component_id_map(spec_path: str) -> dict",
+      "module_path": "buffet_indicator/src/ingest/component_map.py",
+      "import_path": "src.ingest.component_map",
+      "spec_refs": ["§1 component IDs catalog", "§11.1 line 739"],
+      "test_ids": ["test_prereg_component_id_map_matches_v1_sealed_catalog"]
+    },
+    {
+      "id": "F12",
+      "name": "should_apply_stambaugh",
+      "signature": "def should_apply_stambaugh(rho: float) -> bool",
+      "module_path": "buffet_indicator/src/stats/stambaugh.py",
+      "import_path": "src.stats.stambaugh",
+      "spec_refs": ["§3.5 (Stambaugh threshold ρ̂ > 0.85, strict)", "§11.1 line 740"],
+      "test_ids": ["test_stambaugh_exact_boundary_not_applied"]
+    },
+    {
+      "id": "F13",
+      "name": "choose_stationary_block_length",
+      "signature": "def choose_stationary_block_length(x: np.ndarray) -> int",
+      "module_path": "buffet_indicator/src/stats/bootstrap.py",
+      "import_path": "src.stats.bootstrap",
+      "spec_refs": ["§3.8 (arch.bootstrap.optimal_block_length 'stationary' col)", "§11.1 line 741"],
+      "test_ids": ["test_optimal_block_length_uses_arch_stationary_column"],
+      "note": "co-located with F05 (stationary_bootstrap_ci) in src/stats/bootstrap.py"
+    },
+    {
+      "id": "F14",
+      "name": "load_bootstrap_policy",
+      "signature": "def load_bootstrap_policy() -> BootstrapPolicy",
+      "module_path": "buffet_indicator/src/stats/bootstrap_policy.py",
+      "import_path": "src.stats.bootstrap_policy",
+      "spec_refs": ["§3.8 (n_bootstrap=50_000 immutable)", "§11.1 line 742"],
+      "test_ids": ["test_bootstrap_count_policy_is_not_runtime_dependent"]
+    },
+    {
+      "id": "F15",
+      "name": "collect_seal_metadata_with_python_helpers",
+      "signature": "def collect_seal_metadata_with_python_helpers() -> dict",
+      "module_path": "buffet_indicator/src/seal/metadata.py",
+      "import_path": "src.seal.metadata",
+      "spec_refs": ["§9 item 11 (cross-platform seal helper)", "§11.1 line 743"],
+      "test_ids": ["test_seal_helpers_do_not_require_unix_only_tools"]
+    }
+  ],
+  "phase_a_tests": [
+    {"id": "T01", "name": "test_compute_hac_lag_uses_v1_formula", "target_function": "F01", "test_file": "buffet_indicator/tests/stats/test_hac.py", "boundary": "h=12->11, h=120->119"},
+    {"id": "T02", "name": "test_sample_gate_boundary_basic", "target_function": "F02", "test_file": "buffet_indicator/tests/stats/test_sample_gate.py", "boundary": "n_obs_oos=60, hac_lag=11 -> evaluable; 59 -> not_evaluable"},
+    {"id": "T03", "name": "test_sample_gate_boundaries_include_hac_and_neff", "target_function": "F02", "test_file": "buffet_indicator/tests/stats/test_sample_gate.py", "boundary": "n_obs_oos=105 hac=35 neff=30.0 -> evaluable; 104 -> not; neff=29.999 -> not"},
+    {"id": "T04", "name": "test_predictive_regression_uses_statsmodels_hac", "target_function": "F04", "test_file": "buffet_indicator/tests/models/test_predictive_regression_v2.py", "boundary": "NW use_correction=True; HAC_kwds set correctly"},
+    {"id": "T05", "name": "test_oos_rows_counted_after_realization", "target_function": "F04", "test_file": "buffet_indicator/tests/models/test_predictive_regression_v2.py", "boundary": "s + h <= t rule on synthetic panel"},
+    {"id": "T06", "name": "test_skewstudent_loglikelihood_signature_is_used_correctly", "target_function": "F03", "test_file": "buffet_indicator/tests/stats/test_skewt.py", "boundary": "arch API loglikelihood(parameters, resids, sigma2); finite likelihood"},
+    {"id": "T07", "name": "test_skewed_t_known_distribution_and_fallback", "target_function": "F03", "test_file": "buffet_indicator/tests/stats/test_skewt.py", "boundary": "seed=42 size=500 t-df=5 -> 3.0<=eta_tail<=8.0, |lambda|<=0.15; degenerate -> gaussian_fallback"},
+    {"id": "T08", "name": "test_optimal_block_length_uses_arch_stationary_column", "target_function": "F13", "test_file": "buffet_indicator/tests/stats/test_bootstrap.py", "boundary": "arch.bootstrap.optimal_block_length(np.arange(100.0))['stationary'].iloc[0] matches"},
+    {"id": "T09", "name": "test_stationary_bootstrap_is_byte_identical", "target_function": "F05", "test_file": "buffet_indicator/tests/stats/test_bootstrap.py", "boundary": "two runs same seed -> identical bytes"},
+    {"id": "T10", "name": "test_stambaugh_exact_boundary_not_applied", "target_function": "F12", "test_file": "buffet_indicator/tests/stats/test_stambaugh.py", "boundary": "should_apply_stambaugh(0.85) is False; nextafter(0.85, 1.0) is True"},
+    {"id": "T11", "name": "test_campbell_yogo_status_never_silent_nan", "target_function": "F04", "test_file": "buffet_indicator/tests/models/test_predictive_regression_v2.py", "boundary": "rho=0.99 -> status enum always set"},
+    {"id": "T12", "name": "test_all_seven_criteria_known_pass_and_fail", "target_function": "F06", "test_file": "buffet_indicator/tests/models/test_v2_criteria.py", "boundary": "synthetic all-pass / all-fail fixtures"},
+    {"id": "T13", "name": "test_criterion_4_strict_t_boundary", "target_function": "F06", "test_file": "buffet_indicator/tests/models/test_v2_criteria.py", "boundary": "t=1.65 -> FAIL; t=1.6501 -> PASS; strict >"},
+    {"id": "T14", "name": "test_bonferroni_denominator_is_20", "target_function": "F06", "test_file": "buffet_indicator/tests/models/test_v2_criteria.py", "boundary": "alpha/20 = 0.0025"},
+    {"id": "T15", "name": "test_hard_gate_handles_ancestor_detached_preseal_and_shallow", "target_function": "F07", "test_file": "buffet_indicator/tests/stats/test_hard_gate.py", "boundary": "HardGateViolation, HardGateIndeterminate raised on synthetic git fixture", "priority": "FIRST"},
+    {"id": "T16", "name": "test_annual_retest_fires_once_per_year", "target_function": "F08", "test_file": "buffet_indicator/tests/models/test_retest.py", "boundary": "idempotency, date trigger, no-new-data handling"},
+    {"id": "T17", "name": "test_retest_unstable_verdict_is_schema_valid", "target_function": "F08", "test_file": "buffet_indicator/tests/models/test_retest.py", "boundary": "UNSTABLE schema-valid"},
+    {"id": "T18", "name": "test_prereg_component_id_map_matches_v1_sealed_catalog", "target_function": "F11", "test_file": "buffet_indicator/tests/ingest/test_component_map.py", "boundary": "z1=netfed, z2=m2_growth_yoy, z3=banklend_growth_yoy, z4=dxy_inverse, z5=funding_stress"},
+    {"id": "T19", "name": "test_bootstrap_count_policy_is_not_runtime_dependent", "target_function": "F14", "test_file": "buffet_indicator/tests/stats/test_bootstrap_policy.py", "boundary": "policy.verdict_count == 50_000; no runtime_exceeded reason permitted"},
+    {"id": "T20", "name": "test_sealed_prereg_contains_no_unresolved_placeholders", "target_function": "seal-test", "test_file": "buffet_indicator/tests/seal/test_sealed_prereg.py", "boundary": "no forbidden markers in sealed text (using Q5 R1 line-skip)"},
+    {"id": "T21", "name": "test_seal_helpers_do_not_require_unix_only_tools", "target_function": "F15", "test_file": "buffet_indicator/tests/seal/test_metadata_cross_platform.py", "boundary": "no jq/sha256sum dependency; Python helpers work"}
+  ],
+  "phase_b_data_layer": {
+    "load_master": {
+      "module_path": "buffet_indicator/src/ingest/master.py",
+      "import_path": "src.ingest.master",
+      "spec_refs": ["master spec §2.4.10", "kickoff directive §6.1"],
+      "note": "load_master is from master spec, not in §11.1 explicitly; required for downstream functions"
+    },
+    "splice_helpers": {
+      "module_path": "buffet_indicator/src/transform/splices_v2.py",
+      "splices": [
+        {"name": "BUSLOANS -> TOTLL", "date": "1973-01-03", "spec": "v1.0 §1.3 + v2.0 inherited via §10.1"},
+        {"name": "TED -> SOFR-IORB", "date": "2022-01-22", "spec": "v1.0 §1.3 + v2.0 inherited"},
+        {"name": "ICE DXY -> DTWEXBGS", "date": "2006-01-04", "spec": "v1.0 §1.3 + v2.0 inherited"}
+      ]
+    }
+  },
+  "phase_c_transforms": {
+    "pit_zscore": {
+      "module_path": "buffet_indicator/src/transform/pit_zscore.py",
+      "import_path": "src.transform.pit_zscore",
+      "spec_refs": ["v1.0 §1.4 (PIT expanding-window z-score; min n=120)", "kickoff §7.1"]
+    },
+    "composite_construction": {
+      "module_path": "buffet_indicator/src/models/lc_composite_v2.py",
+      "import_path": "src.models.lc_composite_v2",
+      "spec_refs": ["§1.1 + §1.2 composite scopes (LC_FULL, LC_TIER2, LC_DEEP)", "kickoff §7.2"]
+    }
+  },
+  "execution_order_this_session": [
+    "A.2 module scaffolding (15 files in 7 packages)",
+    "A.3 test scaffolding (21 tests across 9 test files)",
+    "A.4 implement src/stats/hard_gate.py FIRST (lifts §16 #6)",
+    "B/C deferred to next prompt if context budget exhausted"
+  ],
+  "execution_order_deferred": [
+    "B.1 src/ingest/master.py::load_master",
+    "B.2 src/transform/splices_v2.py (3 splices)",
+    "C.1 src/transform/pit_zscore.py",
+    "C.2 src/models/lc_composite_v2.py",
+    "D.x statistical layer (regression, NW HAC, Stambaugh, Campbell-Yogo, OOS R², skewed-t, bootstrap, criteria, verdict JSON) — separate prompt"
+  ]
+}
