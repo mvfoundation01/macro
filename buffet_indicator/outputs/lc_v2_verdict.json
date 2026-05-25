@@ -8,8 +8,8 @@
   "sealed_prereg_path": "buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md",
   "sealed_prereg_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05",
   "data_cutoff": "2026-03-31",
-  "run_timestamp": "2026-05-25T18:05:13Z",
-  "git_head": "f3659a386627ce45ef26f9ad839884c462a351c3",
+  "run_timestamp": "2026-05-25T20:58:09Z",
+  "git_head": "22f2cad8d83aa4d3a24702c5b5ecc5122c6a2ab7",
   "n_pass_total": 1,
   "n_pass_predictive": 0,
   "component_id_map": {
@@ -64,8 +64,8 @@
             "campbell_yogo_ci_lower": null,
             "campbell_yogo_ci_upper": null,
             "rho_ar1": 0.8439274652391129,
-            "oos_r2": -0.0525360994836539,
-            "clark_west_stat": -0.6743841813147187,
+            "oos_r2": 0.0351795314204556,
+            "clark_west_stat": 1.0628654539286337,
             "sigma_hat": 0.07977376510902885
           },
           "bootstrap": {
@@ -123,8 +123,8 @@
             "campbell_yogo_ci_lower": null,
             "campbell_yogo_ci_upper": null,
             "rho_ar1": 0.6865956879782511,
-            "oos_r2": -1.9685354747204276,
-            "clark_west_stat": -4.620681825544086,
+            "oos_r2": null,
+            "clark_west_stat": null,
             "sigma_hat": 0.023490660952043947
           },
           "bootstrap": {
@@ -241,8 +241,8 @@
             "campbell_yogo_ci_lower": null,
             "campbell_yogo_ci_upper": null,
             "rho_ar1": 0.9210154143171584,
-            "oos_r2": -0.14693884906679755,
-            "clark_west_stat": 0.15361833409081213,
+            "oos_r2": -0.05135593765532076,
+            "clark_west_stat": 0.81504759582819,
             "sigma_hat": 0.07928009493089756
           },
           "bootstrap": {
@@ -288,8 +288,8 @@
             "campbell_yogo_ci_lower": null,
             "campbell_yogo_ci_upper": null,
             "rho_ar1": 0.7309448586559195,
-            "oos_r2": -3.256003468191908,
-            "clark_west_stat": -5.297286490245449,
+            "oos_r2": null,
+            "clark_west_stat": null,
             "sigma_hat": 0.023368400549357866
           },
           "bootstrap": {
@@ -756,15 +756,22 @@
   },
   "look_ahead_audit": {
     "all_cells_pit_compliant": true,
+    "audit_status": "PASS",
+    "n_cells_audited": 12,
+    "n_origins_audited": 756,
+    "n_violations": 0,
     "violations": [],
     "feature_vintage_basis": "observation_date_approximation",
-    "feature_vintage_basis_note": "v2.0 approximates vintage by observation date per sealed \u00a73.2.2 + PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md \u00a72 (Option B3)."
+    "feature_vintage_basis_note": "v2.0 approximates vintage by observation date per sealed \u00a73.2.2 + PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md \u00a72 (Option B3).",
+    "pit_audit_construction": "per_origin_non_tautological_F_BLK1_A"
   },
   "panel_meta": {
     "data_cutoff": "2026-03-31",
     "forecast_origin_grid": "monthly_end_of_month",
     "feature_vintage_basis": "observation_date_approximation",
     "feature_vintage_basis_note": "v2.0 approximates vintage by observation date per sealed \u00a73.2.2 + PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md \u00a72 (Option B3).",
+    "pit_audit_construction": "per_origin_non_tautological_F_BLK1_A",
+    "pit_audit_construction_note": "Phase F-BLK1.A: each cell records feature_vintage_max_at_origin[t] = max raw observation_date <= t across components used by scope. Audit (run_pit_audit_non_tautological) iterates (origin, cell) pairs and asserts fvm[t] <= t. Pre-BLK1 implementation set fvm to the latest aligned origin without per-origin tracking (Codex Round 5 BLOCKER CR-1).",
     "horizons_years": [
       1,
       3,
@@ -811,8 +818,8 @@
     "phase_d_directive": "PROMPT_CC_v11_4_v2_sprint_PHASE_D.md",
     "phase_e_run_directive": "PROMPT_CC_v11_4_v2_sprint_PHASE_E.md",
     "seal_metadata": {
-      "git_head": "f3659a386627ce45ef26f9ad839884c462a351c3",
-      "timestamp_utc_iso8601": "2026-05-25T18:05:13Z",
+      "git_head": "22f2cad8d83aa4d3a24702c5b5ecc5122c6a2ab7",
+      "timestamp_utc_iso8601": "2026-05-25T20:58:09Z",
       "sealed_prereg_path": "buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md",
       "sealed_prereg_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05",
       "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",

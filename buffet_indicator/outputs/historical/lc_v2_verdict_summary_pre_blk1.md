@@ -1,14 +1,12 @@
-# v2.0 Liquidity Composite verdict — v11.4 sprint (Phase F-BLK1 fixed)
+# v2.0 Liquidity Composite verdict — v11.4 sprint
 
-**Run timestamp (BLK-1 re-run)**: 2026-05-25T20:58Z
-**Verdict-run commit (BLK-1)**: `22f2cad` (Phase F-BLK1.A–G applied)
-**Pre-BLK-1 baseline**: `f3659a3` / `9759146` (preserved in `outputs/historical/lc_v2_verdict_pre_blk1.json`)
+**Run timestamp**: 2026-05-25T18:05:13Z
+**Verdict-run commit**: `f3659a3` (Phase E.2/E.3 complete; verdict-bearing run executed at this HEAD)
+**Verdict-bearing commit (this output)**: `9759146` (Phase E.4/E.5/E.6 with verdict JSON + sidecar committed)
 **Sealed pre-reg commit**: `2a94417` (tag `v11.4-prereg-sealed`)
-**Sealed SHA-256**: `c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05` (immutable)
+**Sealed SHA-256**: `c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05`
 **Data cutoff**: 2026-03-31
 **Decision rule**: `n_pass >= 4 of 7` (sealed §2.1)
-
-> **Phase F-BLK1 (Strategist-authorized via `prompt/052526/PROMPT_CC_v11_4_phase_F_BLK1_fix.md`)** brings the implementation into compliance with what the sealed pre-reg already specified. **Outcome UNCHANGED** vs pre-BLK-1 (`FAIL`, 1/7). See `outputs/lc_v2_verdict_blk1_delta.md` for the per-criterion delta; `outputs/historical/` preserves the pre-BLK-1 verdict + sidecar + summary.
 
 ## Headline
 
@@ -81,36 +79,15 @@ Variance Inflation Factor across the 5 aligned z-scored components has
 max ≈ 1.70 < 5.0. The components remain effectively orthogonal under v2.0's
 z-score construction — consistent with their distinct economic content.
 
-## Audit (Phase F-BLK1.B: non-tautological)
+## Audit
 
-- **PIT look-ahead audit**: **PASS** (audit_status=PASS, n_violations=0).
-  Phase F-BLK1.A populated `feature_vintage_max_at_origin` per cell from raw
-  monthly-EOM series; Phase F-BLK1.B's `run_pit_audit_non_tautological`
-  walks (origin, cell) pairs and asserts `fvm[t] <= t`. Iterates
-  **12 cells × 756 origin-cell pairs total** (vs pre-BLK-1 tautological
-  iteration which did no inequality check). A synthetic look-ahead test
-  (`test_pit_audit_catches_synthetic_look_ahead`) plants a 2099-12-31 `fvm`
-  and verifies the audit reports the violation — proves non-tautological.
-- **SHA-256 reproducibility (Phase F-BLK1.F)**: byte-exact across OSes.
-  Pre-BLK-1 sidecar (`84a457e3…`) did not match the Windows file-byte SHA
-  (`6671cc9f…`); BLK-1.F writes file in binary mode with LF newlines and
-  read-back verification. Current sidecar `df54264099…` matches `sha256sum`.
-- **`n_bootstrap` immutability (Phase F-BLK1.E)**: sealed §3.8 invariant
-  architecturally enforced. CLI `--n-bootstrap` flag removed;
-  `ensure_verdict_n_bootstrap()` raises if a verdict-bearing path receives
-  non-50K. Diagnostic/test callers must pass `purpose="diagnostic"`/`"test"`.
-- **OOS R² benchmark (Phase F-BLK1.D)**: expanding prevailing mean per
-  Goyal-Welch (2008) + sealed §3.3 realized-return cutoff replaces the
-  pre-BLK-1 fixed `mean(y_train)` benchmark. R² shifts in evaluable cells
-  but none affect the verdict (all gated by `n_obs_oos` floor).
-- **Skew-t exception logging (Phase F-BLK1.G)**: `ValueError` → INFO log +
-  `value_error:` fallback; other Exception → ERROR log w/ traceback +
-  `unexpected_<class>:` fallback. No more silent `None` skewt.
-- **Sealed pre-reg integrity**: PASS (SHA-256 matches — immutable).
-- **§16 seal-report criteria**: 10/10 PASS (BLK-1 does not affect seal-report).
-- **Acceptance tests**: 55 / 55 PASS post-BLK-1; +16 new BLK-1 tests added
-  (synthetic look-ahead detection, expanding prevailing mean, n_bootstrap
-  enforcement, byte-exact SHA, skew-t exception logging) all PASS.
+- **PIT look-ahead audit**: **PASS** (0 violations). Strict-shift PIT z-score
+  in `src.transform.pit_zscore.pit_zscore` (`strict_shift=True`,
+  `min_window=120`) makes the cell-level `feature_vintage_max <= cell origin`
+  invariant true by construction.
+- **Sealed pre-reg integrity**: PASS (SHA-256 matches).
+- **§16 seal-report criteria**: 10/10 PASS (no regression).
+- **§11.2 acceptance tests**: 21/21 still PASS post-Phase-E.
 
 ## Implications
 
@@ -132,20 +109,15 @@ Per sealed §6.4 *"Meta-finding on 3-of-3 pre-reg FAIL"*:
 
 ## Provenance
 
-- Verdict JSON (canonical, post-BLK-1): `buffet_indicator/outputs/lc_v2_verdict.json`
+- Verdict JSON: `buffet_indicator/outputs/lc_v2_verdict.json`
 - Verdict JSON SHA-256: `buffet_indicator/outputs/lc_v2_verdict.json.sha256` →
-  `df542640992d4cf5b6014d6483629266f93399dd01d3d9f7cc9a181ea507ab0c`
-  (matches `sha256sum` on Windows / Linux / macOS; verified by read-back)
-- Pre-BLK-1 verdict (preserved, audit-trail): `buffet_indicator/outputs/historical/lc_v2_verdict_pre_blk1.json`
-- Pre-BLK-1 sidecar (preserved as-shipped, divergent from file): `outputs/historical/lc_v2_verdict_pre_blk1.json.sha256`
-- BLK-1 delta analysis: `buffet_indicator/outputs/lc_v2_verdict_blk1_delta.md`
-- Phase F-BLK1 directive: `prompt/052526/PROMPT_CC_v11_4_phase_F_BLK1_fix.md`
+  `84a457e3f47f5ad5e11f8fc2f86adf03ea25e30fead4a99c084e99ccfa6d4180`
 - Phase E run directive: `prompt/052526/PROMPT_CC_v11_4_v2_sprint_PHASE_E.md`
 - Phase D progress (full 21/21 acceptance tests + 14 of 15 functions):
   `outputs/v2_sprint_phase_progress_2026-05-25T16-11-42Z.md`
 - Phase B+C arbitration: `prompt/052526/PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md`
 
-## Library versions (unchanged from pre-BLK-1)
+## Library versions
 
 - **Installed**: `arch=8.0.0`, `pandas=3.0.2`, `numpy=2.4.4`, `scipy=1.17.1`,
   `statsmodels=0.14.6`
@@ -153,12 +125,9 @@ Per sealed §6.4 *"Meta-finding on 3-of-3 pre-reg FAIL"*:
   `scipy=1.13.1`, `statsmodels=0.14.2`
 - **Delta**: Phase D methodology note 7 verified API compatibility for the
   two surfaces actually exercised (`SkewStudent.loglikelihood`,
-  `optimal_block_length`). Codex Round 5 noted a pinned re-run produces the
-  same verdict; Phase F closeout will pin `requirements.lock` and re-run for
-  closeout reproducibility (BLK-1 did not modify environment pinning).
+  `optimal_block_length`). Phase F closeout will pin and re-run.
 
 ## Next step
 
-Phase F-DOC: display framing per sealed §7 (`n_pass = 1 ≤ 3 → FAIL → DIAGNOSTIC ONLY view`)
-+ `requirements.lock` pin + closeout re-run + sprint closeout report +
-§6.4 meta-DECISIONS entry on the 3-of-3 pre-reg FAIL meta-finding.
+Phase F: display framing (sealed §7) + `requirements.lock` pin + re-run +
+sprint closeout report + §6.4 meta-DECISIONS entry.

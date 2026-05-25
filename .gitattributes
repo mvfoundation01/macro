@@ -3,3 +3,11 @@ data/master/*.parquet filter=lfs diff=lfs merge=lfs -text
 # v11.1: Strategy Engine outputs (large XLSX with 32 sheets, CSV with per-period metrics)
 buffet_indicator/outputs/quant_engine/latest/*.csv filter=lfs diff=lfs merge=lfs -text
 buffet_indicator/outputs/quant_engine/latest/*.xlsx filter=lfs diff=lfs merge=lfs -text
+
+# v11.4 Phase F-BLK1.F: verdict JSON + sidecar are byte-exact (LF-only)
+# Preserve LF line endings on checkout so sha256sum matches the sidecar
+# cross-platform.
+buffet_indicator/outputs/lc_v2_verdict*.json -text
+buffet_indicator/outputs/lc_v2_verdict*.json.sha256 -text
+buffet_indicator/outputs/historical/lc_v2_verdict*.json -text
+buffet_indicator/outputs/historical/lc_v2_verdict*.json.sha256 -text
