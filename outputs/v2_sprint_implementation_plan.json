@@ -174,17 +174,57 @@
   ],
   "phase_b_data_layer": {
     "load_master": {
-      "module_path": "buffet_indicator/src/ingest/master.py",
-      "import_path": "src.ingest.master",
-      "spec_refs": ["master spec §2.4.10", "kickoff directive §6.1"],
+      "module_path": "buffet_indicator/src/ingest/master_archive.py",
+      "import_path": "src.ingest.master_archive",
+      "function": "load_master",
+      "approach": "extend existing function with optional vintage kwarg (backward-compatible; default 'latest' preserves current behavior)",
+      "spec_refs": ["sealed pre-reg §3.2.2", "master spec §2.4.10"],
+      "arbitration": "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §1 Option A1",
+      "vintage_semantics": "observation-date approximation (§B Option B3); see outputs/v2_sprint_vintage_approximation_note.md",
       "note": "load_master is from master spec, not in §11.1 explicitly; required for downstream functions"
     },
     "splice_helpers": {
-      "module_path": "buffet_indicator/src/transform/splices_v2.py",
+      "module_path": "buffet_indicator/src/transform/splice.py",
+      "import_path": "src.transform.splice",
+      "exception_class": "SpliceValidationError (in src/ingest/exceptions.py or co-located in splice.py)",
+      "arbitration": "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §3 Option C1",
       "splices": [
-        {"name": "BUSLOANS -> TOTLL", "date": "1973-01-03", "spec": "v1.0 §1.3 + v2.0 inherited via §10.1"},
-        {"name": "TED -> SOFR-IORB", "date": "2022-01-22", "spec": "v1.0 §1.3 + v2.0 inherited"},
-        {"name": "ICE DXY -> DTWEXBGS", "date": "2006-01-04", "spec": "v1.0 §1.3 + v2.0 inherited"}
+        {
+          "name": "splice_busloans_totll_yoy",
+          "from_to": "BUSLOANS -> TOTLL",
+          "date": "1973-01-03",
+          "space": "YoY growth rate",
+          "method": "additive constant c",
+          "gates": "corr(BUSLOANS_yoy, TOTLL_yoy) > 0.50 AND abs(c) < 0.05",
+          "spec": "sealed §10.1 + arbitration §3 Splice 1"
+        },
+        {
+          "name": "splice_icedxy_dtwexbgs_log",
+          "from_to": "ICE_DXY -> DTWEXBGS",
+          "date": "2006-01-04",
+          "space": "log-levels",
+          "method": "additive constant c",
+          "gates": "corr(log_ICE_DXY, log_DTWEXBGS) > 0.85 AND mean(abs(z-divergence)) < 0.30",
+          "spec": "sealed §10.1 + arbitration §3 Splice 2"
+        },
+        {
+          "name": "concat_ioer_iorb",
+          "from_to": "IOER -> IORB",
+          "date": "2021-07-29",
+          "space": "level (no splice)",
+          "method": "level concat (no adjustment)",
+          "gates": "abs(IOER@2021-07-28 - IORB@2021-07-29) < 0.01pp",
+          "spec": "sealed §10.1 + arbitration §3 Splice 3 pre-step"
+        },
+        {
+          "name": "splice_ted_sofr_iorb_zblend",
+          "from_to": "TED -> (SOFR - IORB_extended)",
+          "date": "2022-01-22 (anchor); blend window Feb 2022 -> Apr 2023 (14 months)",
+          "space": "z-score",
+          "method": "linear blend lambda_t = (t - 2022-02) / (2023-04 - 2022-02)",
+          "gates": "abs(funding_z.diff().max()) < 1.5 sigma within blend window",
+          "spec": "sealed §10.1 + arbitration §3 Splice 3 main"
+        }
       ]
     }
   },
@@ -192,12 +232,26 @@
     "pit_zscore": {
       "module_path": "buffet_indicator/src/transform/pit_zscore.py",
       "import_path": "src.transform.pit_zscore",
-      "spec_refs": ["v1.0 §1.4 (PIT expanding-window z-score; min n=120)", "kickoff §7.1"]
+      "function": "pit_zscore",
+      "defaults": {"min_window": 120, "strict_shift": true},
+      "approach": "NEW module; v2.0 canonical defaults; existing compute_pit_zscore and expanding_zscore UNTOUCHED",
+      "spec_refs": ["sealed pre-reg §10.1 PIT z-score definition"],
+      "arbitration": "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §4 Option D1"
     },
     "composite_construction": {
-      "module_path": "buffet_indicator/src/models/lc_composite_v2.py",
-      "import_path": "src.models.lc_composite_v2",
-      "spec_refs": ["§1.1 + §1.2 composite scopes (LC_FULL, LC_TIER2, LC_DEEP)", "kickoff §7.2"]
+      "module_path": "buffet_indicator/src/transform/composite.py",
+      "import_path": "src.transform.composite",
+      "function": "build_composite",
+      "scopes": {
+        "LC_FULL":  {"z1": 0.25,  "z2": 0.20,  "z3": 0.20,  "z4": 0.20,  "z5": -0.15, "effective_start": "2003-01-31"},
+        "LC_TIER2": {"z2": 0.267, "z3": 0.267, "z4": 0.267, "z5": -0.200,             "effective_start": "1987-01-31"},
+        "LC_DEEP":  {"z2": 0.333, "z3": 0.333, "z4": 0.333,                           "effective_start": "1973-01-31"}
+      },
+      "normalization": "sum_of_absolute_values approximately 1.0 (NOT signed-sum=1)",
+      "nan_propagation": "if any required component is NaN at t, composite at t is NaN (no silent weight reallocation)",
+      "effective_start": "policy-based (sealed §10.1); mask dates before scope effective_start to NaN",
+      "spec_refs": ["sealed pre-reg §1.1, §1.2, §10.1"],
+      "arbitration": "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §5 (E.1, E.2, E.3 all confirmed)"
     }
   },
   "execution_order_this_session": [
@@ -207,10 +261,27 @@
     "B/C deferred to next prompt if context budget exhausted"
   ],
   "execution_order_deferred": [
-    "B.1 src/ingest/master.py::load_master",
-    "B.2 src/transform/splices_v2.py (3 splices)",
-    "C.1 src/transform/pit_zscore.py",
-    "C.2 src/models/lc_composite_v2.py",
+    "B.1 src/ingest/master_archive.py::load_master (extend with vintage kwarg)",
+    "B.2 src/transform/splice.py (4 splice/pre-step helpers)",
+    "C.1 src/transform/pit_zscore.py (n>=120 strict-shift)",
+    "C.2 src/transform/composite.py (LC_FULL/LC_TIER2/LC_DEEP)",
     "D.x statistical layer (regression, NW HAC, Stambaugh, Campbell-Yogo, OOS R², skewed-t, bootstrap, criteria, verdict JSON) — separate prompt"
+  ],
+  "corrections_log": [
+    {
+      "timestamp": "2026-05-25T12:55:00Z",
+      "authority": "PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md §6",
+      "rationale": "Phase B+C callback resolved 7 conflicts between original prompt and sealed §10.1; module paths corrected and concat_ioer_iorb added as new function (z5 pre-step). Composite normalization confirmed as sum-of-absolute-values approximately 1.0.",
+      "strategist_mistake_number": 9,
+      "changes": [
+        "load_master module: src/ingest/master.py -> src/ingest/master_archive.py (extend existing)",
+        "splice helpers module: src/transform/splices_v2.py -> src/transform/splice.py",
+        "splice helpers count: 3 -> 4 (added concat_ioer_iorb pre-step for z5)",
+        "splice methods specified verbatim per sealed §10.1 (YoY-growth / log-levels / z-blend)",
+        "composite module: src/models/lc_composite_v2.py -> src/transform/composite.py",
+        "composite scopes/weights/effective_start added explicitly per sealed §10.1",
+        "pit_zscore defaults: min_window=120, strict_shift=true (sealed §10.1)"
+      ]
+    }
   ]
 }

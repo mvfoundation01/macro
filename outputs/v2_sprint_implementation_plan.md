@@ -62,12 +62,22 @@
 
 ## §D — Phase B/C deferred items (NOT in §11.1 explicitly but needed downstream)
 
-- `load_master()` → `src/ingest/master.py` (per master spec §2.4.10 and kickoff §6.1)
-- 3 splice helpers → `src/transform/splices_v2.py` (BUSLOANS→TOTLL 1973-01-03; TED→SOFR-IORB 2022-01-22; ICE DXY→DTWEXBGS 2006-01-04)
-- PIT z-score → `src/transform/pit_zscore.py`
-- LC composite construction (LC_FULL/LC_TIER2/LC_DEEP) → `src/models/lc_composite_v2.py`
+**Updated 2026-05-25 per `PROMPT_CC_v11_4_v2_sprint_PHASE_B_C_RESUME.md` §6** (Strategist mistake #9 acknowledged; module paths and methods corrected):
 
-These are deferred to a later session/prompt unless context budget allows mid-prompt continuation.
+- `load_master()` → **extend existing** `src/ingest/master_archive.py::load_master` with backward-compatible `vintage` kwarg (per arbitration §1 Option A1). Vintage = observation-date approximation (per §B Option B3); see `outputs/v2_sprint_vintage_approximation_note.md`.
+- **4 splice helpers** → `src/transform/splice.py` (new):
+  - `splice_busloans_totll_yoy()` @ 1973-01-03 in **YoY growth-rate space**, additive constant `c`, gates `corr > 0.50` AND `abs(c) < 0.05`.
+  - `splice_icedxy_dtwexbgs_log()` @ 2006-01-04 in **log-levels space**, additive constant `c`, gates `corr > 0.85` AND `mean(abs(z-divergence)) < 0.30`.
+  - `concat_ioer_iorb()` @ 2021-07-29 — z5 pre-step (level concat, no splice), gate `abs(IOER@2021-07-28 - IORB@2021-07-29) < 0.01pp`.
+  - `splice_ted_sofr_iorb_zblend()` blend Feb 2022 → Apr 2023 (14 months) in **z-score space**, gate `abs(funding_z.diff().max()) < 1.5σ`.
+- `pit_zscore` → `src/transform/pit_zscore.py` (new) with sealed-canonical defaults `min_window=120`, `strict_shift=True`. Existing `compute_pit_zscore` and `expanding_zscore` untouched.
+- `build_composite` → `src/transform/composite.py` (new), three scopes:
+  - LC_FULL  (start 2003-01-31): z1=+0.25, z2=+0.20, z3=+0.20, z4=+0.20, z5=−0.15
+  - LC_TIER2 (start 1987-01-31): z2=+0.267, z3=+0.267, z4=+0.267, z5=−0.200
+  - LC_DEEP  (start 1973-01-31): z2=+0.333, z3=+0.333, z4=+0.333
+  - Normalization: Σ|w| ≈ 1.0 (NOT signed-sum=1). NaN propagation: any missing component → composite NaN.
+
+These are implemented in the Phase B+C resume session.
 
 ## §E — This-session execution order
 
