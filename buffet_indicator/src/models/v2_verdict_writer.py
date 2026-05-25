@@ -606,12 +606,45 @@ def compose_verdict_json(
 def write_verdict_json(
     verdict_doc: dict[str, Any], output_path: Path
 ) -> tuple[Path, str]:
-    """Write the verdict JSON + a SHA-256 sidecar; return ``(json_path, sha256_hex)``."""
+    """Write the verdict JSON + a SHA-256 sidecar; return ``(json_path, sha256_hex)``.
+
+    Phase F-BLK1.F: byte-exact hashing across OSes.
+
+    Per Codex Round 5 MAJOR (reproducibility):
+    Pre-BLK1, this function hashed the in-memory JSON string then wrote via
+    ``Path.write_text`` which on Windows performs CRLF translation. Result:
+    ``sha256sum outputs/lc_v2_verdict.json`` (file-byte SHA) DIVERGED from
+    the sidecar SHA (in-memory string SHA). The 84a457e3... sidecar shipped
+    with the pre-BLK1 verdict did not match the actual file-byte SHA
+    (6671cc9f... on Windows).
+
+    Strategy now:
+    1. Serialize JSON with explicit LF line endings.
+    2. Write file in binary mode (no platform CRLF translation).
+    3. Compute SHA-256 of the EXACT bytes written.
+    4. Read-back verification; raise if hash differs from expected.
+    5. Sidecar carries that file-byte SHA.
+    """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    body = json.dumps(verdict_doc, indent=2, default=str, sort_keys=False)
-    output_path.write_text(body, encoding="utf-8")
-    sha = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    json_str = json.dumps(verdict_doc, indent=2, default=str, sort_keys=False)
+    json_bytes = json_str.encode("utf-8").replace(b"\r\n", b"\n")
+    expected_sha = hashlib.sha256(json_bytes).hexdigest()
+
+    with output_path.open("wb") as f:
+        f.write(json_bytes)
+
+    with output_path.open("rb") as f:
+        read_back = f.read()
+    actual_sha = hashlib.sha256(read_back).hexdigest()
+    if actual_sha != expected_sha:
+        raise RuntimeError(
+            f"write_verdict_json: byte-exact write verification failed: "
+            f"expected={expected_sha}, actual_after_readback={actual_sha}"
+        )
+
     sidecar = output_path.with_suffix(output_path.suffix + ".sha256")
-    sidecar.write_text(sha + "\n", encoding="utf-8")
-    return output_path, sha
+    sidecar_line = f"{expected_sha}  {output_path.name}\n".encode("utf-8")
+    with sidecar.open("wb") as f:
+        f.write(sidecar_line)
+    return output_path, expected_sha

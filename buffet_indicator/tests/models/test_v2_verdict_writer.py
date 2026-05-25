@@ -93,10 +93,46 @@ def test_verdict_round_trip_json(tmp_path: Path) -> None:
     assert parsed["schema_version"] == doc["schema_version"]
     assert parsed["verdict"] == doc["verdict"]
     assert parsed["n_pass_total"] == doc["n_pass_total"]
-    # Sidecar SHA file exists.
+    # Sidecar SHA file exists; sha256sum-compatible format ("<sha>  <name>\n").
     sidecar = out.with_suffix(out.suffix + ".sha256")
     assert sidecar.exists()
-    assert sidecar.read_text(encoding="utf-8").strip() == sha
+    # First whitespace-separated token is the SHA hex.
+    sidecar_sha = sidecar.read_text(encoding="utf-8").split()[0]
+    assert sidecar_sha == sha
+
+
+def test_verdict_sidecar_sha_equals_file_byte_sha_no_crlf(tmp_path: Path) -> None:
+    """Phase F-BLK1.F: sidecar SHA must equal sha256(file bytes) on all OSes.
+
+    Pre-BLK1, write_text() on Windows performed CRLF translation, causing
+    sidecar SHA (computed from in-memory UTF-8 string) to diverge from the
+    actual file-byte SHA. Codex Round 5 MAJOR (reproducibility).
+    """
+    import hashlib
+
+    from src.models.v2_run_verdict import run_verdict
+
+    out = tmp_path / "lc_v2_verdict.json"
+    _, _, sha_from_writer = run_verdict(
+        n_bootstrap=200, purpose="test", output_path=out,
+    )
+
+    file_bytes = out.read_bytes()
+    sha_from_file_bytes = hashlib.sha256(file_bytes).hexdigest()
+    assert sha_from_writer == sha_from_file_bytes, (
+        f"writer SHA {sha_from_writer} != file-byte SHA {sha_from_file_bytes}"
+    )
+
+    sidecar = out.with_suffix(out.suffix + ".sha256")
+    sidecar_sha = sidecar.read_text(encoding="utf-8").split()[0]
+    assert sidecar_sha == sha_from_file_bytes, (
+        f"sidecar SHA {sidecar_sha} != file-byte SHA {sha_from_file_bytes}"
+    )
+
+    # No CR bytes anywhere in the file (LF-only).
+    assert b"\r" not in file_bytes, (
+        "file contains carriage returns; CRLF translation should be off"
+    )
 
 
 def test_verdict_component_id_map_matches_sealed(tmp_path: Path) -> None:
