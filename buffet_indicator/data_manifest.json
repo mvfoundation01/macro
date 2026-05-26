@@ -1,7 +1,309 @@
 {
-  "generated_at": "2026-05-18T17:42:27.622929",
-  "entries": [
-    {
+  "_meta": {
+    "manifest_version": "v2.0-F_REPRO.A",
+    "generated_at": "2026-05-26T01:51:46Z",
+    "v11_4_sprint_authority": "PROMPT_CC_v11_4_phase_F_REPRO.md \u00a72",
+    "sealed_pre_reg_sha256": "c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05",
+    "canonical_verdict_sha256": "df542640992d4cf5b6014d6483629266f93399dd01d3d9f7cc9a181ea507ab0c",
+    "total_series": 22,
+    "tier_distribution": {
+      "2": 15,
+      "5": 4,
+      "1": 1,
+      "4": 1,
+      "spliced": 1
+    },
+    "schema_note": "Each series entry pins source, frequency, units, n_observations, earliest/latest, SHA-256 of cached file, cache_path, vintage_basis, used_in_v2_0_components, transformations_applied, splice_partners. Preserved pre-v2.0 entries carry preserved_from_pre_v2_0_manifest=true."
+  },
+  "series": {
+    "master.walcl": {
+      "series_id": "WALCL",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "W",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 1223,
+      "earliest_date": "2002-12-18",
+      "latest_date": "2026-05-20",
+      "sha256": "37664fc8857c547c915890864af2818a990d8e8f46cb4888a9326d164559de16",
+      "cache_path": "buffet_indicator/data/master/walcl.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z1"
+      ],
+      "transformations_applied": [
+        "level_minus_wdtgal_minus_rrpontsyd_netfed"
+      ],
+      "splice_partners": []
+    },
+    "master.wdtgal": {
+      "series_id": "WDTGAL",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "W",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 1223,
+      "earliest_date": "2002-12-18",
+      "latest_date": "2026-05-20",
+      "sha256": "20969a5f30f82fc267e85241446f74e87b9706394f66ead72c696f37f25622b0",
+      "cache_path": "buffet_indicator/data/master/wdtgal.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z1"
+      ],
+      "transformations_applied": [
+        "subtracted_in_netfed"
+      ],
+      "splice_partners": []
+    },
+    "master.rrpontsyd": {
+      "series_id": "RRPONTSYD",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 3304,
+      "earliest_date": "2013-09-23",
+      "latest_date": "2026-05-21",
+      "sha256": "f164d5fdd0e4bbb202ebabf290bc9510821fc35a12882e763dcd1da3c5661000",
+      "cache_path": "buffet_indicator/data/master/rrpontsyd.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z1"
+      ],
+      "transformations_applied": [
+        "subtracted_in_netfed_with_zero_fill_lt_2013_09_23"
+      ],
+      "splice_partners": []
+    },
+    "master.m2_sl": {
+      "series_id": "M2SL",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "M",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 807,
+      "earliest_date": "1959-01-31",
+      "latest_date": "2026-03-31",
+      "sha256": "f44465d266677a6d93bc64382d0c5d702ad276e71d95552bfbe26ffe2d1e55f3",
+      "cache_path": "buffet_indicator/data/master/m2_sl.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z2"
+      ],
+      "transformations_applied": [
+        "yoy_pct_change_12mo"
+      ],
+      "splice_partners": []
+    },
+    "master.busloans": {
+      "series_id": "BUSLOANS",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "M",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 952,
+      "earliest_date": "1947-01-31",
+      "latest_date": "2026-04-30",
+      "sha256": "ce9a8f4551d7f5f4054b6fcd21b0d90309603b31a86b67ad0d4131cba2725287",
+      "cache_path": "buffet_indicator/data/master/busloans.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z3"
+      ],
+      "transformations_applied": [
+        "yoy_pct_change_12mo_pre_splice"
+      ],
+      "splice_partners": [
+        "totll@1973-01-03 yoy-growth additive c per sealed \u00a710.1"
+      ]
+    },
+    "master.totll": {
+      "series_id": "TOTLL",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "W",
+      "units": "Billions of U.S. Dollars",
+      "n_observations": 2784,
+      "earliest_date": "1973-01-03",
+      "latest_date": "2026-05-06",
+      "sha256": "e9e22eae87e017a3323cbdadcf9177a97002861bf16906fae514efef1841fb12",
+      "cache_path": "buffet_indicator/data/master/totll.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z3"
+      ],
+      "transformations_applied": [
+        "yoy_pct_change_12mo_post_splice"
+      ],
+      "splice_partners": [
+        "busloans@1973-01-03"
+      ]
+    },
+    "master.dtwexbgs": {
+      "series_id": "DTWEXBGS",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Index Jan 2006=100",
+      "n_observations": 5313,
+      "earliest_date": "2006-01-04",
+      "latest_date": "2026-05-15",
+      "sha256": "0032ba72c97d5122ad4969fa925a545ffe55c7c1fb261aa5675f1698e581a9ba",
+      "cache_path": "buffet_indicator/data/master/dtwexbgs.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z4"
+      ],
+      "transformations_applied": [
+        "log_then_inverted_via_negative_z_score"
+      ],
+      "splice_partners": []
+    },
+    "master.tedrate": {
+      "series_id": "TEDRATE",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Percent",
+      "n_observations": 9407,
+      "earliest_date": "1986-01-02",
+      "latest_date": "2022-01-21",
+      "sha256": "c0ea379039d687e33f47f41b63d69a519e0fc4d789b8107791090211ff1b4b5e",
+      "cache_path": "buffet_indicator/data/master/tedrate.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z5"
+      ],
+      "transformations_applied": [
+        "pit_z_pre_blend_120mo_warmup"
+      ],
+      "splice_partners": [
+        "sofr-iorb_zblend@2022-02 to 2023-04 (14-month z-score blend)"
+      ]
+    },
+    "master.sofr": {
+      "series_id": "SOFR",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Percent",
+      "n_observations": 2123,
+      "earliest_date": "2018-04-03",
+      "latest_date": "2026-05-21",
+      "sha256": "a19f5fdb80008753d7b904463ac16c467b37af53b8e818ecdf3ba3d4298fec70",
+      "cache_path": "buffet_indicator/data/master/sofr.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z5"
+      ],
+      "transformations_applied": [
+        "minus_iorb_then_pit_z_post_blend_24mo_warmup"
+      ],
+      "splice_partners": [
+        "iorb_extended@2021-07-31",
+        "tedrate_zblend@2022-02 to 2023-04"
+      ]
+    },
+    "master.iorb": {
+      "series_id": "IORB",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Percent",
+      "n_observations": 1759,
+      "earliest_date": "2021-07-29",
+      "latest_date": "2026-05-22",
+      "sha256": "157634394f6dd1740b8248b5e1a4581a925ba2829bbedd4d2a2660d021c50368",
+      "cache_path": "buffet_indicator/data/master/iorb.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z5"
+      ],
+      "transformations_applied": [
+        "iorb_post_2021_07_31"
+      ],
+      "splice_partners": [
+        "ioer@2021-07-31"
+      ]
+    },
+    "master.ioer": {
+      "series_id": "IOER",
+      "source": "fred_alfred_observation_date_approximation",
+      "source_tier": 2,
+      "frequency": "D",
+      "units": "Percent",
+      "n_observations": 4676,
+      "earliest_date": "2008-10-09",
+      "latest_date": "2021-07-28",
+      "sha256": "ddc557e48df252e6df268c3fa9d3612afc442a8b33aba1ed40254310d74b2bc3",
+      "cache_path": "buffet_indicator/data/master/ioer.parquet",
+      "vintage_basis": "observation_date_approximation_per_phase_b_c_arbitration_section_B_option_B3",
+      "vintage_note": "Sealed \u00a73.2.2 mandates load_master(vintage=t); Phase B+C \u00a7B approved observation-date approximation under Option B3. Per-origin feature_vintage_max_at_origin verified non-tautological by Phase F-BLK1.A + B.",
+      "used_in_v2_0_components": [
+        "z5"
+      ],
+      "transformations_applied": [
+        "extended_to_iorb_pre_2021_07_31"
+      ],
+      "splice_partners": [
+        "iorb@2021-07-31"
+      ]
+    },
+    "forward_returns.spxtr_daily": {
+      "series_id": "SPXTR",
+      "symbol": "SPXTR",
+      "source": "tradingview_csv",
+      "source_tier": 5,
+      "frequency": "D",
+      "units": "Index points (USD, total return)",
+      "n_observations": 9670,
+      "earliest_date": "1988-01-04",
+      "latest_date": "2026-05-18",
+      "sha256": "54a942084c8eb0214a43c43b3db9c1470cb05a4b3a29d71db5200f13ca19db9c",
+      "cache_path": "raw data/SP_SPXTR, 1D.csv",
+      "used_in_v2_0_components": [
+        "forward_returns_post_1988"
+      ],
+      "transformations_applied": [
+        "monthly_eom_level_then_horizon_forward_return"
+      ],
+      "splice_partners": [
+        "shiller_nominal_total_return@1988-01-01"
+      ]
+    },
+    "forward_returns.shiller_ie_data": {
+      "series_id": "SHILLER_IE_DATA",
+      "source": "shiller_ie_data_xls",
+      "source_tier": 1,
+      "frequency": "M",
+      "units": "Index (Shiller monthly composite)",
+      "n_observations": 1864,
+      "earliest_date": "1871-01-31",
+      "latest_date": "2026-04-30",
+      "sha256": "0da8a5df5b64acdba19595e56626f3ee9e41a78f7060299414be2adc3d1f2a09",
+      "cache_path": "data/raw/ie_data.xls (or comparable Shiller monthly download)",
+      "used_in_v2_0_components": [
+        "forward_returns_pre_1988"
+      ],
+      "transformations_applied": [
+        "nominal_total_return_then_splice_at_1988_01_with_spxtr"
+      ],
+      "splice_partners": [
+        "spxtr_daily@1988-01-01"
+      ]
+    },
+    "fred.gdp": {
       "key": "fred.gdp",
       "series_id": "GDP",
       "source_tier": 2,
@@ -12,9 +314,10 @@
       "latest": "2026-03-31",
       "sha256": "3618d5027aceb165a06d8704f8c32e201bfcb1f771eaba75967eb88b8a56aad2",
       "cache_path": "D:\\macro\\buffet_indicator\\data\\raw\\GDP.parquet",
-      "retrieval_timestamp": "2026-05-18T17:41:28.641906"
+      "retrieval_timestamp": "2026-05-18T17:41:28.641906",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "fred.equities_all": {
       "key": "fred.equities_all",
       "series_id": "BOGZ1LM883164105Q",
       "source_tier": 2,
@@ -25,9 +328,10 @@
       "latest": "2025-12-31",
       "sha256": "d0bcfeca2047b4f102b4cac95445e0393d77a1ef175fbd2e5e9db43b4b3fadba",
       "cache_path": "D:\\macro\\buffet_indicator\\data\\raw\\BOGZ1LM883164105Q.parquet",
-      "retrieval_timestamp": "2026-05-18T17:42:23.732353"
+      "retrieval_timestamp": "2026-05-18T17:42:23.732353",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "fred.equities_public": {
       "key": "fred.equities_public",
       "series_id": "BOGZ1LM883164115Q",
       "source_tier": 2,
@@ -38,9 +342,10 @@
       "latest": "2025-12-31",
       "sha256": "c7e141fb2f2ef68146f95263d25ac24f60c2fe03bf002d864308c44339c3692f",
       "cache_path": "D:\\macro\\buffet_indicator\\data\\raw\\BOGZ1LM883164115Q.parquet",
-      "retrieval_timestamp": "2026-05-18T17:42:24.519391"
+      "retrieval_timestamp": "2026-05-18T17:42:24.519391",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "fred.equities_nonfin": {
       "key": "fred.equities_nonfin",
       "series_id": "NCBEILQ027S",
       "source_tier": 2,
@@ -51,9 +356,10 @@
       "latest": "2025-12-31",
       "sha256": "d926c5b6acbd99e2b81231822ef80fd395dea83c44a033bc438e7e3f9aa0346f",
       "cache_path": "D:\\macro\\buffet_indicator\\data\\raw\\NCBEILQ027S.parquet",
-      "retrieval_timestamp": "2026-05-18T17:42:25.355506"
+      "retrieval_timestamp": "2026-05-18T17:42:25.355506",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "tradingview.spx": {
       "key": "tradingview.spx",
       "symbol": "SPX",
       "source_tier": 5,
@@ -65,23 +371,10 @@
       "sha256": "5386cda2865aaa41a43de565297b38a017c6333543e3b6e074226b733ae4f33d",
       "source_file": "D:\\macro\\raw data\\SP_SPX, 1D.csv",
       "file_format": "csv",
-      "retrieval_timestamp": "2026-05-18T08:55:37.004003"
+      "retrieval_timestamp": "2026-05-18T08:55:37.004003",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
-      "key": "tradingview.spxtr",
-      "symbol": "SPXTR",
-      "source_tier": 5,
-      "frequency": "D",
-      "units": "index points (USD, total return)",
-      "n_observations": 9670,
-      "earliest": "1988-01-04",
-      "latest": "2026-05-18",
-      "sha256": "54a942084c8eb0214a43c43b3db9c1470cb05a4b3a29d71db5200f13ca19db9c",
-      "source_file": "D:\\macro\\raw data\\SP_SPXTR, 1D.csv",
-      "file_format": "csv",
-      "retrieval_timestamp": "2026-05-18T12:22:30.552368"
-    },
-    {
+    "tradingview.wilshire_tv": {
       "key": "tradingview.wilshire_tv",
       "symbol": "FRED:WILL5000PRFC",
       "source_tier": 5,
@@ -93,9 +386,10 @@
       "sha256": "2938ccd04b24e90a84fc86a1a99b249c9c1f817333f9fd5d1c482cba061ac9ed",
       "source_file": "D:\\macro\\raw data\\FRED_WILL5000PRFC, 1D.csv",
       "file_format": "csv",
-      "retrieval_timestamp": "2026-05-18T12:35:37.405482"
+      "retrieval_timestamp": "2026-05-18T12:35:37.405482",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "tradingview.gdp_backup": {
       "key": "tradingview.gdp_backup",
       "symbol": "FRED:GDP",
       "source_tier": 5,
@@ -107,9 +401,10 @@
       "sha256": "fee2bc0d2af64f99acb1c7910c4147b6deda4aecebea6bb3e3dfc330205d690d",
       "source_file": "D:\\macro\\raw data\\FRED_GDP, 3M.csv",
       "file_format": "csv",
-      "retrieval_timestamp": "2026-05-18T09:22:33.341462"
+      "retrieval_timestamp": "2026-05-18T09:22:33.341462",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
+    "yahoo.wilshire": {
       "key": "yahoo.wilshire",
       "symbol": "^W5000",
       "source_tier": 4,
@@ -119,20 +414,10 @@
       "latest": "2026-05-15",
       "sha256": "f9bfa3e3cfb520c023af150f7e8130c3eccf22f647842daf0b78ab1cddad3f4b",
       "cache_path": "D:\\macro\\buffet_indicator\\data\\raw\\CARET_W5000.parquet",
-      "retrieval_timestamp": "2026-05-18T17:19:10.150497"
+      "retrieval_timestamp": "2026-05-18T17:19:10.150497",
+      "preserved_from_pre_v2_0_manifest": true
     },
-    {
-      "key": "shiller.ie_data",
-      "source_tier": 1,
-      "frequency": "M",
-      "file_format": "xls",
-      "n_observations": 1864,
-      "earliest": "1871-01-31",
-      "latest": "2026-04-30",
-      "sha256": "0da8a5df5b64acdba19595e56626f3ee9e41a78f7060299414be2adc3d1f2a09",
-      "retrieval_timestamp": "2026-05-05T23:32:06.075142"
-    },
-    {
+    "master.wilshire_5000": {
       "key": "master.wilshire_5000",
       "series_id": "wilshire_5000",
       "source_tier": "spliced",
@@ -142,7 +427,8 @@
       "sources_used": [
         "tv_FRED_WILL5000PRFC",
         "yahoo_^W5000"
-      ]
+      ],
+      "preserved_from_pre_v2_0_manifest": true
     }
-  ]
+  }
 }
