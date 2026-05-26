@@ -24,11 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Checkout (with LFS)
+      - name: Checkout (tags, no LFS)
+        # LFS disabled: this verification job only touches non-LFS files
+        # (sealed pre-reg .md, lc_v2_verdict.json, tests/models|stats|replication).
+        # LFS-backed parquet/xlsx assets are not referenced by these test paths.
+        # fetch-tags: true keeps the 3 permanent tags visible to git tag --list
+        # without paying the full-history LFS bandwidth cost.
         uses: actions/checkout@v4
         with:
-          lfs: true
-          fetch-depth: 0   # need full history for `git tag --list` step
+          lfs: false
+          fetch-tags: true
 
       - name: Set up Python 3.12.10
         uses: actions/setup-python@v5
