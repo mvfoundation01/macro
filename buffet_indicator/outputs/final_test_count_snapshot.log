@@ -1,0 +1,61 @@
+.......................s.............................................s.. [ 10%]
+.......s................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+................................................ss...................... [ 51%]
+..................ssssss.sssssssssssssssssss............................ [ 62%]
+........................................................................ [ 72%]
+........................................................................ [ 82%]
+........................................................................ [ 93%]
+...............................................                          [100%]
+============================== warnings summary ===============================
+tests/ingest/test_master_archive.py::test_M5_build_first_run
+tests/ingest/test_master_archive.py::test_M6_second_run_idempotent
+tests/ingest/test_master_archive.py::test_M7_tail_only_update
+tests/ingest/test_master_archive.py::test_M9_load_master_basic
+tests/ingest/test_master_archive.py::test_M10_load_master_window
+  D:\macro\buffet_indicator\src\ingest\master_archive.py:237: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+    merged = pd.concat(merged_rows).sort_index()
+
+tests/transform/test_huber_scale.py::test_H5_returns_two_floats_with_positive_scale
+tests/transform/test_v11_0_1_mrc_v2.py::test_mrc_v2_returns_thirteen_columns
+  C:\Users\quang\AppData\Local\Temp\macro_v2_pinned_venv\Lib\site-packages\statsmodels\robust\scale.py:297: RuntimeWarning: invalid value encountered in sqrt
+    nscale = np.sqrt(scale_num / scale_denom)
+
+tests/transform/test_v11_0_mrc.py::test_mrc_has_seven_constituents
+  D:\macro\buffet_indicator\src\transform\mvci_compute.py:79: RuntimeWarning: Degrees of freedom <= 0 for slice.
+    var = np.nanvar(window, axis=0, ddof=1)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\ingest\test_csv_loader.py:99: could not import 'xlwt': No module named 'xlwt'
+SKIPPED [1] tests\ingest\test_shiller_loader.py:170: INTEGRATION_TESTS!=1
+SKIPPED [1] tests\ingest\test_yahoo_loader.py:145: INTEGRATION_TESTS!=1
+SKIPPED [1] tests\quant_engine\test_v11_2_stage_9_11_upgrades.py:101: Surface 2 (Drawdowns) not yet built in this session
+SKIPPED [1] tests\quant_engine\test_v11_2_stage_9_11_upgrades.py:108: Extended Analytics surfaces not yet built in this session
+SKIPPED [1] tests\test_v4_acceptance.py:41: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v4_acceptance.py:80: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v4_acceptance.py:98: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v4_acceptance.py:109: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v5_acceptance.py:29: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v5_acceptance.py:51: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v5_acceptance.py:89: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v5_acceptance.py:113: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v6_acceptance.py:28: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v6_acceptance.py:54: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v6_acceptance.py:74: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v6_acceptance.py:96: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:28: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:52: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:68: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:83: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:106: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v7_acceptance.py:136: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_1_acceptance.py:29: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_1_acceptance.py:45: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_1_acceptance.py:56: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_acceptance.py:29: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_acceptance.py:52: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_acceptance.py:63: ACCEPTANCE!=1
+SKIPPED [1] tests\test_v8a_acceptance.py:84: ACCEPTANCE!=1
+665 passed, 30 skipped, 8 warnings in 55.83s
