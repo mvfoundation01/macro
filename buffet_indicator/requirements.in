@@ -18,6 +18,11 @@ scipy==1.13.1
 statsmodels==0.14.2
 
 # Project direct dependencies
+# Pillow: tests/viz/test_v11_0b_screenshots.py + test_v11_0c_recapture.py validate
+# PNG output; missing from the original requirements.lock so pinned-env tests
+# failed under Phase F-DOC.B. Pinned conservatively to a Python-3.12-compatible
+# release (sealed §3.7.2/§3.8 do not pin Pillow; this is a project dep).
+pillow==11.3.0
 pyarrow==15.0.2
 pydantic==2.7.4
 requests==2.32.3
