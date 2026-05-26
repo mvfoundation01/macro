@@ -1,0 +1,117 @@
+=== Scanning documents for SHA-256 patterns ===
+  [ok]   README.md (3 SHA(s) found)
+  [ok]   DECISIONS.md (1 SHA(s) found)
+  [ok]   buffet_indicator/outputs/SPRINT_v11_4_INDEX.md (6 SHA(s) found)
+  [ok]   buffet_indicator/outputs/lc_v2_verdict_summary.md (2 SHA(s) found)
+  [ok]   buffet_indicator/outputs/lc_v2_verdict_blk1_delta.md (2 SHA(s) found)
+  [ok]   buffet_indicator/outputs/lc_v2_verdict_closeout_delta.md (4 SHA(s) found)
+  [ok]   buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md (5 SHA(s) found)
+  [ok]   buffet_indicator/outputs/replication/REPLICATION_INSTRUCTIONS.md (3 SHA(s) found)
+  [ok]   buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md (4 SHA(s) found)
+  [ok]   buffet_indicator/data_manifest.json (23 SHA(s) found)
+  [ok]   .github/workflows/v11_4_verify.yml (2 SHA(s) found)
+  [ok]   tools/sealed_pre_reg_guard.py (1 SHA(s) found)
+
+=== Canonical SHA presence audit ===
+  sealed_pre_reg
+    sha=c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05
+    appears in 12 document(s):
+      - README.md
+      - DECISIONS.md
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/lc_v2_verdict_summary.md
+      - buffet_indicator/outputs/lc_v2_verdict_blk1_delta.md
+      - buffet_indicator/outputs/lc_v2_verdict_closeout_delta.md
+      - buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md
+      - buffet_indicator/outputs/replication/REPLICATION_INSTRUCTIONS.md
+      - buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md
+      - buffet_indicator/data_manifest.json
+      - .github/workflows/v11_4_verify.yml
+      - tools/sealed_pre_reg_guard.py
+  verdict_filebyte_blk1
+    sha=df542640992d4cf5b6014d6483629266f93399dd01d3d9f7cc9a181ea507ab0c
+    appears in 10 document(s):
+      - README.md
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/lc_v2_verdict_summary.md
+      - buffet_indicator/outputs/lc_v2_verdict_blk1_delta.md
+      - buffet_indicator/outputs/lc_v2_verdict_closeout_delta.md
+      - buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md
+      - buffet_indicator/outputs/replication/REPLICATION_INSTRUCTIONS.md
+      - buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md
+      - buffet_indicator/data_manifest.json
+      - .github/workflows/v11_4_verify.yml
+  verdict_normalized_substantive
+    sha=0fe5c5053af78bac061a7ca89568b484b6583a6d9da0d0ddbf5b0837d7344f02
+    appears in 6 document(s):
+      - README.md
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/lc_v2_verdict_closeout_delta.md
+      - buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md
+      - buffet_indicator/outputs/replication/REPLICATION_INSTRUCTIONS.md
+      - buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md
+  verdict_pre_blk1_filebyte
+    sha=6671cc9ff7b9e9f97a0c7447528bf0bcdc12b18a9406b29a8f0e632550200416
+    appears in 2 document(s):
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md
+  verdict_closeout_filebyte
+    sha=1925e658ef9c88aabecae03c445396f4ed6ffe7a290f07cd0ecb5122a5c31899
+    appears in 3 document(s):
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/lc_v2_verdict_closeout_delta.md
+      - buffet_indicator/outputs/v11_4_sprint_engineering_closeout.md
+  verdict_clonestate_filebyte
+    sha=33649ab75c5f521ad17d8198f85ec7f4d8d0d1230f4d17977369bdcbaf5c891a
+    appears in 2 document(s):
+      - buffet_indicator/outputs/SPRINT_v11_4_INDEX.md
+      - buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md
+
+=== Unknown SHAs found (potential typos or new artifacts) ===
+  2938ccd04b24e90a84fc86a1a99b249c9c1f817333f9fd5d1c482cba061ac9ed
+    in: buffet_indicator/data_manifest.json
+  5386cda2865aaa41a43de565297b38a017c6333543e3b6e074226b733ae4f33d
+    in: buffet_indicator/data_manifest.json
+  d0bcfeca2047b4f102b4cac95445e0393d77a1ef175fbd2e5e9db43b4b3fadba
+    in: buffet_indicator/data_manifest.json
+  0032ba72c97d5122ad4969fa925a545ffe55c7c1fb261aa5675f1698e581a9ba
+    in: buffet_indicator/data_manifest.json
+  54a942084c8eb0214a43c43b3db9c1470cb05a4b3a29d71db5200f13ca19db9c
+    in: buffet_indicator/data_manifest.json
+  c7e141fb2f2ef68146f95263d25ac24f60c2fe03bf002d864308c44339c3692f
+    in: buffet_indicator/data_manifest.json
+  c0ea379039d687e33f47f41b63d69a519e0fc4d789b8107791090211ff1b4b5e
+    in: buffet_indicator/data_manifest.json
+  ddc557e48df252e6df268c3fa9d3612afc442a8b33aba1ed40254310d74b2bc3
+    in: buffet_indicator/data_manifest.json
+  f9bfa3e3cfb520c023af150f7e8130c3eccf22f647842daf0b78ab1cddad3f4b
+    in: buffet_indicator/data_manifest.json
+  fee2bc0d2af64f99acb1c7910c4147b6deda4aecebea6bb3e3dfc330205d690d
+    in: buffet_indicator/data_manifest.json
+  ce9a8f4551d7f5f4054b6fcd21b0d90309603b31a86b67ad0d4131cba2725287
+    in: buffet_indicator/data_manifest.json
+  f164d5fdd0e4bbb202ebabf290bc9510821fc35a12882e763dcd1da3c5661000
+    in: buffet_indicator/data_manifest.json
+  20969a5f30f82fc267e85241446f74e87b9706394f66ead72c696f37f25622b0
+    in: buffet_indicator/data_manifest.json
+  e9e22eae87e017a3323cbdadcf9177a97002861bf16906fae514efef1841fb12
+    in: buffet_indicator/data_manifest.json
+  f44465d266677a6d93bc64382d0c5d702ad276e71d95552bfbe26ffe2d1e55f3
+    in: buffet_indicator/data_manifest.json
+  157634394f6dd1740b8248b5e1a4581a925ba2829bbedd4d2a2660d021c50368
+    in: buffet_indicator/data_manifest.json
+  a19f5fdb80008753d7b904463ac16c467b37af53b8e818ecdf3ba3d4298fec70
+    in: buffet_indicator/data_manifest.json
+  0da8a5df5b64acdba19595e56626f3ee9e41a78f7060299414be2adc3d1f2a09
+    in: buffet_indicator/data_manifest.json
+  3618d5027aceb165a06d8704f8c32e201bfcb1f771eaba75967eb88b8a56aad2
+    in: buffet_indicator/data_manifest.json
+  d926c5b6acbd99e2b81231822ef80fd395dea83c44a033bc438e7e3f9aa0346f
+    in: buffet_indicator/data_manifest.json
+  37664fc8857c547c915890864af2818a990d8e8f46cb4888a9326d164559de16
+    in: buffet_indicator/data_manifest.json
+
+=== Live SHA verification ===
+  [OK] sealed pre-reg live SHA: c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05
+  [OK] canonical verdict live SHA: df542640992d4cf5b6014d6483629266f93399dd01d3d9f7cc9a181ea507ab0c
+  [OK] pre-BLK-1 historical verdict live SHA: 6671cc9ff7b9e9f97a0c7447528bf0bcdc12b18a9406b29a8f0e632550200416
