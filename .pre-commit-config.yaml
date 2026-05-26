@@ -1,0 +1,61 @@
+# Pre-commit hooks for v11.4 sprint defensive infrastructure
+# Install: pre-commit install (from repo root)
+# Run manually: pre-commit run --all-files
+#
+# v11.4 branch is FROZEN-QUALITY: these hooks protect FORWARD commits.
+# Existing tracked code is not retroactively reformatted.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.md$'
+      - id: end-of-file-fixer
+        exclude: '\.json$'
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        args: [--strict, --ignore-missing-imports]
+        files: ^buffet_indicator/src/
+        additional_dependencies:
+          - numpy==1.26.4
+          - pandas==2.2.3
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: '1.7.10'
+    hooks:
+      - id: bandit
+        args: [-r, -ll]
+        files: ^buffet_indicator/src/
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'tests/.*|outputs/.*\.json$'
+
+  - repo: local
+    hooks:
+      - id: sealed-pre-reg-protect
+        name: Sealed pre-reg SHA-256 protection
+        entry: python tools/sealed_pre_reg_guard.py
+        language: system
+        files: ^buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER\.md$
+        pass_filenames: false
