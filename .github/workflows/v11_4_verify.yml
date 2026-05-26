@@ -1,0 +1,117 @@
+name: v11.4 sprint verification
+
+on:
+  push:
+    branches: [spec/liquidity-composite-v2.0]
+    paths-ignore:
+      - 'prompt/**'
+      - 'raw data/**'
+      - '**.md'
+  pull_request:
+    branches: [spec/liquidity-composite-v2.0]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SEALED_PRE_REG_SHA: c3c3ec1a83e4cb9cf8f7c35523f0542530cfc4bb2e986ae49ddab23c1bed8b05
+  CANONICAL_VERDICT_SHA: df542640992d4cf5b6014d6483629266f93399dd01d3d9f7cc9a181ea507ab0c
+
+jobs:
+  verify-v11-4-state:
+    name: Verify v11.4 sprint invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0   # need full history for `git tag --list` step
+
+      - name: Set up Python 3.12.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+
+      - name: Verify sealed pre-reg SHA-256 immutable
+        run: |
+          ACTUAL=$(sha256sum buffet_indicator/specs/MV_LIQUIDITY_COMPOSITE_V2_PREREGISTER.md | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$SEALED_PRE_REG_SHA" ]; then
+            echo "::error::Sealed pre-reg SHA-256 changed! Expected $SEALED_PRE_REG_SHA, got $ACTUAL"
+            exit 1
+          fi
+          echo "OK Sealed pre-reg SHA-256 immutable"
+
+      - name: Verify canonical verdict SHA-256 unchanged
+        run: |
+          ACTUAL=$(sha256sum buffet_indicator/outputs/lc_v2_verdict.json | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$CANONICAL_VERDICT_SHA" ]; then
+            echo "::error::Canonical verdict SHA-256 changed! Expected $CANONICAL_VERDICT_SHA, got $ACTUAL"
+            exit 1
+          fi
+          echo "OK Canonical verdict SHA-256 unchanged"
+
+      - name: Install pinned dependencies (hash-verified)
+        run: |
+          cd buffet_indicator
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements.lock
+
+      - name: Verify installed library versions match sealed pins
+        run: |
+          cd buffet_indicator
+          python -c "
+          import arch, pandas, numpy, scipy, statsmodels
+          expected = {'arch': '7.0.0', 'pandas': '2.2.3', 'numpy': '1.26.4', 'scipy': '1.13.1', 'statsmodels': '0.14.2'}
+          actual = {'arch': arch.__version__, 'pandas': pandas.__version__, 'numpy': numpy.__version__, 'scipy': scipy.__version__, 'statsmodels': statsmodels.__version__}
+          mismatches = [(k, expected[k], actual[k]) for k in expected if expected[k] != actual[k]]
+          if mismatches:
+              for k, e, a in mismatches:
+                  print(f'MISMATCH: {k} expected {e}, got {a}')
+              raise SystemExit(1)
+          print('All sealed pins verified.')
+          "
+
+      - name: Run v2 verdict-bearing test path
+        run: |
+          cd buffet_indicator
+          python -m pytest tests/models/ tests/stats/ tests/replication/ -q --tb=short
+
+      - name: Verify critical artifacts present
+        run: |
+          MISSING=0
+          for f in \
+            buffet_indicator/outputs/lc_v2_verdict.json \
+            buffet_indicator/outputs/lc_v2_verdict_summary.md \
+            buffet_indicator/outputs/lc_v2_display_fail.md \
+            buffet_indicator/outputs/SPRINT_v11_4_INDEX.md \
+            buffet_indicator/outputs/historical/lc_v2_verdict_pre_blk1.json \
+            buffet_indicator/data_manifest.json \
+            buffet_indicator/data_manifest.md \
+            buffet_indicator/requirements.lock \
+            buffet_indicator/src/replication/reconstruct_master.py \
+            buffet_indicator/outputs/replication/REPLICATION_INSTRUCTIONS.md \
+            buffet_indicator/outputs/replication/v11_4_clean_state_repro_report.md \
+            DECISIONS.md
+          do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing critical artifact: $f"
+              MISSING=1
+            fi
+          done
+          if [ "$MISSING" -ne 0 ]; then exit 1; fi
+          echo "OK All critical artifacts present"
+
+      - name: Verify all permanent tags present
+        run: |
+          MISSING=0
+          for t in v11.4-prereg-sealed v11.4-engineering-closeout v11.4-ssrn-reproducibility-ready; do
+            if ! git tag --list | grep -q "^$t\$"; then
+              echo "::error::Missing tag: $t"
+              MISSING=1
+            fi
+          done
+          if [ "$MISSING" -ne 0 ]; then exit 1; fi
+          echo "OK All permanent tags present"
